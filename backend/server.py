@@ -389,18 +389,56 @@ async def create_user(user_data: UserCreate, current_user: User = Depends(get_cu
         raise HTTPException(status_code=400, detail="User already exists")
     
     # Create user
-    user = User(
-        **user_data.dict(exclude={"password"}),
-        password_hash=hash_password(user_data.password),
-        created_by=current_user.id
-    )
+    user_dict = user_data.dict(exclude={"password"})
+    user_dict['password_hash'] = hash_password(user_data.password)
+    user_dict['created_by'] = current_user.id
+    user = User(**user_dict)
     
     user_dict = prepare_for_mongo(user.dict())
+    user_dict.pop('_id', None)
     await db.users.insert_one(user_dict)
     
     await log_activity("user_management", "users", "create", "success", current_user.id, {"user_id": user.id})
     
     return user
+
+@api_router.put("/users/{user_id}", response_model=User)
+async def update_user(user_id: str, user_data: UserUpdate, current_user: User = Depends(get_current_user)):
+    """Update user"""
+    existing = await db.users.find_one({"id": user_id, "is_active": True})
+    if not existing:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user_dict = user_data.dict(exclude_unset=True)
+    user_dict['updated_by'] = current_user.id
+    user_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
+    
+    await db.users.update_one({"id": user_id}, {"$set": user_dict})
+    
+    updated_user = await db.users.find_one({"id": user_id})
+    updated_user.pop('_id', None)
+    updated_user.pop('password_hash', None)  # Don't return password
+    
+    await log_activity("user_management", "users", "update", "success", current_user.id, {"user_id": user_id})
+    return User(**parse_from_mongo(updated_user))
+
+@api_router.delete("/users/{user_id}")
+async def delete_user(user_id: str, current_user: User = Depends(get_current_user)):
+    """Soft delete user"""
+    existing = await db.users.find_one({"id": user_id, "is_active": True})
+    if not existing:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user_id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+    
+    await db.users.update_one(
+        {"id": user_id}, 
+        {"$set": {"is_active": False, "updated_by": current_user.id, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    await log_activity("user_management", "users", "delete", "success", current_user.id, {"user_id": user_id})
+    return {"message": "User deleted successfully"}
 
 # Roles CRUD
 @api_router.get("/roles", response_model=List[Role])
