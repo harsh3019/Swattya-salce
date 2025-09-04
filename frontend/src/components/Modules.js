@@ -102,6 +102,19 @@ export const Modules = () => {
               <FormError error={crud.form.formState.errors.description} />
             </div>
 
+            <div>
+              <Label htmlFor="status">Status</Label>
+              <Select onValueChange={(value) => crud.form.setValue('status', value)} defaultValue="active">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="flex items-center space-x-2">
               <Switch
                 {...crud.form.register('is_active')}
