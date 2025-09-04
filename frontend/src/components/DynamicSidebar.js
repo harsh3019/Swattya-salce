@@ -154,10 +154,16 @@ const DynamicSidebar = () => {
   };
 
   const renderModule = (module) => {
+    console.log('🔍 DynamicSidebar: Rendering module:', module.name);
+    console.log('🔍 DynamicSidebar: Module menus:', module.menus);
+    console.log('🔍 DynamicSidebar: User permissions for visibility check:', userPermissions.length);
+    
     const hasAnyVisibleMenu = module.menus.some(menu => 
       hasPermission(menu.path, 'view') || 
       (menu.children && menu.children.some(child => hasPermission(child.path, 'view')))
     );
+
+    console.log('🔍 DynamicSidebar: Module', module.name, 'has visible menus:', hasAnyVisibleMenu);
 
     if (!hasAnyVisibleMenu) return null;
 
