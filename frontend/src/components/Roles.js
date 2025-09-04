@@ -13,6 +13,7 @@ import * as z from 'zod';
 
 const roleSchema = z.object({
   name: z.string().min(2, 'Role name must be at least 2 characters'),
+  code: z.string().optional(),
   description: z.string().optional(),
   is_active: z.boolean().default(true)
 });
