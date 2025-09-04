@@ -598,6 +598,8 @@ async def update_department(dept_id: str, dept_data: Department, current_user: U
     await db.departments.update_one({"id": dept_id}, {"$set": dept_dict})
     
     updated_dept = await db.departments.find_one({"id": dept_id})
+    if not updated_dept:
+        raise HTTPException(status_code=404, detail="Department not found after update")
     updated_dept.pop('_id', None)
     
     await log_activity("user_management", "departments", "update", "success", current_user.id, {"department_id": dept_id})
