@@ -84,6 +84,7 @@ class UserUpdate(BaseModel):
 
 class Role(BaseAuditModel):
     name: str
+    code: Optional[str] = None
     description: Optional[str] = None
 
 class Permission(BaseAuditModel):
