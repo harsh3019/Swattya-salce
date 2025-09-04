@@ -425,6 +425,183 @@ class SawayattaERPTester:
         success, status, response = self.make_request('GET', 'activity-logs')
         return self.log_test("GET Activity Logs", success, f"Found {len(response) if success else 0} logs")
 
+    def test_role_permission_matrix(self):
+        """Test Role Permission Matrix functionality"""
+        print("\n🔒 Testing Role Permission Matrix...")
+        
+        # First get a role to test with
+        success, status, roles_data = self.make_request('GET', 'roles')
+        if not success or not roles_data:
+            return self.log_test("Role Permission Matrix", False, "No roles available for testing")
+        
+        role_id = roles_data[0]['id']
+        
+        # Test GET role permission matrix
+        success, status, response = self.make_request('GET', f'role-permissions/matrix/{role_id}')
+        if success:
+            matrix = response.get('matrix', [])
+            total_modules = len(matrix)
+            total_menus = sum(len(module.get('menus', [])) for module in matrix)
+            matrix_success = self.log_test("GET Role Permission Matrix", True, 
+                                         f"Found {total_modules} modules, {total_menus} menus")
+            
+            # Test UPDATE role permission matrix (simulate toggling a permission)
+            if matrix and matrix[0].get('menus'):
+                menu = matrix[0]['menus'][0]
+                menu_id = menu['id']
+                module_id = matrix[0]['module']['id']
+                
+                # Find a permission to toggle
+                permissions = menu.get('permissions', {})
+                if permissions:
+                    perm_name = list(permissions.keys())[0]
+                    perm_data = permissions[perm_name]
+                    
+                    update_data = {
+                        "updates": [{
+                            "menu_id": menu_id,
+                            "module_id": module_id,
+                            "permission_id": perm_data['permission_id'],
+                            "granted": not perm_data['granted']  # Toggle permission
+                        }]
+                    }
+                    
+                    success, status, response = self.make_request('POST', f'role-permissions/matrix/{role_id}', update_data)
+                    update_success = self.log_test("UPDATE Role Permission Matrix", success, f"Status: {status}")
+                    
+                    return matrix_success and update_success
+            
+            return matrix_success
+        else:
+            return self.log_test("GET Role Permission Matrix", False, f"Status: {status}")
+
+    def test_unassigned_modules(self):
+        """Test unassigned modules endpoint"""
+        print("\n📦 Testing Unassigned Modules...")
+        
+        # Get a role to test with
+        success, status, roles_data = self.make_request('GET', 'roles')
+        if not success or not roles_data:
+            return self.log_test("Get Unassigned Modules", False, "No roles available")
+        
+        role_id = roles_data[0]['id']
+        
+        success, status, response = self.make_request('GET', f'role-permissions/unassigned-modules/{role_id}')
+        if success:
+            modules_count = len(response.get('modules', []))
+            return self.log_test("Get Unassigned Modules", True, f"Found {modules_count} unassigned modules")
+        else:
+            return self.log_test("Get Unassigned Modules", False, f"Status: {status}")
+
+    def test_add_module_to_role(self):
+        """Test adding module to role"""
+        print("\n➕ Testing Add Module to Role...")
+        
+        # Get roles and modules
+        roles_success, _, roles_data = self.make_request('GET', 'roles')
+        modules_success, _, modules_data = self.make_request('GET', 'modules')
+        menus_success, _, menus_data = self.make_request('GET', 'menus')
+        perms_success, _, perms_data = self.make_request('GET', 'permissions')
+        
+        if not all([roles_success, modules_success, menus_success, perms_success]):
+            return self.log_test("Add Module to Role", False, "Failed to get required data")
+        
+        if not all([roles_data, modules_data, menus_data, perms_data]):
+            return self.log_test("Add Module to Role", False, "No data available for testing")
+        
+        role_id = roles_data[0]['id']
+        module_id = modules_data[0]['id']
+        
+        # Find menus for this module
+        module_menus = [menu for menu in menus_data if menu['module_id'] == module_id]
+        if not module_menus:
+            return self.log_test("Add Module to Role", False, "No menus found for module")
+        
+        permission_id = perms_data[0]['id']
+        
+        add_data = {
+            "role_id": role_id,
+            "module_id": module_id,
+            "permissions": [{
+                "menu_id": module_menus[0]['id'],
+                "permission_ids": [permission_id]
+            }]
+        }
+        
+        success, status, response = self.make_request('POST', 'role-permissions/add-module', add_data)
+        return self.log_test("Add Module to Role", success, f"Status: {status}")
+
+    def test_export_functionality(self):
+        """Test export endpoints"""
+        print("\n📤 Testing Export Functionality...")
+        
+        # Test Users Export
+        success, status, response = self.make_request('GET', 'users/export')
+        if success and 'data' in response:
+            csv_lines = response['data'].count('\n')
+            users_export = self.log_test("Export Users CSV", True, f"Generated {csv_lines} lines")
+        else:
+            users_export = self.log_test("Export Users CSV", False, f"Status: {status}")
+        
+        # Test Roles Export
+        success, status, response = self.make_request('GET', 'roles/export')
+        if success and 'data' in response:
+            csv_lines = response['data'].count('\n')
+            roles_export = self.log_test("Export Roles CSV", True, f"Generated {csv_lines} lines")
+        else:
+            roles_export = self.log_test("Export Roles CSV", False, f"Status: {status}")
+        
+        return users_export and roles_export
+
+    def test_sidebar_navigation(self):
+        """Test sidebar navigation endpoint"""
+        print("\n🧭 Testing Sidebar Navigation...")
+        
+        success, status, response = self.make_request('GET', 'nav/sidebar')
+        if success:
+            modules_count = len(response.get('modules', []))
+            return self.log_test("Sidebar Navigation", True, f"Found {modules_count} accessible modules")
+        else:
+            return self.log_test("Sidebar Navigation", False, f"Status: {status}")
+
+    def test_user_permissions(self):
+        """Test user permissions endpoint"""
+        print("\n🔑 Testing User Permissions...")
+        
+        success, status, response = self.make_request('GET', 'auth/permissions')
+        if success:
+            permissions_count = len(response.get('permissions', []))
+            return self.log_test("Get User Permissions", True, f"Found {permissions_count} permissions")
+        else:
+            return self.log_test("Get User Permissions", False, f"Status: {status}")
+
+    def test_standardized_permissions(self):
+        """Test that standardized permissions exist"""
+        print("\n📋 Testing Standardized Permissions...")
+        
+        success, status, response = self.make_request('GET', 'permissions')
+        if success:
+            permission_names = [perm.get('name', '') for perm in response]
+            expected_perms = ['View', 'Add', 'Edit', 'Delete', 'Export']
+            
+            found_perms = []
+            missing_perms = []
+            
+            for expected in expected_perms:
+                if expected in permission_names:
+                    found_perms.append(expected)
+                else:
+                    missing_perms.append(expected)
+            
+            if len(found_perms) == len(expected_perms):
+                return self.log_test("Standardized Permissions", True, 
+                                   f"All expected permissions found: {', '.join(found_perms)}")
+            else:
+                return self.log_test("Standardized Permissions", False, 
+                                   f"Missing permissions: {', '.join(missing_perms)}")
+        else:
+            return self.log_test("Standardized Permissions", False, f"Status: {status}")
+
     def run_all_tests(self):
         """Run all backend tests"""
         print("🚀 Starting Sawayatta ERP Backend API Tests")
