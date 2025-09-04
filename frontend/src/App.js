@@ -394,9 +394,21 @@ const ProtectedRoute = ({ children }) => {
   return <Layout>{children}</Layout>;
 };
 
-// Placeholder Components for other pages
-const CompaniesPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Companies</h1><p className="text-slate-600 mt-2">Coming soon...</p></div>;
-const ContactsPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Contacts</h1><p className="text-slate-600 mt-2">Coming soon...</p></div>;
+// Home Route Component - handles initial navigation
+const HomeRoute = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // If user is authenticated, go to dashboard, otherwise go to login
+  return <Navigate to={user ? "/dashboard" : "/login"} replace />;
+};
 
 // Main App Component
 function App() {
