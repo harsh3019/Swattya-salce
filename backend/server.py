@@ -1189,47 +1189,128 @@ async def startup_event():
         # Create default admin user if not exists
         admin_user = await db.users.find_one({"username": "admin", "is_active": True})
         if not admin_user:
-            # Create default role
-            admin_role = Role(
-                name="Super Admin",
-                description="Full system access",
-                created_by="system"
-            )
-            role_dict = prepare_for_mongo(admin_role.dict())
-            # Remove MongoDB ObjectId to avoid serialization issues
-            role_dict.pop('_id', None)
-            await db.roles.insert_one(role_dict)
-            
-            # Create default department
-            default_dept = Department(name="IT", created_by="system")
-            dept_dict = prepare_for_mongo(default_dept.dict())
-            dept_dict.pop('_id', None)
-            await db.departments.insert_one(dept_dict)
-            
-            # Create default designation
-            default_desig = Designation(name="Administrator", created_by="system")
-            desig_dict = prepare_for_mongo(default_desig.dict())
-            desig_dict.pop('_id', None)
-            await db.designations.insert_one(desig_dict)
-            
-            # Create default admin user
-            admin = User(
-                username="admin",
-                email="admin@sawayatta.com",
-                password_hash=hash_password("admin123"),
-                role_id=admin_role.id,
-                department_id=default_dept.id,
-                designation_id=default_desig.id,
-                created_by="system"
-            )
-            user_dict = prepare_for_mongo(admin.dict())
-            user_dict.pop('_id', None)
-            await db.users.insert_one(user_dict)
-            
-            logger.info("Default admin user created: admin/admin123")
+            await initialize_rbac_system()
+            logger.info("RBAC system initialized with default admin user: admin/admin123")
             
     except Exception as e:
         logger.error(f"Startup error: {e}")
+
+async def initialize_rbac_system():
+    """Initialize complete RBAC system with permissions, modules, menus, and roles"""
+    
+    # 1. Create default permissions
+    permissions_data = [
+        {"name": "view", "description": "View/List records"},
+        {"name": "add", "description": "Create new records"},
+        {"name": "edit", "description": "Update existing records"},
+        {"name": "delete", "description": "Delete records"}
+    ]
+    
+    created_permissions = {}
+    for perm_data in permissions_data:
+        perm = Permission(**perm_data, created_by="system")
+        perm_dict = prepare_for_mongo(perm.dict())
+        perm_dict.pop('_id', None)
+        await db.permissions.insert_one(perm_dict)
+        created_permissions[perm_data["name"]] = perm.id
+    
+    # 2. Create default modules
+    modules_data = [
+        {"name": "User Management", "description": "User and role management"},
+        {"name": "Sales", "description": "Sales and CRM features"},
+        {"name": "System", "description": "System administration"}
+    ]
+    
+    created_modules = {}
+    for mod_data in modules_data:
+        mod = Module(**mod_data, created_by="system")
+        mod_dict = prepare_for_mongo(mod.dict())
+        mod_dict.pop('_id', None)
+        await db.modules.insert_one(mod_dict)
+        created_modules[mod_data["name"]] = mod.id
+    
+    # 3. Create default menus
+    menus_data = [
+        # User Management menus
+        {"name": "Users", "path": "/users", "module_id": created_modules["User Management"], "order_index": 1},
+        {"name": "Roles", "path": "/roles", "module_id": created_modules["User Management"], "order_index": 2},
+        {"name": "Departments", "path": "/departments", "module_id": created_modules["User Management"], "order_index": 3},
+        {"name": "Designations", "path": "/designations", "module_id": created_modules["User Management"], "order_index": 4},
+        {"name": "Permissions", "path": "/permissions", "module_id": created_modules["User Management"], "order_index": 5},
+        {"name": "Modules", "path": "/modules", "module_id": created_modules["User Management"], "order_index": 6},
+        {"name": "Menus", "path": "/menus", "module_id": created_modules["User Management"], "order_index": 7},
+        {"name": "Role Permissions", "path": "/role-permissions", "module_id": created_modules["User Management"], "order_index": 8},
+        
+        # Sales menus
+        {"name": "Companies", "path": "/companies", "module_id": created_modules["Sales"], "order_index": 1},
+        {"name": "Contacts", "path": "/contacts", "module_id": created_modules["Sales"], "order_index": 2},
+        {"name": "Channel Partners", "path": "/channel-partners", "module_id": created_modules["Sales"], "order_index": 3},
+        {"name": "Leads", "path": "/leads", "module_id": created_modules["Sales"], "order_index": 4},
+        {"name": "Opportunities", "path": "/opportunities", "module_id": created_modules["Sales"], "order_index": 5},
+        
+        # System menus
+        {"name": "Activity Logs", "path": "/activity-logs", "module_id": created_modules["System"], "order_index": 1}
+    ]
+    
+    created_menus = {}
+    for menu_data in menus_data:
+        menu = Menu(**menu_data, created_by="system")
+        menu_dict = prepare_for_mongo(menu.dict())
+        menu_dict.pop('_id', None)
+        await db.menus.insert_one(menu_dict)
+        created_menus[menu_data["name"]] = menu.id
+    
+    # 4. Create default role
+    admin_role = Role(
+        name="Super Admin",
+        code="SUPER_ADMIN",
+        description="Full system access",
+        created_by="system"
+    )
+    role_dict = prepare_for_mongo(admin_role.dict())
+    role_dict.pop('_id', None)
+    await db.roles.insert_one(role_dict)
+    
+    # 5. Create role-permission mappings (give admin all permissions for all menus)
+    for menu_name, menu_id in created_menus.items():
+        menu_doc = await db.menus.find_one({"id": menu_id})
+        if menu_doc:
+            for perm_name, perm_id in created_permissions.items():
+                role_perm = RolePermission(
+                    role_id=admin_role.id,
+                    module_id=menu_doc["module_id"],
+                    menu_id=menu_id,
+                    permission_id=perm_id,
+                    created_by="system"
+                )
+                rp_dict = prepare_for_mongo(role_perm.dict())
+                rp_dict.pop('_id', None)
+                await db.role_permissions.insert_one(rp_dict)
+    
+    # 6. Create default department and designation
+    default_dept = Department(name="IT", created_by="system")
+    dept_dict = prepare_for_mongo(default_dept.dict())
+    dept_dict.pop('_id', None)
+    await db.departments.insert_one(dept_dict)
+    
+    default_desig = Designation(name="Administrator", created_by="system")
+    desig_dict = prepare_for_mongo(default_desig.dict())
+    desig_dict.pop('_id', None)
+    await db.designations.insert_one(desig_dict)
+    
+    # 7. Create default admin user
+    admin = User(
+        username="admin",
+        email="admin@sawayatta.com",
+        password_hash=hash_password("admin123"),
+        role_id=admin_role.id,
+        department_id=default_dept.id,
+        designation_id=default_desig.id,
+        created_by="system"
+    )
+    user_dict = prepare_for_mongo(admin.dict())
+    user_dict.pop('_id', None)
+    await db.users.insert_one(user_dict)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
