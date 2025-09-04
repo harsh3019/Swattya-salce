@@ -156,6 +156,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -167,8 +168,9 @@ const Login = () => {
       const success = await login(username, password);
       console.log('Login success:', success);
       if (success) {
-        // Navigation will be handled by React Router based on authentication state
-        console.log('Login successful, user should be set');
+        console.log('Login successful, navigating to root for HomeRoute to handle');
+        // Navigate to root path so HomeRoute can redirect to dashboard
+        navigate('/', { replace: true });
       }
     } catch (error) {
       console.error('Login error:', error);
