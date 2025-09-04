@@ -298,6 +298,42 @@ async def check_permission(user: User, module_name: str, menu_name: str, permiss
     
     return role_perm is not None
 
+# Permission helper functions
+async def has_permission_by_menu_id(user: User, menu_id: str, permission_name: str):
+    """Check permission by menu ID - optimized helper"""
+    if not user.role_id:
+        return False
+    
+    # Find the permission
+    permission = await db.permissions.find_one({"name": permission_name, "status": "active"})
+    if not permission:
+        return False
+    
+    # Check role permission
+    role_perm = await db.role_permissions.find_one({
+        "role_id": user.role_id,
+        "menu_id": menu_id,
+        "permission_id": permission["id"],
+        "is_active": True
+    })
+    
+    return role_perm is not None
+
+async def has_view(user: User, menu_id: str):
+    return await has_permission_by_menu_id(user, menu_id, "View")
+
+async def has_add(user: User, menu_id: str):
+    return await has_permission_by_menu_id(user, menu_id, "Add")
+
+async def has_edit(user: User, menu_id: str):
+    return await has_permission_by_menu_id(user, menu_id, "Edit")
+
+async def has_delete(user: User, menu_id: str):
+    return await has_permission_by_menu_id(user, menu_id, "Delete")
+
+async def has_export(user: User, menu_id: str):
+    return await has_permission_by_menu_id(user, menu_id, "Export")
+
 async def require_permission(module_name: str, menu_name: str, permission_name: str):
     """Dependency to require specific permission"""
     def permission_checker(current_user: User = Depends(get_current_user)):
