@@ -366,7 +366,12 @@ async def logout(current_user: User = Depends(get_current_user)):
 async def get_users(current_user: User = Depends(get_current_user)):
     """Get all users"""
     users = await db.users.find({"is_active": True}).to_list(length=None)
-    return [User(**parse_from_mongo(user)) for user in users if user.get("id") != "password_hash"]
+    result = []
+    for user in users:
+        user.pop('_id', None)  # Remove MongoDB ObjectId
+        parsed_user = parse_from_mongo(user)
+        result.append(User(**parsed_user))
+    return result
 
 @api_router.post("/users", response_model=User)
 async def create_user(user_data: UserCreate, current_user: User = Depends(get_current_user)):
