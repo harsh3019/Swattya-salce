@@ -504,6 +504,9 @@ const FormError = ({ error }) => {
 };
 
 // Users Component
+// Export the shared components and hook
+export { useCRUD, DataTable, FormError };
+
 export const Users = () => {
   const [roles, setRoles] = useState([]);
   const [departments, setDepartments] = useState([]);
