@@ -245,6 +245,8 @@ const DynamicSidebar = () => {
       </div>
 
       <nav className="mt-4">
+        {console.log('🔍 DynamicSidebar: Final render - navigation state:', navigation)}
+        {console.log('🔍 DynamicSidebar: Final render - modules count:', navigation.modules?.length || 0)}
         {navigation.modules.map(module => renderModule(module))}
       </nav>
     </div>
