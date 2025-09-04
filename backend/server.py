@@ -670,8 +670,8 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: User = 
 @api_router.delete("/users/{user_id}")
 async def delete_user(user_id: str, current_user: User = Depends(get_current_user)):
     """Soft delete user"""
-    # Check delete permission
-    has_permission = await check_permission(current_user, "User Management", "Users", "delete")
+    # Check Delete permission
+    has_permission = await check_permission(current_user, "User Management", "Users", "Delete")
     if not has_permission:
         raise HTTPException(status_code=403, detail="Insufficient permissions to delete users")
     
