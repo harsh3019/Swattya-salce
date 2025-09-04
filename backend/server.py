@@ -858,6 +858,8 @@ async def update_menu(menu_id: str, menu_data: Menu, current_user: User = Depend
     await db.menus.update_one({"id": menu_id}, {"$set": menu_dict})
     
     updated_menu = await db.menus.find_one({"id": menu_id})
+    if not updated_menu:
+        raise HTTPException(status_code=404, detail="Menu not found after update")
     updated_menu.pop('_id', None)
     
     await log_activity("user_management", "menus", "update", "success", current_user.id, {"menu_id": menu_id})
