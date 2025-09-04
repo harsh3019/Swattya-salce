@@ -145,7 +145,7 @@ const Login = () => {
       // Trigger permission refresh after successful login
       console.log('🔍 Login: Triggering permission refresh after successful login');
       await refreshPermissions();
-      navigate('/dashboard');
+      // Let ProtectedRoute handle navigation naturally - don't navigate immediately
     }
     
     setIsLoading(false);
