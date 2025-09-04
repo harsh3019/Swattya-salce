@@ -533,9 +533,42 @@ export const Users = () => {
     fetchRelatedData();
   }, []);
 
+  const getRoleName = (roleId) => {
+    const role = roles.find(r => r.id === roleId);
+    return role ? role.name : '-';
+  };
+
+  const getDepartmentName = (deptId) => {
+    const dept = departments.find(d => d.id === deptId);
+    return dept ? dept.name : '-';
+  };
+
+  const getDesignationName = (desigId) => {
+    const desig = designations.find(d => d.id === desigId);
+    return desig ? desig.name : '-';
+  };
+
   const columns = [
     { key: 'username', label: 'Username', sortable: true },
     { key: 'email', label: 'Email', sortable: true },
+    { 
+      key: 'role_id', 
+      label: 'Role', 
+      sortable: true,
+      render: (item) => getRoleName(item.role_id)
+    },
+    { 
+      key: 'department_id', 
+      label: 'Department', 
+      sortable: true,
+      render: (item) => getDepartmentName(item.department_id)
+    },
+    { 
+      key: 'designation_id', 
+      label: 'Designation', 
+      sortable: true,
+      render: (item) => getDesignationName(item.designation_id)
+    },
     { 
       key: 'status', 
       label: 'Status', 
