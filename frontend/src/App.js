@@ -410,6 +410,10 @@ const HomeRoute = () => {
   return <Navigate to={user ? "/dashboard" : "/login"} replace />;
 };
 
+// Placeholder Components for other pages
+const CompaniesPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Companies</h1><p className="text-slate-600 mt-2">Coming soon...</p></div>;
+const ContactsPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Contacts</h1><p className="text-slate-600 mt-2">Coming soon...</p></div>;
+
 // Main App Component
 function App() {
   return (
