@@ -896,6 +896,41 @@ async def create_role_permission(rp_data: RolePermission, current_user: User = D
     await log_activity("user_management", "role_permissions", "create", "success", current_user.id, {"mapping_id": role_perm.id})
     return role_perm
 
+@api_router.put("/role-permissions/{rp_id}", response_model=RolePermission)
+async def update_role_permission(rp_id: str, rp_data: RolePermission, current_user: User = Depends(get_current_user)):
+    """Update role-permission mapping"""
+    existing = await db.role_permissions.find_one({"id": rp_id, "is_active": True})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Role-Permission mapping not found")
+    
+    rp_dict = rp_data.dict()
+    rp_dict['updated_by'] = current_user.id
+    rp_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
+    rp_dict.pop('_id', None)
+    
+    await db.role_permissions.update_one({"id": rp_id}, {"$set": rp_dict})
+    
+    updated_rp = await db.role_permissions.find_one({"id": rp_id})
+    updated_rp.pop('_id', None)
+    
+    await log_activity("user_management", "role_permissions", "update", "success", current_user.id, {"mapping_id": rp_id})
+    return RolePermission(**parse_from_mongo(updated_rp))
+
+@api_router.delete("/role-permissions/{rp_id}")
+async def delete_role_permission(rp_id: str, current_user: User = Depends(get_current_user)):
+    """Soft delete role-permission mapping"""
+    existing = await db.role_permissions.find_one({"id": rp_id, "is_active": True})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Role-Permission mapping not found")
+    
+    await db.role_permissions.update_one(
+        {"id": rp_id}, 
+        {"$set": {"is_active": False, "updated_by": current_user.id, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    await log_activity("user_management", "role_permissions", "delete", "success", current_user.id, {"mapping_id": rp_id})
+    return {"message": "Role-Permission mapping deleted successfully"}
+
 # Activity Logs (Read-only)
 @api_router.get("/activity-logs", response_model=List[ActivityLog])
 async def get_activity_logs(current_user: User = Depends(get_current_user)):
