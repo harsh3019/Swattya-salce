@@ -858,7 +858,8 @@ async def update_menu(menu_id: str, menu_data: Menu, current_user: User = Depend
     if not existing:
         raise HTTPException(status_code=404, detail="Menu not found")
     
-    menu_dict = menu_data.dict()
+    # Only update the fields that should be updated, exclude auto-generated fields
+    menu_dict = menu_data.dict(exclude={'id', 'created_at', 'created_by', 'is_active'})
     menu_dict['updated_by'] = current_user.id
     menu_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
     menu_dict.pop('_id', None)
