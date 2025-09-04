@@ -262,9 +262,52 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
         
-        return User(**user)
+        user.pop('_id', None)
+        return User(**parse_from_mongo(user))
     except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid authentication")
+
+async def check_permission(user: User, module_name: str, menu_name: str, permission_name: str):
+    """Check if user has specific permission for module/menu"""
+    if not user.role_id:
+        return False
+    
+    # Find the module
+    module = await db.modules.find_one({"name": module_name, "status": "active"})
+    if not module:
+        return False
+    
+    # Find the menu
+    menu = await db.menus.find_one({"name": menu_name, "module_id": module["id"]})
+    if not menu:
+        return False
+    
+    # Find the permission
+    permission = await db.permissions.find_one({"name": permission_name, "status": "active"})
+    if not permission:
+        return False
+    
+    # Check role permission
+    role_perm = await db.role_permissions.find_one({
+        "role_id": user.role_id,
+        "module_id": module["id"],
+        "menu_id": menu["id"],
+        "permission_id": permission["id"],
+        "is_active": True
+    })
+    
+    return role_perm is not None
+
+async def require_permission(module_name: str, menu_name: str, permission_name: str):
+    """Dependency to require specific permission"""
+    def permission_checker(current_user: User = Depends(get_current_user)):
+        async def check():
+            has_permission = await check_permission(current_user, module_name, menu_name, permission_name)
+            if not has_permission:
+                raise HTTPException(status_code=403, detail="Insufficient permissions")
+            return current_user
+        return check()
+    return Depends(permission_checker)
 
 async def log_activity(module_name: str, table_name: str, action: str, status: str, 
                       user_id: Optional[str] = None, details: Optional[Dict] = None):
