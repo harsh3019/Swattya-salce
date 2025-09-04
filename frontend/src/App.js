@@ -162,11 +162,8 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    console.log('Form submitted with:', { username, password });
-    
     try {
       const success = await login(username, password);
-      console.log('Login success:', success);
       if (success) {
         console.log('Login successful, navigating directly to dashboard');
         // Navigate directly to dashboard instead of relying on HomeRoute
