@@ -18,7 +18,7 @@ import { ActivityLogs } from './components/ActivityLogs';
 import DynamicSidebar from './components/DynamicSidebar';
 import ForbiddenPage from './components/ForbiddenPage';
 import RolePermissionMatrix from './components/RolePermissionMatrix';
-import { PermissionProvider } from './contexts/PermissionContext';
+import { PermissionProvider, usePermissions } from './contexts/PermissionContext';
 
 // Import Shadcn components
 import { Button } from './components/ui/button';
