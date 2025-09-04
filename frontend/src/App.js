@@ -217,7 +217,11 @@ const Sidebar = ({ isOpen, onClose }) => {
         { label: 'Users', path: '/users' },
         { label: 'Roles', path: '/roles' },
         { label: 'Departments', path: '/departments' },
-        { label: 'Designations', path: '/designations' }
+        { label: 'Designations', path: '/designations' },
+        { label: 'Permissions', path: '/permissions' },
+        { label: 'Modules', path: '/modules' },
+        { label: 'Menus', path: '/menus' },
+        { label: 'Role Permissions', path: '/role-permissions' }
       ]
     },
     { 
