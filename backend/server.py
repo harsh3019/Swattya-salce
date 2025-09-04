@@ -334,8 +334,9 @@ async def login(request: LoginRequest):
         # Log successful login
         await log_activity("auth", "users", "login", "success", user_data["id"])
         
-        # Remove password from response
+        # Remove password and MongoDB ObjectId from response
         user_data.pop("password_hash", None)
+        user_data.pop("_id", None)
         user_data = parse_from_mongo(user_data)
         
         return LoginResponse(access_token=token, user=user_data)
