@@ -105,7 +105,7 @@ const DynamicSidebar = () => {
 
   const handleNavigation = (path, menuName) => {
     // Check if user has view permission for this menu
-    if (!hasPermission(path, 'view')) {
+    if (!hasPermission(path, 'View')) {
       navigate('/403');
       return;
     }
