@@ -102,7 +102,7 @@ export const PermissionProvider = ({ children }) => {
     canEdit,
     canDelete,
     canExport,
-    refreshPermissions: fetchPermissions
+    refreshPermissions: fetchPermissions // Export this function so components can trigger refresh
   };
 
   return (
