@@ -94,6 +94,16 @@ export const Roles = () => {
             </div>
 
             <div>
+              <Label htmlFor="code">Code</Label>
+              <Input
+                {...crud.form.register('code')}
+                id="code"
+                placeholder="Enter role code (e.g., ADMIN, USER, MANAGER)"
+              />
+              <FormError error={crud.form.formState.errors.code} />
+            </div>
+
+            <div>
               <Label htmlFor="description">Description</Label>
               <Textarea
                 {...crud.form.register('description')}
