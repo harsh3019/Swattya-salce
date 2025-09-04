@@ -168,9 +168,9 @@ const Login = () => {
       const success = await login(username, password);
       console.log('Login success:', success);
       if (success) {
-        console.log('Login successful, navigating to root for HomeRoute to handle');
-        // Navigate to root path so HomeRoute can redirect to dashboard
-        navigate('/', { replace: true });
+        console.log('Login successful, navigating directly to dashboard');
+        // Navigate directly to dashboard instead of relying on HomeRoute
+        navigate('/dashboard', { replace: true });
       }
     } catch (error) {
       console.error('Login error:', error);
