@@ -728,7 +728,8 @@ async def update_permission(perm_id: str, perm_data: Permission, current_user: U
     if not existing:
         raise HTTPException(status_code=404, detail="Permission not found")
     
-    perm_dict = perm_data.dict()
+    # Only update the fields that should be updated, exclude auto-generated fields
+    perm_dict = perm_data.dict(exclude={'id', 'created_at', 'created_by', 'is_active'})
     perm_dict['updated_by'] = current_user.id
     perm_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
     perm_dict.pop('_id', None)
