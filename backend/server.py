@@ -768,6 +768,41 @@ async def create_module(module_data: Module, current_user: User = Depends(get_cu
     await log_activity("user_management", "modules", "create", "success", current_user.id, {"module_id": module.id})
     return module
 
+@api_router.put("/modules/{module_id}", response_model=Module)
+async def update_module(module_id: str, module_data: Module, current_user: User = Depends(get_current_user)):
+    """Update module"""
+    existing = await db.modules.find_one({"id": module_id, "is_active": True})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Module not found")
+    
+    module_dict = module_data.dict()
+    module_dict['updated_by'] = current_user.id
+    module_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
+    module_dict.pop('_id', None)
+    
+    await db.modules.update_one({"id": module_id}, {"$set": module_dict})
+    
+    updated_module = await db.modules.find_one({"id": module_id})
+    updated_module.pop('_id', None)
+    
+    await log_activity("user_management", "modules", "update", "success", current_user.id, {"module_id": module_id})
+    return Module(**parse_from_mongo(updated_module))
+
+@api_router.delete("/modules/{module_id}")
+async def delete_module(module_id: str, current_user: User = Depends(get_current_user)):
+    """Soft delete module"""
+    existing = await db.modules.find_one({"id": module_id, "is_active": True})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Module not found")
+    
+    await db.modules.update_one(
+        {"id": module_id}, 
+        {"$set": {"is_active": False, "updated_by": current_user.id, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    await log_activity("user_management", "modules", "delete", "success", current_user.id, {"module_id": module_id})
+    return {"message": "Module deleted successfully"}
+
 # Menus CRUD
 @api_router.get("/menus", response_model=List[Menu])
 async def get_menus(current_user: User = Depends(get_current_user)):
@@ -794,6 +829,41 @@ async def create_menu(menu_data: Menu, current_user: User = Depends(get_current_
     
     await log_activity("user_management", "menus", "create", "success", current_user.id, {"menu_id": menu.id})
     return menu
+
+@api_router.put("/menus/{menu_id}", response_model=Menu)
+async def update_menu(menu_id: str, menu_data: Menu, current_user: User = Depends(get_current_user)):
+    """Update menu"""
+    existing = await db.menus.find_one({"id": menu_id, "is_active": True})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Menu not found")
+    
+    menu_dict = menu_data.dict()
+    menu_dict['updated_by'] = current_user.id
+    menu_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
+    menu_dict.pop('_id', None)
+    
+    await db.menus.update_one({"id": menu_id}, {"$set": menu_dict})
+    
+    updated_menu = await db.menus.find_one({"id": menu_id})
+    updated_menu.pop('_id', None)
+    
+    await log_activity("user_management", "menus", "update", "success", current_user.id, {"menu_id": menu_id})
+    return Menu(**parse_from_mongo(updated_menu))
+
+@api_router.delete("/menus/{menu_id}")
+async def delete_menu(menu_id: str, current_user: User = Depends(get_current_user)):
+    """Soft delete menu"""
+    existing = await db.menus.find_one({"id": menu_id, "is_active": True})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Menu not found")
+    
+    await db.menus.update_one(
+        {"id": menu_id}, 
+        {"$set": {"is_active": False, "updated_by": current_user.id, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    await log_activity("user_management", "menus", "delete", "success", current_user.id, {"menu_id": menu_id})
+    return {"message": "Menu deleted successfully"}
 
 # Role-Permissions CRUD
 @api_router.get("/role-permissions", response_model=List[RolePermission])
