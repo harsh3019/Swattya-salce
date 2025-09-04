@@ -95,6 +95,7 @@ class Permission(BaseAuditModel):
 class Module(BaseAuditModel):
     name: str
     description: Optional[str] = None
+    status: str = "active"  # active/inactive
 
 class Menu(BaseAuditModel):
     name: str
