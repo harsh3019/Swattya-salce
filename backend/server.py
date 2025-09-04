@@ -794,6 +794,8 @@ async def update_module(module_id: str, module_data: Module, current_user: User 
     await db.modules.update_one({"id": module_id}, {"$set": module_dict})
     
     updated_module = await db.modules.find_one({"id": module_id})
+    if not updated_module:
+        raise HTTPException(status_code=404, detail="Module not found after update")
     updated_module.pop('_id', None)
     
     await log_activity("user_management", "modules", "update", "success", current_user.id, {"module_id": module_id})
