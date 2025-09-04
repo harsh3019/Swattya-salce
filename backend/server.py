@@ -662,6 +662,8 @@ async def update_designation(desig_id: str, desig_data: Designation, current_use
     await db.designations.update_one({"id": desig_id}, {"$set": desig_dict})
     
     updated_desig = await db.designations.find_one({"id": desig_id})
+    if not updated_desig:
+        raise HTTPException(status_code=404, detail="Designation not found after update")
     updated_desig.pop('_id', None)
     
     await log_activity("user_management", "designations", "update", "success", current_user.id, {"designation_id": desig_id})
