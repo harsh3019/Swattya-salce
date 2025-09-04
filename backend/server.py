@@ -106,6 +106,8 @@ class Menu(BaseAuditModel):
 
 class RolePermission(BaseAuditModel):
     role_id: str
+    module_id: str
+    menu_id: str
     permission_id: str
 
 class Department(BaseAuditModel):
