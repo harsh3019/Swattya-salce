@@ -99,9 +99,11 @@ const DynamicSidebar = () => {
   };
 
   const hasPermission = (menuPath, permission) => {
-    return userPermissions.some(p => 
+    const result = userPermissions.some(p => 
       p.path === menuPath && p.permission === permission
     );
+    console.log(`🔍 DynamicSidebar: hasPermission check - path: ${menuPath}, permission: ${permission}, result: ${result}`);
+    return result;
   };
 
   const toggleModule = (moduleId) => {
