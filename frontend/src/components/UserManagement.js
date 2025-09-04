@@ -673,7 +673,10 @@ export const Users = () => {
 
             <div>
               <Label htmlFor="role_id">Role</Label>
-              <Select onValueChange={(value) => crud.form.setValue('role_id', value)}>
+              <Select 
+                onValueChange={(value) => crud.form.setValue('role_id', value)}
+                defaultValue={crud.editingItem?.role_id}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
@@ -689,7 +692,10 @@ export const Users = () => {
 
             <div>
               <Label htmlFor="department_id">Department</Label>
-              <Select onValueChange={(value) => crud.form.setValue('department_id', value)}>
+              <Select 
+                onValueChange={(value) => crud.form.setValue('department_id', value)}
+                defaultValue={crud.editingItem?.department_id}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select department" />
                 </SelectTrigger>
@@ -705,7 +711,10 @@ export const Users = () => {
 
             <div>
               <Label htmlFor="designation_id">Designation</Label>
-              <Select onValueChange={(value) => crud.form.setValue('designation_id', value)}>
+              <Select 
+                onValueChange={(value) => crud.form.setValue('designation_id', value)}
+                defaultValue={crud.editingItem?.designation_id}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select designation" />
                 </SelectTrigger>
