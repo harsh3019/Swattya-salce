@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from './ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
+import { usePermissions } from '../contexts/PermissionContext'; // Import usePermissions hook
 import { 
   Building, 
   ChevronDown, 
