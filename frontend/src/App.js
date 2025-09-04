@@ -133,6 +133,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+  const { refreshPermissions } = usePermissions(); // Add this to trigger permission refresh
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -141,6 +142,9 @@ const Login = () => {
     
     const success = await login(username, password);
     if (success) {
+      // Trigger permission refresh after successful login
+      console.log('🔍 Login: Triggering permission refresh after successful login');
+      await refreshPermissions();
       navigate('/dashboard');
     }
     
