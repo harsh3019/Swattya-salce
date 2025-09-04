@@ -112,40 +112,36 @@ export const Permissions = () => {
 
           <form onSubmit={crud.form.handleSubmit(crud.handleSubmit)} className="space-y-4">
             <div>
-              <Label htmlFor="key">Permission Key *</Label>
+              <Label htmlFor="name">Permission Name *</Label>
               <Input
-                {...crud.form.register('key')}
-                id="key"
-                placeholder="e.g., users.create, users.read"
+                {...crud.form.register('name')}
+                id="name"
+                placeholder="e.g., view, add, edit, delete"
               />
-              <FormError error={crud.form.formState.errors.key} />
+              <FormError error={crud.form.formState.errors.name} />
             </div>
 
             <div>
-              <Label htmlFor="label">Label *</Label>
+              <Label htmlFor="description">Description</Label>
               <Input
-                {...crud.form.register('label')}
-                id="label"
-                placeholder="e.g., Create Users, View Users"
+                {...crud.form.register('description')}
+                id="description"
+                placeholder="e.g., View records, Create new records"
               />
-              <FormError error={crud.form.formState.errors.label} />
+              <FormError error={crud.form.formState.errors.description} />
             </div>
 
             <div>
-              <Label htmlFor="module_id">Module *</Label>
-              <Select onValueChange={(value) => crud.form.setValue('module_id', value)}>
+              <Label htmlFor="status">Status</Label>
+              <Select onValueChange={(value) => crud.form.setValue('status', value)} defaultValue="active">
                 <SelectTrigger>
-                  <SelectValue placeholder="Select module" />
+                  <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  {modules.map((module) => (
-                    <SelectItem key={module.id} value={module.id}>
-                      {module.name}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
               </Select>
-              <FormError error={crud.form.formState.errors.module_id} />
             </div>
 
             <div className="flex items-center space-x-2">
