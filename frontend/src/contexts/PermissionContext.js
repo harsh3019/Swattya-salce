@@ -16,28 +16,57 @@ export const usePermissions = () => {
 
 export const PermissionProvider = ({ children }) => {
   const [permissions, setPermissions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Changed from true to false initially
 
+  // Listen for authentication state changes via storage events
   useEffect(() => {
-    fetchPermissions();
+    const handleStorageChange = (e) => {
+      if (e.key === 'token') {
+        if (e.newValue) {
+          // Token was added, fetch permissions
+          fetchPermissions();
+        } else {
+          // Token was removed, clear permissions
+          setPermissions([]);
+        }
+      }
+    };
+
+    // Listen for storage changes (for token updates)
+    window.addEventListener('storage', handleStorageChange);
+
+    // Check if token exists on mount and fetch permissions if it does
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetchPermissions();
+    }
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const fetchPermissions = async () => {
+    setLoading(true);
     try {
       // Check if user is authenticated by checking for token
       const token = localStorage.getItem('token');
       if (!token) {
+        console.log('🔍 PermissionContext: No token found, clearing permissions');
         setPermissions([]);
         setLoading(false);
         return;
       }
 
+      console.log('🔍 PermissionContext: Fetching permissions with token');
       const response = await axios.get(`${API}/auth/permissions`);
+      console.log('✅ PermissionContext: Permissions fetched:', response.data.permissions?.length || 0);
       setPermissions(response.data.permissions || []);
     } catch (error) {
-      console.error('Error fetching permissions:', error);
+      console.error('❌ PermissionContext: Error fetching permissions:', error);
       // If 401/403, clear permissions but don't set error
       if (error.response?.status === 401 || error.response?.status === 403) {
+        console.log('🔍 PermissionContext: Auth error, clearing permissions');
         setPermissions([]);
       }
     } finally {
