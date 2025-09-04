@@ -3,6 +3,17 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-route
 import axios from 'axios';
 import './App.css';
 
+// Import User Management Components
+import { Users } from './components/UserManagement';
+import { Roles } from './components/Roles';
+import { Departments } from './components/Departments';
+import { Designations } from './components/Designations';
+import { Permissions } from './components/Permissions';
+import { Modules } from './components/Modules';
+import { Menus } from './components/Menus';
+import { RolePermissions } from './components/RolePermissions';
+import { ActivityLogs } from './components/ActivityLogs';
+
 // Import Shadcn components
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
