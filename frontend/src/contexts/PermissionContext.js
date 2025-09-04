@@ -16,7 +16,7 @@ export const usePermissions = () => {
 
 export const PermissionProvider = ({ children }) => {
   const [permissions, setPermissions] = useState([]);
-  const [loading, setLoading] = useState(false); // Changed from true to false initially
+  const [loading, setLoading] = useState(true); // Changed back to true to properly handle initial loading state
 
   // Listen for authentication state changes via storage events
   useEffect(() => {
