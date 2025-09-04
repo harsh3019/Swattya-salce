@@ -485,6 +485,8 @@ async def update_role(role_id: str, role_data: Role, current_user: User = Depend
     await db.roles.update_one({"id": role_id}, {"$set": role_dict})
     
     updated_role = await db.roles.find_one({"id": role_id})
+    if not updated_role:
+        raise HTTPException(status_code=404, detail="Role not found after update")
     updated_role.pop('_id', None)
     
     await log_activity("user_management", "roles", "update", "success", current_user.id, {"role_id": role_id})
