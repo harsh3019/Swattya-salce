@@ -45,14 +45,9 @@ export const Permissions = () => {
   };
 
   const columns = [
-    { key: 'key', label: 'Permission Key', sortable: true },
-    { key: 'label', label: 'Label', sortable: true },
-    { 
-      key: 'module_id', 
-      label: 'Module', 
-      sortable: true,
-      render: (item) => getModuleName(item.module_id)
-    },
+    { key: 'name', label: 'Permission Name', sortable: true },
+    { key: 'description', label: 'Description', sortable: true },
+    { key: 'status', label: 'Status', sortable: true },
     { 
       key: 'is_active', 
       label: 'Active', 
