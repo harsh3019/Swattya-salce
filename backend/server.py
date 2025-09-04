@@ -915,7 +915,7 @@ async def get_permissions(current_user: User = Depends(get_current_user)):
 @api_router.post("/permissions", response_model=Permission)
 async def create_permission(perm_data: Permission, current_user: User = Depends(get_current_user)):
     """Create new permission"""
-    existing = await db.permissions.find_one({"key": perm_data.key, "is_active": True})
+    existing = await db.permissions.find_one({"name": perm_data.name, "is_active": True})
     if existing:
         raise HTTPException(status_code=400, detail="Permission already exists")
     
