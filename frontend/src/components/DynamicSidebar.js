@@ -119,7 +119,7 @@ const DynamicSidebar = () => {
 
   const renderMenu = (menu, level = 0) => {
     const isActive = location.pathname === menu.path;
-    const hasViewPermission = hasPermission(menu.path, 'view');
+    const hasViewPermission = hasPermission(menu.path, 'View');
     
     if (!hasViewPermission) return null;
 
