@@ -138,20 +138,12 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    try {
-      const success = await login(username, password);
-      if (success) {
-        console.log('🔍 Login: Successful login, waiting for state update...');
-        // Give React time to update state before navigation
-        setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 100);
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-    } finally {
-      setIsLoading(false);
+    const success = await login(username, password);
+    if (success) {
+      // Navigation will be handled by React Router based on authentication state
     }
+    
+    setIsLoading(false);
   };
 
   return (
