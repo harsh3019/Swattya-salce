@@ -466,7 +466,9 @@ async def get_contacts(current_user: User = Depends(get_current_user)):
 @api_router.post("/contacts", response_model=Contact)
 async def create_contact(contact_data: Contact, current_user: User = Depends(get_current_user)):
     """Create new contact"""
-    contact = Contact(**contact_data.dict(), created_by=current_user.id)
+    contact_dict = contact_data.dict()
+    contact_dict['created_by'] = current_user.id
+    contact = Contact(**contact_dict)
     contact_dict = prepare_for_mongo(contact.dict())
     await db.contacts.insert_one(contact_dict)
     
