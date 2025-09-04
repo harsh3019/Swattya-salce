@@ -152,9 +152,17 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    const success = await login(username, password);
-    if (success) {
-      // Navigation will be handled by React Router based on authentication state
+    console.log('Form submitted with:', { username, password });
+    
+    try {
+      const success = await login(username, password);
+      console.log('Login success:', success);
+      if (success) {
+        // Navigation will be handled by React Router based on authentication state
+        console.log('Login successful, user should be set');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
     }
     
     setIsLoading(false);
