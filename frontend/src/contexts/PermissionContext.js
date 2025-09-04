@@ -61,6 +61,7 @@ export const PermissionProvider = ({ children }) => {
     canAdd,
     canEdit,
     canDelete,
+    canExport,
     refreshPermissions: fetchPermissions
   };
 
