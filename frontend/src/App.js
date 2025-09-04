@@ -441,7 +441,7 @@ function App() {
               } />
               <Route path="/role-permissions" element={
                 <ProtectedRoute>
-                  <RolePermissions />
+                  <RolePermissionMatrix />
                 </ProtectedRoute>
               } />
               <Route path="/activity-logs" element={
