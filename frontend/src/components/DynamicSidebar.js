@@ -94,27 +94,7 @@ const DynamicSidebar = () => {
     }
   };
 
-  const fetchUserPermissions = async () => {
-    try {
-      console.log('🔍 DynamicSidebar: Fetching user permissions...');
-      const response = await axios.get(`${API}/auth/permissions`);
-      console.log('✅ DynamicSidebar: Permissions response:', response.data);
-      console.log('✅ DynamicSidebar: Number of permissions:', response.data.permissions?.length || 0);
-      setUserPermissions(response.data.permissions || []);
-    } catch (error) {
-      console.error('❌ DynamicSidebar: Error fetching permissions:', error);
-      console.error('❌ Permissions error response:', error.response?.data);
-      console.error('❌ Permissions error status:', error.response?.status);
-    }
-  };
-
-  const hasPermission = (menuPath, permission) => {
-    const result = userPermissions.some(p => 
-      p.path === menuPath && p.permission === permission
-    );
-    console.log(`🔍 DynamicSidebar: hasPermission check - path: ${menuPath}, permission: ${permission}, result: ${result}`);
-    return result;
-  };
+  // Remove the fetchUserPermissions function since we're using context now
 
   const toggleModule = (moduleId) => {
     setExpandedModules(prev => ({
