@@ -58,6 +58,7 @@ export const Designations = () => {
         onDelete={crud.handleDelete}
         onAdd={crud.openCreateDialog}
         title="Designations"
+        modulePath="/designations"
       />
 
       {/* Create/Edit Dialog */}
