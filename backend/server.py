@@ -99,9 +99,9 @@ class Module(BaseAuditModel):
 
 class Menu(BaseAuditModel):
     name: str
+    path: str
+    parent: Optional[str] = None  # nullable for root menus
     module_id: str
-    route_path: str
-    icon: Optional[str] = None
     order_index: int = 0
 
 class RolePermission(BaseAuditModel):
