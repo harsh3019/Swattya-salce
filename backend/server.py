@@ -706,6 +706,41 @@ async def create_permission(perm_data: Permission, current_user: User = Depends(
     await log_activity("user_management", "permissions", "create", "success", current_user.id, {"permission_id": permission.id})
     return permission
 
+@api_router.put("/permissions/{perm_id}", response_model=Permission)
+async def update_permission(perm_id: str, perm_data: Permission, current_user: User = Depends(get_current_user)):
+    """Update permission"""
+    existing = await db.permissions.find_one({"id": perm_id, "is_active": True})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Permission not found")
+    
+    perm_dict = perm_data.dict()
+    perm_dict['updated_by'] = current_user.id
+    perm_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
+    perm_dict.pop('_id', None)
+    
+    await db.permissions.update_one({"id": perm_id}, {"$set": perm_dict})
+    
+    updated_perm = await db.permissions.find_one({"id": perm_id})
+    updated_perm.pop('_id', None)
+    
+    await log_activity("user_management", "permissions", "update", "success", current_user.id, {"permission_id": perm_id})
+    return Permission(**parse_from_mongo(updated_perm))
+
+@api_router.delete("/permissions/{perm_id}")
+async def delete_permission(perm_id: str, current_user: User = Depends(get_current_user)):
+    """Soft delete permission"""
+    existing = await db.permissions.find_one({"id": perm_id, "is_active": True})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Permission not found")
+    
+    await db.permissions.update_one(
+        {"id": perm_id}, 
+        {"$set": {"is_active": False, "updated_by": current_user.id, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    await log_activity("user_management", "permissions", "delete", "success", current_user.id, {"permission_id": perm_id})
+    return {"message": "Permission deleted successfully"}
+
 # Modules CRUD
 @api_router.get("/modules", response_model=List[Module])
 async def get_modules(current_user: User = Depends(get_current_user)):
