@@ -612,7 +612,7 @@ export const Users = () => {
 
   return (
     <div className="space-y-6">
-      <DataTable
+      <PermissionDataTable
         data={crud.data}
         columns={columns}
         loading={crud.loading}
@@ -625,13 +625,13 @@ export const Users = () => {
         setCurrentPage={crud.setCurrentPage}
         totalPages={crud.totalPages}
         onSort={crud.handleSort}
-        onExport={crud.exportToCSV}
         onView={crud.openViewDialog}
         onEdit={crud.openEditDialog}
         onDelete={crud.handleDelete}
         onAdd={crud.openCreateDialog}
         title="Users"
         modulePath="/users"
+        entityName="users"
       />
 
       {/* Create/Edit Dialog */}
