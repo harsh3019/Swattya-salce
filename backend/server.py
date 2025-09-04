@@ -437,7 +437,9 @@ async def get_companies(current_user: User = Depends(get_current_user)):
 @api_router.post("/companies", response_model=Company)
 async def create_company(company_data: Company, current_user: User = Depends(get_current_user)):
     """Create new company"""
-    company = Company(**company_data.dict(), created_by=current_user.id)
+    company_dict = company_data.dict()
+    company_dict['created_by'] = current_user.id
+    company = Company(**company_dict)
     company_dict = prepare_for_mongo(company.dict())
     await db.companies.insert_one(company_dict)
     
