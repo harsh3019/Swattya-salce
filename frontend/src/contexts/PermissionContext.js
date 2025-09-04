@@ -50,6 +50,7 @@ export const PermissionProvider = ({ children }) => {
   const canAdd = (path) => hasPermission(path, 'Add');
   const canEdit = (path) => hasPermission(path, 'Edit');
   const canDelete = (path) => hasPermission(path, 'Delete');
+  const canExport = (path) => hasPermission(path, 'Export');
 
   const value = {
     permissions,
