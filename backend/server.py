@@ -417,6 +417,8 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: User = 
     await db.users.update_one({"id": user_id}, {"$set": user_dict})
     
     updated_user = await db.users.find_one({"id": user_id})
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="User not found after update")
     updated_user.pop('_id', None)
     updated_user.pop('password_hash', None)  # Don't return password
     
