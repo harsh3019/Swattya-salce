@@ -386,6 +386,14 @@ const ProtectedRoute = ({ children }) => {
   // TODO: Remove this bypass once login is fixed
   if (typeof window !== 'undefined' && window.location.search.includes('bypass=true')) {
     console.log('🔍 ProtectedRoute: BYPASS MODE - rendering layout without auth check');
+    
+    // Set up axios header if token exists in localStorage
+    const token = localStorage.getItem('token');
+    if (token && !axios.defaults.headers.common['Authorization']) {
+      console.log('🔍 ProtectedRoute: Setting axios header in bypass mode');
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+    
     return <Layout>{children}</Layout>;
   }
 
