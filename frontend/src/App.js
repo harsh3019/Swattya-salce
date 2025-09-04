@@ -33,7 +33,7 @@ import {
   User, 
   LogOut, 
   Building, 
-  Users, 
+  Users as UsersIcon, 
   Phone, 
   Target, 
   TrendingUp,
