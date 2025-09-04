@@ -349,7 +349,7 @@ const Dashboard = () => {
   };
 
   const statCards = [
-    { title: 'Total Users', value: stats.totalUsers, icon: Users, color: 'blue' },
+    { title: 'Total Users', value: stats.totalUsers, icon: UsersIcon, color: 'blue' },
     { title: 'Companies', value: stats.totalCompanies, icon: Building, color: 'green' },
     { title: 'Contacts', value: stats.totalContacts, icon: Phone, color: 'purple' },
     { title: 'Leads', value: stats.totalLeads, icon: Target, color: 'orange' }
