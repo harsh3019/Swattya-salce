@@ -542,6 +542,11 @@ async def get_users(current_user: User = Depends(get_current_user)):
 @api_router.post("/users", response_model=User)
 async def create_user(user_data: UserCreate, current_user: User = Depends(get_current_user)):
     """Create new user"""
+    # Check add permission
+    has_permission = await check_permission(current_user, "User Management", "Users", "add")
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="Insufficient permissions to create users")
+    
     # Check if user exists
     existing = await db.users.find_one({
         "$or": [
