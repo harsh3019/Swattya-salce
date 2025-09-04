@@ -417,13 +417,52 @@ async def create_role(role_data: Role, current_user: User = Depends(get_current_
     if existing:
         raise HTTPException(status_code=400, detail="Role already exists")
     
-    role = Role(**role_data.dict(), created_by=current_user.id)
+    # Fix the duplicate created_by issue
+    role_dict = role_data.dict()
+    role_dict['created_by'] = current_user.id
+    role = Role(**role_dict)
     role_dict = prepare_for_mongo(role.dict())
+    role_dict.pop('_id', None)
     await db.roles.insert_one(role_dict)
     
     await log_activity("user_management", "roles", "create", "success", current_user.id, {"role_id": role.id})
     
     return role
+
+@api_router.put("/roles/{role_id}", response_model=Role)
+async def update_role(role_id: str, role_data: Role, current_user: User = Depends(get_current_user)):
+    """Update role"""
+    existing = await db.roles.find_one({"id": role_id, "is_active": True})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Role not found")
+    
+    role_dict = role_data.dict()
+    role_dict['updated_by'] = current_user.id
+    role_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
+    role_dict.pop('_id', None)
+    
+    await db.roles.update_one({"id": role_id}, {"$set": role_dict})
+    
+    updated_role = await db.roles.find_one({"id": role_id})
+    updated_role.pop('_id', None)
+    
+    await log_activity("user_management", "roles", "update", "success", current_user.id, {"role_id": role_id})
+    return Role(**parse_from_mongo(updated_role))
+
+@api_router.delete("/roles/{role_id}")
+async def delete_role(role_id: str, current_user: User = Depends(get_current_user)):
+    """Soft delete role"""
+    existing = await db.roles.find_one({"id": role_id, "is_active": True})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Role not found")
+    
+    await db.roles.update_one(
+        {"id": role_id}, 
+        {"$set": {"is_active": False, "updated_by": current_user.id, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    await log_activity("user_management", "roles", "delete", "success", current_user.id, {"role_id": role_id})
+    return {"message": "Role deleted successfully"}
 
 # ================ SALES MODULE ENDPOINTS ================
 
