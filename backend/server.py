@@ -585,6 +585,255 @@ async def get_user_permissions(current_user: User = Depends(get_current_user)):
     
     return {"permissions": permissions}
 
+# ================ ROLE PERMISSION MANAGEMENT ENDPOINTS ================
+
+@api_router.get("/role-permissions/matrix/{role_id}")
+async def get_role_permission_matrix(role_id: str, current_user: User = Depends(get_current_user)):
+    """Get permission matrix for a specific role"""
+    # Check View permission for Role Permissions
+    has_permission = await check_permission(current_user, "User Management", "Role Permissions", "View")
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="Insufficient permissions to view role permissions")
+    
+    # Get all permissions
+    permissions = await db.permissions.find({"status": "active"}).to_list(length=None)
+    permissions_dict = {p["id"]: p for p in permissions}
+    
+    # Get all modules and their menus
+    modules = await db.modules.find({"status": "active"}).to_list(length=None)
+    matrix = []
+    
+    for module in modules:
+        menus = await db.menus.find({"module_id": module["id"]}).sort("order_index", 1).to_list(length=None)
+        
+        module_data = {
+            "module": {
+                "id": module["id"],
+                "name": module["name"],
+                "description": module.get("description", "")
+            },
+            "menus": []
+        }
+        
+        for menu in menus:
+            menu_permissions = {}
+            
+            # Get existing role permissions for this menu
+            role_perms = await db.role_permissions.find({
+                "role_id": role_id,
+                "module_id": module["id"],
+                "menu_id": menu["id"],
+                "is_active": True
+            }).to_list(length=None)
+            
+            # Create permission map for this menu
+            for perm in permissions:
+                has_perm = any(rp["permission_id"] == perm["id"] for rp in role_perms)
+                menu_permissions[perm["name"]] = {
+                    "granted": has_perm,
+                    "permission_id": perm["id"],
+                    "description": perm.get("description", "")
+                }
+            
+            module_data["menus"].append({
+                "id": menu["id"],
+                "name": menu["name"],
+                "path": menu["path"],
+                "permissions": menu_permissions
+            })
+        
+        if module_data["menus"]:  # Only include modules with menus
+            matrix.append(module_data)
+    
+    return {"matrix": matrix}
+
+@api_router.post("/role-permissions/matrix/{role_id}")
+async def update_role_permission_matrix(
+    role_id: str, 
+    matrix_update: dict, 
+    current_user: User = Depends(get_current_user)
+):
+    """Update role permission matrix"""
+    # Check Edit permission for Role Permissions
+    has_permission = await check_permission(current_user, "User Management", "Role Permissions", "Edit")
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="Insufficient permissions to edit role permissions")
+    
+    updates = matrix_update.get("updates", [])
+    
+    for update in updates:
+        menu_id = update.get("menu_id")
+        module_id = update.get("module_id")
+        permission_id = update.get("permission_id")
+        granted = update.get("granted", False)
+        
+        if not all([menu_id, module_id, permission_id]):
+            continue
+        
+        # Check if role permission exists
+        existing = await db.role_permissions.find_one({
+            "role_id": role_id,
+            "module_id": module_id,
+            "menu_id": menu_id,
+            "permission_id": permission_id
+        })
+        
+        if granted:
+            if not existing:
+                # Create new role permission
+                role_perm = RolePermission(
+                    role_id=role_id,
+                    module_id=module_id,
+                    menu_id=menu_id,
+                    permission_id=permission_id,
+                    created_by=current_user.id
+                )
+                rp_dict = prepare_for_mongo(role_perm.dict())
+                rp_dict.pop('_id', None)
+                await db.role_permissions.insert_one(rp_dict)
+            elif not existing.get("is_active", True):
+                # Reactivate existing permission
+                await db.role_permissions.update_one(
+                    {"id": existing["id"]},
+                    {"$set": {"is_active": True, "updated_by": current_user.id, "updated_at": datetime.now(timezone.utc).isoformat()}}
+                )
+        else:
+            if existing and existing.get("is_active", True):
+                # Deactivate permission (soft delete)
+                await db.role_permissions.update_one(
+                    {"id": existing["id"]},
+                    {"$set": {"is_active": False, "updated_by": current_user.id, "updated_at": datetime.now(timezone.utc).isoformat()}}
+                )
+    
+    await log_activity("user_management", "role_permissions", "update", "success", current_user.id, {
+        "role_id": role_id,
+        "updates_count": len(updates)
+    })
+    
+    return {"message": "Role permissions updated successfully"}
+
+@api_router.get("/role-permissions/unassigned-modules/{role_id}")
+async def get_unassigned_modules(role_id: str, current_user: User = Depends(get_current_user)):
+    """Get modules not yet assigned to a role"""
+    # Check View permission for Role Permissions
+    has_permission = await check_permission(current_user, "User Management", "Role Permissions", "View")
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="Insufficient permissions to view role permissions")
+    
+    # Get all modules
+    all_modules = await db.modules.find({"status": "active"}).to_list(length=None)
+    
+    # Get modules already assigned to this role
+    assigned_modules = await db.role_permissions.find({
+        "role_id": role_id,
+        "is_active": True
+    }).distinct("module_id")
+    
+    # Filter unassigned modules
+    unassigned = [
+        {"id": module["id"], "name": module["name"], "description": module.get("description", "")}
+        for module in all_modules
+        if module["id"] not in assigned_modules
+    ]
+    
+    return {"modules": unassigned}
+
+@api_router.post("/role-permissions/add-module")
+async def add_module_to_role(
+    assignment_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Add a module to a role with specified permissions"""
+    # Check Add permission for Role Permissions
+    has_permission = await check_permission(current_user, "User Management", "Role Permissions", "Add")
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="Insufficient permissions to add role permissions")
+    
+    role_id = assignment_data.get("role_id")
+    module_id = assignment_data.get("module_id")
+    permissions = assignment_data.get("permissions", [])  # [{"menu_id": "...", "permission_ids": ["..."]}]
+    
+    if not all([role_id, module_id]):
+        raise HTTPException(status_code=400, detail="Role ID and Module ID are required")
+    
+    # Create role permissions
+    created_count = 0
+    for perm_data in permissions:
+        menu_id = perm_data.get("menu_id")
+        permission_ids = perm_data.get("permission_ids", [])
+        
+        for permission_id in permission_ids:
+            # Check if already exists
+            existing = await db.role_permissions.find_one({
+                "role_id": role_id,
+                "module_id": module_id,
+                "menu_id": menu_id,
+                "permission_id": permission_id
+            })
+            
+            if not existing:
+                role_perm = RolePermission(
+                    role_id=role_id,
+                    module_id=module_id,
+                    menu_id=menu_id,
+                    permission_id=permission_id,
+                    created_by=current_user.id
+                )
+                rp_dict = prepare_for_mongo(role_perm.dict())
+                rp_dict.pop('_id', None)
+                await db.role_permissions.insert_one(rp_dict)
+                created_count += 1
+    
+    await log_activity("user_management", "role_permissions", "create", "success", current_user.id, {
+        "role_id": role_id,
+        "module_id": module_id,
+        "permissions_created": created_count
+    })
+    
+    return {"message": f"Module added to role with {created_count} permissions"}
+
+# ================ EXPORT ENDPOINTS ================
+
+@api_router.get("/users/export")
+async def export_users(current_user: User = Depends(get_current_user)):
+    """Export users to Excel"""
+    # Check Export permission
+    has_permission = await check_permission(current_user, "User Management", "Users", "Export")
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="Insufficient permissions to export users")
+    
+    # For now, return CSV data (Excel implementation would require additional dependencies)
+    users = await db.users.find({"is_active": True}).to_list(length=None)
+    
+    csv_data = "Username,Email,Status,Created At\n"
+    for user in users:
+        user.pop('_id', None)
+        parsed_user = parse_from_mongo(user)
+        csv_data += f"{parsed_user.get('username', '')},{parsed_user.get('email', '')},{parsed_user.get('status', '')},{parsed_user.get('created_at', '')}\n"
+    
+    await log_activity("user_management", "users", "export", "success", current_user.id)
+    
+    return {"data": csv_data, "filename": f"users_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
+
+@api_router.get("/roles/export")
+async def export_roles(current_user: User = Depends(get_current_user)):
+    """Export roles to Excel"""
+    has_permission = await check_permission(current_user, "User Management", "Roles", "Export")
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="Insufficient permissions to export roles")
+    
+    roles = await db.roles.find({"is_active": True}).to_list(length=None)
+    
+    csv_data = "Name,Code,Description,Created At\n"
+    for role in roles:
+        role.pop('_id', None)
+        parsed_role = parse_from_mongo(role)
+        csv_data += f"{parsed_role.get('name', '')},{parsed_role.get('code', '')},{parsed_role.get('description', '')},{parsed_role.get('created_at', '')}\n"
+    
+    await log_activity("user_management", "roles", "export", "success", current_user.id)
+    
+    return {"data": csv_data, "filename": f"roles_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
+
 # ================ USER MANAGEMENT ENDPOINTS ================
 
 # Users CRUD
