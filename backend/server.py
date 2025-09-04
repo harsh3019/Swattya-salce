@@ -88,9 +88,9 @@ class Role(BaseAuditModel):
     description: Optional[str] = None
 
 class Permission(BaseAuditModel):
-    key: str
-    label: str
-    module_id: str
+    name: str
+    description: Optional[str] = None
+    status: str = "active"  # active/inactive
 
 class Module(BaseAuditModel):
     name: str
