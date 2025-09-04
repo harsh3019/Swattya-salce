@@ -152,6 +152,10 @@ export const Roles = () => {
                 <p className="text-sm text-gray-600">{crud.viewingItem.name}</p>
               </div>
               <div>
+                <Label className="font-medium">Code:</Label>
+                <p className="text-sm text-gray-600">{crud.viewingItem.code || 'No code'}</p>
+              </div>
+              <div>
                 <Label className="font-medium">Description:</Label>
                 <p className="text-sm text-gray-600">{crud.viewingItem.description || 'No description'}</p>
               </div>
