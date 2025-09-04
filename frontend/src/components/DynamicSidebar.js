@@ -38,14 +38,23 @@ const DynamicSidebar = () => {
   const [navigation, setNavigation] = useState({ modules: [] });
   const [expandedModules, setExpandedModules] = useState({});
   const [loading, setLoading] = useState(true);
-  const [userPermissions, setUserPermissions] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Use PermissionContext instead of managing permissions separately
+  const { permissions, hasPermission, loading: permissionsLoading } = usePermissions();
 
   useEffect(() => {
     fetchNavigationData();
-    fetchUserPermissions();
   }, []);
+
+  // Re-fetch navigation when permissions change
+  useEffect(() => {
+    if (!permissionsLoading && permissions.length > 0) {
+      console.log('🔍 DynamicSidebar: Permissions loaded, re-fetching navigation...');
+      fetchNavigationData();
+    }
+  }, [permissions, permissionsLoading]);
 
   const fetchNavigationData = async () => {
     try {
