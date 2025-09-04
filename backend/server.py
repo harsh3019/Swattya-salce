@@ -663,7 +663,8 @@ async def update_designation(desig_id: str, desig_data: Designation, current_use
     if not existing:
         raise HTTPException(status_code=404, detail="Designation not found")
     
-    desig_dict = desig_data.dict()
+    # Only update the fields that should be updated, exclude auto-generated fields
+    desig_dict = desig_data.dict(exclude={'id', 'created_at', 'created_by', 'is_active'})
     desig_dict['updated_by'] = current_user.id
     desig_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
     desig_dict.pop('_id', None)
