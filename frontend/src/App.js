@@ -142,14 +142,20 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    const success = await login(username, password);
-    if (success) {
-      console.log('🔍 Login: Successful login, user state should be updated');
-      // Let ProtectedRoute handle navigation naturally - don't navigate immediately
-      // PermissionContext will automatically fetch permissions when token is detected
+    try {
+      const success = await login(username, password);
+      if (success) {
+        console.log('🔍 Login: Successful login, waiting for state update...');
+        // Give React time to update state before navigation
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 100);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (
