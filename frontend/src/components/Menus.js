@@ -89,6 +89,7 @@ export const Menus = () => {
         onDelete={crud.handleDelete}
         onAdd={crud.openCreateDialog}
         title="Menus"
+        modulePath="/menus"
       />
 
       {/* Create/Edit Dialog */}

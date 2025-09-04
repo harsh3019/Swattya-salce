@@ -86,6 +86,7 @@ export const Permissions = () => {
         onDelete={crud.handleDelete}
         onAdd={crud.openCreateDialog}
         title="Permissions"
+        modulePath="/permissions"
       />
 
       {/* Create/Edit Dialog */}

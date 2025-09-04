@@ -92,6 +92,7 @@ export const ActivityLogs = () => {
         onDelete={handleDelete}
         onAdd={handleAdd}
         title="Activity Logs"
+        modulePath="/activity-logs"
       />
 
       {/* View Dialog */}
