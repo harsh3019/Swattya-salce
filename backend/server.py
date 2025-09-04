@@ -520,6 +520,35 @@ async def logout(current_user: User = Depends(get_current_user)):
     await log_activity("auth", "users", "logout", "success", current_user.id)
     return {"message": "Logged out successfully"}
 
+@api_router.get("/auth/permissions")
+async def get_user_permissions(current_user: User = Depends(get_current_user)):
+    """Get current user's permissions"""
+    if not current_user.role_id:
+        return {"permissions": []}
+    
+    # Get all role permissions for this user
+    role_permissions = await db.role_permissions.find({
+        "role_id": current_user.role_id,
+        "is_active": True
+    }).to_list(length=None)
+    
+    permissions = []
+    for rp in role_permissions:
+        # Get module, menu, and permission details
+        module = await db.modules.find_one({"id": rp["module_id"], "status": "active"})
+        menu = await db.menus.find_one({"id": rp["menu_id"]})
+        permission = await db.permissions.find_one({"id": rp["permission_id"], "status": "active"})
+        
+        if module and menu and permission:
+            permissions.append({
+                "module": module["name"],
+                "menu": menu["name"],
+                "permission": permission["name"],
+                "path": menu["path"]
+            })
+    
+    return {"permissions": permissions}
+
 # ================ USER MANAGEMENT ENDPOINTS ================
 
 # Users CRUD
