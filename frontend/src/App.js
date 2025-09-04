@@ -372,29 +372,11 @@ const Layout = ({ children }) => {
   );
 };
 
-// Protected Route Component - Temporarily bypassing auth for testing
+// Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
-  console.log('🔍 ProtectedRoute: loading =', loading, ', user =', user ? `${user.username} (${user.id})` : 'null');
-
-  // Temporarily bypass authentication to test CRUD operations
-  // TODO: Remove this bypass once login is fixed
-  if (typeof window !== 'undefined' && window.location.search.includes('bypass=true')) {
-    console.log('🔍 ProtectedRoute: BYPASS MODE - rendering layout without auth check');
-    
-    // Set up axios header if token exists in localStorage
-    const token = localStorage.getItem('token');
-    if (token && !axios.defaults.headers.common['Authorization']) {
-      console.log('🔍 ProtectedRoute: Setting axios header in bypass mode');
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    }
-    
-    return <Layout>{children}</Layout>;
-  }
-
   if (loading) {
-    console.log('🔍 ProtectedRoute: Showing loading spinner');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
@@ -403,11 +385,9 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!user) {
-    console.log('🔍 ProtectedRoute: No user found, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
-  console.log('🔍 ProtectedRoute: User authenticated, rendering layout');
   return <Layout>{children}</Layout>;
 };
 
