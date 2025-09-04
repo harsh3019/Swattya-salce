@@ -441,8 +441,18 @@ const ProtectedRoute = ({ children }) => {
   return <Layout>{children}</Layout>;
 };
 
+// Import User Management Components
+import { Users } from './components/UserManagement';
+import { Roles } from './components/Roles';
+import { Departments } from './components/Departments';
+import { Designations } from './components/Designations';
+import { Permissions } from './components/Permissions';
+import { Modules } from './components/Modules';
+import { Menus } from './components/Menus';
+import { RolePermissions } from './components/RolePermissions';
+import { ActivityLogs } from './components/ActivityLogs';
+
 // Placeholder Components for other pages
-const UsersPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Users Management</h1><p className="text-slate-600 mt-2">Coming soon...</p></div>;
 const CompaniesPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Companies</h1><p className="text-slate-600 mt-2">Coming soon...</p></div>;
 const ContactsPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Contacts</h1><p className="text-slate-600 mt-2">Coming soon...</p></div>;
 
