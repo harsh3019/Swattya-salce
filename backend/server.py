@@ -403,7 +403,7 @@ async def create_user(user_data: UserCreate, current_user: User = Depends(get_cu
     
     return user
 
-@api_router.put("/users/{user_id}", response_model=User)
+@api_router.put("/users/{user_id}")
 async def update_user(user_id: str, user_data: UserUpdate, current_user: User = Depends(get_current_user)):
     """Update user"""
     existing = await db.users.find_one({"id": user_id, "is_active": True})
