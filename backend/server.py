@@ -526,6 +526,11 @@ async def logout(current_user: User = Depends(get_current_user)):
 @api_router.get("/users", response_model=List[User])
 async def get_users(current_user: User = Depends(get_current_user)):
     """Get all users"""
+    # Check view permission
+    has_permission = await check_permission(current_user, "User Management", "Users", "view")
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="Insufficient permissions to view users")
+    
     users = await db.users.find({"is_active": True}).to_list(length=None)
     result = []
     for user in users:
