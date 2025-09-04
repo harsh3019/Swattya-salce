@@ -392,76 +392,79 @@ function App() {
   return (
     <div className="App font-sans">
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            {/* User Management Routes */}
-            <Route path="/users" element={
-              <ProtectedRoute>
-                <Users />
-              </ProtectedRoute>
-            } />
-            <Route path="/roles" element={
-              <ProtectedRoute>
-                <Roles />
-              </ProtectedRoute>
-            } />
-            <Route path="/departments" element={
-              <ProtectedRoute>
-                <Departments />
-              </ProtectedRoute>
-            } />
-            <Route path="/designations" element={
-              <ProtectedRoute>
-                <Designations />
-              </ProtectedRoute>
-            } />
-            <Route path="/permissions" element={
-              <ProtectedRoute>
-                <Permissions />
-              </ProtectedRoute>
-            } />
-            <Route path="/modules" element={
-              <ProtectedRoute>
-                <Modules />
-              </ProtectedRoute>
-            } />
-            <Route path="/menus" element={
-              <ProtectedRoute>
-                <Menus />
-              </ProtectedRoute>
-            } />
-            <Route path="/role-permissions" element={
-              <ProtectedRoute>
-                <RolePermissions />
-              </ProtectedRoute>
-            } />
-            <Route path="/activity-logs" element={
-              <ProtectedRoute>
-                <ActivityLogs />
-              </ProtectedRoute>
-            } />
-            
-            {/* Sales Routes */}
-            <Route path="/companies" element={
-              <ProtectedRoute>
-                <CompaniesPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/contacts" element={
-              <ProtectedRoute>
-                <ContactsPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </BrowserRouter>
-        <Toaster />
+        <PermissionProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/403" element={<ForbiddenPage />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              {/* User Management Routes */}
+              <Route path="/users" element={
+                <ProtectedRoute>
+                  <Users />
+                </ProtectedRoute>
+              } />
+              <Route path="/roles" element={
+                <ProtectedRoute>
+                  <Roles />
+                </ProtectedRoute>
+              } />
+              <Route path="/departments" element={
+                <ProtectedRoute>
+                  <Departments />
+                </ProtectedRoute>
+              } />
+              <Route path="/designations" element={
+                <ProtectedRoute>
+                  <Designations />
+                </ProtectedRoute>
+              } />
+              <Route path="/permissions" element={
+                <ProtectedRoute>
+                  <Permissions />
+                </ProtectedRoute>
+              } />
+              <Route path="/modules" element={
+                <ProtectedRoute>
+                  <Modules />
+                </ProtectedRoute>
+              } />
+              <Route path="/menus" element={
+                <ProtectedRoute>
+                  <Menus />
+                </ProtectedRoute>
+              } />
+              <Route path="/role-permissions" element={
+                <ProtectedRoute>
+                  <RolePermissions />
+                </ProtectedRoute>
+              } />
+              <Route path="/activity-logs" element={
+                <ProtectedRoute>
+                  <ActivityLogs />
+                </ProtectedRoute>
+              } />
+              
+              {/* Sales Routes */}
+              <Route path="/companies" element={
+                <ProtectedRoute>
+                  <CompaniesPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/contacts" element={
+                <ProtectedRoute>
+                  <ContactsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </BrowserRouter>
+          <Toaster />
+        </PermissionProvider>
       </AuthProvider>
     </div>
   );
