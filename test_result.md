@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Admin user can log in successfully, but no sidebar menus are showing. Need to test admin login, sidebar endpoint, permissions endpoint, and database verification to identify the root cause."
+user_problem_statement: "User reports multiple CRUD operation issues: 1) Cannot create users after filling Add User form, 2) Same issue for other masters (role, department, designation, permission, menus, modules), 3) Add/Edit/Delete buttons not showing despite having permissions for permissions, modules, and menus masters. Suggests disabling permission checkboxes for masters that shouldn't be editable."
 
 backend:
   - task: "Admin Authentication"
