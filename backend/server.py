@@ -640,8 +640,8 @@ async def create_user(user_data: UserCreate, current_user: User = Depends(get_cu
 @api_router.put("/users/{user_id}")
 async def update_user(user_id: str, user_data: UserUpdate, current_user: User = Depends(get_current_user)):
     """Update user"""
-    # Check edit permission
-    has_permission = await check_permission(current_user, "User Management", "Users", "edit")
+    # Check Edit permission
+    has_permission = await check_permission(current_user, "User Management", "Users", "Edit")
     if not has_permission:
         raise HTTPException(status_code=403, detail="Insufficient permissions to edit users")
     
