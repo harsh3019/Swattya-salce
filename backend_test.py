@@ -2,6 +2,7 @@ import requests
 import sys
 import json
 from datetime import datetime
+import uuid
 
 class SawayattaERPTester:
     def __init__(self, base_url="https://sawayatta-hub.preview.emergentagent.com"):
@@ -11,6 +12,7 @@ class SawayattaERPTester:
         self.tests_run = 0
         self.tests_passed = 0
         self.user_data = None
+        self.created_items = {}  # Track created items for cleanup
 
     def run_test(self, name, method, endpoint, expected_status, data=None, headers=None):
         """Run a single API test"""
