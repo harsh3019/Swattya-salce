@@ -54,8 +54,8 @@ export const Menus = () => {
       sortable: true,
       render: (item) => getModuleName(item.module_id)
     },
-    { key: 'route_path', label: 'Route Path', sortable: true },
-    { key: 'icon', label: 'Icon', sortable: true },
+    { key: 'path', label: 'Path', sortable: true },
+    { key: 'parent', label: 'Parent', sortable: true },
     { key: 'order_index', label: 'Order', sortable: true },
     { 
       key: 'is_active', 
