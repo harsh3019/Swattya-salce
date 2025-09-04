@@ -118,9 +118,19 @@ const useCRUD = (endpoint, schema) => {
     try {
       setLoading(true);
       setError('');
+      
+      // Debug axios configuration
+      console.log('🔍 UserManagement: fetchData called');
+      console.log('🔍 UserManagement: axios.defaults.headers.common =', axios.defaults.headers.common);
+      console.log('🔍 UserManagement: localStorage token =', localStorage.getItem('token') ? 'present' : 'missing');
+      
       const response = await axios.get(`${API}/${endpoint}`);
+      console.log('✅ UserManagement: API call successful, data length =', response.data.length);
       setData(response.data);
     } catch (err) {
+      console.error('❌ UserManagement: API call failed:', err);
+      console.error('❌ UserManagement: Error response:', err.response?.data);
+      console.error('❌ UserManagement: Error status:', err.response?.status);
       setError(err.response?.data?.detail || 'Failed to fetch data');
       toast.error('Failed to fetch data');
     } finally {
