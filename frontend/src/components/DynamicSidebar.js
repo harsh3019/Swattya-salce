@@ -48,7 +48,15 @@ const DynamicSidebar = () => {
 
   const fetchNavigationData = async () => {
     try {
+      console.log('🔍 DynamicSidebar: Fetching navigation data...');
+      console.log('🔍 API URL:', `${API}/nav/sidebar`);
+      console.log('🔍 Token:', localStorage.getItem('token') ? 'Present' : 'Missing');
+      
       const response = await axios.get(`${API}/nav/sidebar`);
+      
+      console.log('✅ DynamicSidebar: Navigation response received:', response.data);
+      console.log('✅ DynamicSidebar: Number of modules:', response.data.modules?.length || 0);
+      
       setNavigation(response.data);
       
       // Auto-expand modules that contain the current path
@@ -56,6 +64,7 @@ const DynamicSidebar = () => {
       const newExpanded = {};
       
       response.data.modules.forEach(module => {
+        console.log('🔍 Processing module:', module.name, 'with', module.menus?.length || 0, 'menus');
         const hasActivePath = module.menus.some(menu => 
           currentPath.startsWith(menu.path) || 
           (menu.children && menu.children.some(child => currentPath.startsWith(child.path)))
@@ -67,7 +76,9 @@ const DynamicSidebar = () => {
       
       setExpandedModules(newExpanded);
     } catch (error) {
-      console.error('Error fetching navigation:', error);
+      console.error('❌ DynamicSidebar: Error fetching navigation:', error);
+      console.error('❌ Error response:', error.response?.data);
+      console.error('❌ Error status:', error.response?.status);
     } finally {
       setLoading(false);
     }
