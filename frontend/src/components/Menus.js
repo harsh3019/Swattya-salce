@@ -137,23 +137,23 @@ export const Menus = () => {
             </div>
 
             <div>
-              <Label htmlFor="route_path">Route Path *</Label>
+              <Label htmlFor="path">Path *</Label>
               <Input
-                {...crud.form.register('route_path')}
-                id="route_path"
+                {...crud.form.register('path')}
+                id="path"
                 placeholder="/users, /dashboard"
               />
-              <FormError error={crud.form.formState.errors.route_path} />
+              <FormError error={crud.form.formState.errors.path} />
             </div>
 
             <div>
-              <Label htmlFor="icon">Icon</Label>
+              <Label htmlFor="parent">Parent Menu</Label>
               <Input
-                {...crud.form.register('icon')}
-                id="icon"
-                placeholder="lucide icon name (e.g., Users, Home)"
+                {...crud.form.register('parent')}
+                id="parent"
+                placeholder="Parent menu ID (leave empty for root)"
               />
-              <FormError error={crud.form.formState.errors.icon} />
+              <FormError error={crud.form.formState.errors.parent} />
             </div>
 
             <div>
