@@ -324,8 +324,10 @@ const DataTable = ({
   onEdit,
   onDelete,
   onAdd,
-  title
+  title,
+  modulePath = ''
 }) => {
+  const { canAdd, canEdit, canDelete, canView } = usePermissions();
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
