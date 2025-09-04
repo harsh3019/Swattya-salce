@@ -730,6 +730,8 @@ async def update_permission(perm_id: str, perm_data: Permission, current_user: U
     await db.permissions.update_one({"id": perm_id}, {"$set": perm_dict})
     
     updated_perm = await db.permissions.find_one({"id": perm_id})
+    if not updated_perm:
+        raise HTTPException(status_code=404, detail="Permission not found after update")
     updated_perm.pop('_id', None)
     
     await log_activity("user_management", "permissions", "update", "success", current_user.id, {"permission_id": perm_id})
