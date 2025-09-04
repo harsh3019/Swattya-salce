@@ -487,7 +487,7 @@ function App() {
                   <ContactsPage />
                 </ProtectedRoute>
               } />
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<HomeRoute />} />
             </Routes>
           </BrowserRouter>
           <Toaster />
