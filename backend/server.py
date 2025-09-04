@@ -477,7 +477,8 @@ async def update_role(role_id: str, role_data: Role, current_user: User = Depend
     if not existing:
         raise HTTPException(status_code=404, detail="Role not found")
     
-    role_dict = role_data.dict()
+    # Only update the fields that should be updated, exclude auto-generated fields
+    role_dict = role_data.dict(exclude={'id', 'created_at', 'created_by', 'is_active'})
     role_dict['updated_by'] = current_user.id
     role_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
     role_dict.pop('_id', None)
