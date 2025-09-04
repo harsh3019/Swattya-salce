@@ -210,7 +210,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const menuItems = [
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
     { 
-      icon: Users, 
+      icon: UsersIcon, 
       label: 'User Management', 
       path: '/users',
       submenu: [
