@@ -349,12 +349,10 @@ const Dashboard = () => {
 
 // Main Layout Component
 const Layout = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="flex">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <DynamicSidebar />
         <div className="flex-1">
           <Header />
           <main className="min-h-screen">
