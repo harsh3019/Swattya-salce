@@ -83,10 +83,10 @@ const moduleSchema = z.object({
 
 const menuSchema = z.object({
   name: z.string().min(2, 'Menu name must be at least 2 characters'),
+  path: z.string().min(1, 'Path is required'),
+  parent: z.string().optional(),
   module_id: z.string().min(1, 'Module is required'),
-  route_path: z.string().min(1, 'Route path is required'),
-  icon: z.string().optional(),
-  order_index: z.number().min(0, 'Order must be 0 or greater'),
+  order_index: z.coerce.number().min(0, 'Order must be 0 or greater'),
   is_active: z.boolean().default(true)
 });
 
