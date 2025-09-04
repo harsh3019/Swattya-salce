@@ -23,6 +23,7 @@ export const Roles = () => {
 
   const columns = [
     { key: 'name', label: 'Role Name', sortable: true },
+    { key: 'code', label: 'Code', sortable: true },
     { key: 'description', label: 'Description', sortable: true },
     { 
       key: 'is_active', 
