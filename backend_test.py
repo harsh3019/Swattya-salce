@@ -624,6 +624,15 @@ class SawayattaERPTester:
         test_results.append(("Role-Permissions CRUD", self.test_role_permissions_crud()))
         test_results.append(("Activity Logs", self.test_activity_logs()))
         
+        # Test RBAC specific functionality
+        test_results.append(("Standardized Permissions", self.test_standardized_permissions()))
+        test_results.append(("Sidebar Navigation", self.test_sidebar_navigation()))
+        test_results.append(("User Permissions", self.test_user_permissions()))
+        test_results.append(("Role Permission Matrix", self.test_role_permission_matrix()))
+        test_results.append(("Unassigned Modules", self.test_unassigned_modules()))
+        test_results.append(("Add Module to Role", self.test_add_module_to_role()))
+        test_results.append(("Export Functionality", self.test_export_functionality()))
+        
         # Print summary
         print("\n" + "=" * 60)
         print(f"📊 TEST SUMMARY")
