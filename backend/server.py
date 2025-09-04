@@ -598,7 +598,8 @@ async def update_department(dept_id: str, dept_data: Department, current_user: U
     if not existing:
         raise HTTPException(status_code=404, detail="Department not found")
     
-    dept_dict = dept_data.dict()
+    # Only update the fields that should be updated, exclude auto-generated fields
+    dept_dict = dept_data.dict(exclude={'id', 'created_at', 'created_by', 'is_active'})
     dept_dict['updated_by'] = current_user.id
     dept_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
     dept_dict.pop('_id', None)
