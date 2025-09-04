@@ -350,6 +350,119 @@ def parse_from_mongo(item: dict) -> dict:
         item['close_date'] = datetime.fromisoformat(item['close_date'])
     return item
 
+# ================ NAVIGATION ENDPOINTS ================
+
+@api_router.get("/nav/sidebar")
+async def get_sidebar_navigation(current_user: User = Depends(get_current_user)):
+    """Get sidebar navigation based on user permissions"""
+    if not current_user.role_id:
+        return {"modules": []}
+    
+    try:
+        # Get all role permissions for this user
+        role_permissions = await db.role_permissions.find({
+            "role_id": current_user.role_id,
+            "is_active": True
+        }).to_list(length=None)
+        
+        if not role_permissions:
+            return {"modules": []}
+        
+        # Get all modules, menus, and permissions that user has access to
+        accessible_modules = {}
+        
+        for rp in role_permissions:
+            # Get permission details
+            permission = await db.permissions.find_one({
+                "id": rp["permission_id"],
+                "status": "active"
+            })
+            
+            # Only include if user has 'view' permission
+            if permission and permission["name"] == "view":
+                # Get module details
+                module = await db.modules.find_one({
+                    "id": rp["module_id"],
+                    "status": "active"
+                })
+                
+                # Get menu details
+                menu = await db.menus.find_one({
+                    "id": rp["menu_id"]
+                })
+                
+                if module and menu:
+                    module_id = module["id"]
+                    
+                    if module_id not in accessible_modules:
+                        accessible_modules[module_id] = {
+                            "id": module["id"],
+                            "name": module["name"],
+                            "description": module.get("description"),
+                            "order_index": getattr(module, 'order_index', 0),
+                            "menus": {}
+                        }
+                    
+                    # Add menu to module
+                    accessible_modules[module_id]["menus"][menu["id"]] = {
+                        "id": menu["id"],
+                        "name": menu["name"],
+                        "path": menu["path"],
+                        "parent": menu.get("parent"),
+                        "order_index": menu["order_index"]
+                    }
+        
+        # Convert to final structure and sort
+        result_modules = []
+        for module_data in accessible_modules.values():
+            # Convert menus dict to sorted list
+            menus_list = list(module_data["menus"].values())
+            menus_list.sort(key=lambda x: x["order_index"])
+            
+            # Build nested menu structure
+            menu_tree = build_menu_tree(menus_list)
+            
+            if menu_tree:  # Only include modules with visible menus
+                result_modules.append({
+                    "id": module_data["id"],
+                    "name": module_data["name"],
+                    "description": module_data.get("description"),
+                    "menus": menu_tree
+                })
+        
+        # Sort modules by order_index (if we add that field later)
+        result_modules.sort(key=lambda x: x.get("order_index", 0))
+        
+        return {"modules": result_modules}
+        
+    except Exception as e:
+        logger.error(f"Error getting sidebar navigation: {e}")
+        return {"modules": []}
+
+def build_menu_tree(menus):
+    """Build nested menu structure from flat menu list"""
+    menu_dict = {menu["id"]: menu for menu in menus}
+    root_menus = []
+    
+    for menu in menus:
+        if menu.get("parent"):
+            # This is a child menu
+            parent_menu = menu_dict.get(menu["parent"])
+            if parent_menu:
+                if "children" not in parent_menu:
+                    parent_menu["children"] = []
+                parent_menu["children"].append(menu)
+        else:
+            # This is a root menu
+            root_menus.append(menu)
+    
+    # Sort children within each parent
+    for menu in menu_dict.values():
+        if "children" in menu:
+            menu["children"].sort(key=lambda x: x["order_index"])
+    
+    return root_menus
+
 # ================ AUTHENTICATION ENDPOINTS ================
 
 @api_router.post("/auth/login", response_model=LoginResponse)
