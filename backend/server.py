@@ -793,7 +793,8 @@ async def update_module(module_id: str, module_data: Module, current_user: User 
     if not existing:
         raise HTTPException(status_code=404, detail="Module not found")
     
-    module_dict = module_data.dict()
+    # Only update the fields that should be updated, exclude auto-generated fields
+    module_dict = module_data.dict(exclude={'id', 'created_at', 'created_by', 'is_active'})
     module_dict['updated_by'] = current_user.id
     module_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
     module_dict.pop('_id', None)
