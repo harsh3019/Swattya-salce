@@ -469,11 +469,54 @@ function App() {
                 <Dashboard />
               </ProtectedRoute>
             } />
+            {/* User Management Routes */}
             <Route path="/users" element={
               <ProtectedRoute>
-                <UsersPage />
+                <Users />
               </ProtectedRoute>
             } />
+            <Route path="/roles" element={
+              <ProtectedRoute>
+                <Roles />
+              </ProtectedRoute>
+            } />
+            <Route path="/departments" element={
+              <ProtectedRoute>
+                <Departments />
+              </ProtectedRoute>
+            } />
+            <Route path="/designations" element={
+              <ProtectedRoute>
+                <Designations />
+              </ProtectedRoute>
+            } />
+            <Route path="/permissions" element={
+              <ProtectedRoute>
+                <Permissions />
+              </ProtectedRoute>
+            } />
+            <Route path="/modules" element={
+              <ProtectedRoute>
+                <Modules />
+              </ProtectedRoute>
+            } />
+            <Route path="/menus" element={
+              <ProtectedRoute>
+                <Menus />
+              </ProtectedRoute>
+            } />
+            <Route path="/role-permissions" element={
+              <ProtectedRoute>
+                <RolePermissions />
+              </ProtectedRoute>
+            } />
+            <Route path="/activity-logs" element={
+              <ProtectedRoute>
+                <ActivityLogs />
+              </ProtectedRoute>
+            } />
+            
+            {/* Sales Routes */}
             <Route path="/companies" element={
               <ProtectedRoute>
                 <CompaniesPage />
