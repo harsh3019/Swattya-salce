@@ -461,17 +461,17 @@ function App() {
             } />
             <Route path="/users" element={
               <ProtectedRoute>
-                <Users />
+                <UsersPage />
               </ProtectedRoute>
             } />
             <Route path="/companies" element={
               <ProtectedRoute>
-                <Companies />
+                <CompaniesPage />
               </ProtectedRoute>
             } />
             <Route path="/contacts" element={
               <ProtectedRoute>
-                <Contacts />
+                <ContactsPage />
               </ProtectedRoute>
             } />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
