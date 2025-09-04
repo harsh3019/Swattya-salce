@@ -493,7 +493,7 @@ async def startup_event():
     """Initialize default data"""
     try:
         # Create default admin user if not exists
-        admin_user = await db.users.find_one({"username": "admin"})
+        admin_user = await db.users.find_one({"username": "admin", "is_active": True})
         if not admin_user:
             # Create default role
             admin_role = Role(
@@ -502,16 +502,20 @@ async def startup_event():
                 created_by="system"
             )
             role_dict = prepare_for_mongo(admin_role.dict())
+            # Remove MongoDB ObjectId to avoid serialization issues
+            role_dict.pop('_id', None)
             await db.roles.insert_one(role_dict)
             
             # Create default department
             default_dept = Department(name="IT", created_by="system")
             dept_dict = prepare_for_mongo(default_dept.dict())
+            dept_dict.pop('_id', None)
             await db.departments.insert_one(dept_dict)
             
             # Create default designation
             default_desig = Designation(name="Administrator", created_by="system")
             desig_dict = prepare_for_mongo(default_desig.dict())
+            desig_dict.pop('_id', None)
             await db.designations.insert_one(desig_dict)
             
             # Create default admin user
@@ -525,6 +529,7 @@ async def startup_event():
                 created_by="system"
             )
             user_dict = prepare_for_mongo(admin.dict())
+            user_dict.pop('_id', None)
             await db.users.insert_one(user_dict)
             
             logger.info("Default admin user created: admin/admin123")
