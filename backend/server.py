@@ -414,8 +414,8 @@ async def get_sidebar_navigation(current_user: User = Depends(get_current_user))
                 "status": "active"
             })
             
-            # Only include if user has 'view' permission
-            if permission and permission["name"] == "view":
+            # Only include if user has 'View' permission
+            if permission and permission["name"] == "View":
                 # Get module details
                 module = await db.modules.find_one({
                     "id": rp["module_id"],
