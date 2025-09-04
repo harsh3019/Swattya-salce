@@ -926,6 +926,8 @@ async def update_role_permission(rp_id: str, rp_data: RolePermission, current_us
     await db.role_permissions.update_one({"id": rp_id}, {"$set": rp_dict})
     
     updated_rp = await db.role_permissions.find_one({"id": rp_id})
+    if not updated_rp:
+        raise HTTPException(status_code=404, detail="Role-Permission mapping not found after update")
     updated_rp.pop('_id', None)
     
     await log_activity("user_management", "role_permissions", "update", "success", current_user.id, {"mapping_id": rp_id})
