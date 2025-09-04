@@ -107,7 +107,7 @@ const useCRUD = (endpoint, schema) => {
 
   const form = useForm({
     resolver: zodResolver(schema),
-    defaultValues: schema.parse({})
+    defaultValues: {}
   });
 
   const fetchData = async () => {
