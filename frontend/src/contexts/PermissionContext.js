@@ -24,11 +24,22 @@ export const PermissionProvider = ({ children }) => {
 
   const fetchPermissions = async () => {
     try {
+      // Check if user is authenticated by checking for token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setPermissions([]);
+        setLoading(false);
+        return;
+      }
+
       const response = await axios.get(`${API}/auth/permissions`);
       setPermissions(response.data.permissions || []);
     } catch (error) {
       console.error('Error fetching permissions:', error);
-      setPermissions([]);
+      // If 401/403, clear permissions but don't set error
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        setPermissions([]);
+      }
     } finally {
       setLoading(false);
     }
