@@ -46,8 +46,8 @@ export const PermissionProvider = ({ children }) => {
     );
   };
 
-  const canView = (path) => hasPermission(path, 'view');
-  const canAdd = (path) => hasPermission(path, 'add');
+  const canView = (path) => hasPermission(path, 'View');
+  const canAdd = (path) => hasPermission(path, 'Add');
   const canEdit = (path) => hasPermission(path, 'edit');
   const canDelete = (path) => hasPermission(path, 'delete');
 
