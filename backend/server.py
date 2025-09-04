@@ -927,7 +927,8 @@ async def update_role_permission(rp_id: str, rp_data: RolePermission, current_us
     if not existing:
         raise HTTPException(status_code=404, detail="Role-Permission mapping not found")
     
-    rp_dict = rp_data.dict()
+    # Only update the fields that should be updated, exclude auto-generated fields
+    rp_dict = rp_data.dict(exclude={'id', 'created_at', 'created_by', 'is_active'})
     rp_dict['updated_by'] = current_user.id
     rp_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
     rp_dict.pop('_id', None)
