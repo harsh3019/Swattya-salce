@@ -68,9 +68,9 @@ const designationSchema = z.object({
 });
 
 const permissionSchema = z.object({
-  key: z.string().min(3, 'Permission key must be at least 3 characters'),
-  label: z.string().min(2, 'Permission label must be at least 2 characters'),
-  module_id: z.string().min(1, 'Module is required'),
+  name: z.string().min(2, 'Permission name must be at least 2 characters'),
+  description: z.string().optional(),
+  status: z.string().default('active'),
   is_active: z.boolean().default(true)
 });
 
