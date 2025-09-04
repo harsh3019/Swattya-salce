@@ -77,6 +77,7 @@ const permissionSchema = z.object({
 const moduleSchema = z.object({
   name: z.string().min(2, 'Module name must be at least 2 characters'),
   description: z.string().optional(),
+  status: z.string().default('active'),
   is_active: z.boolean().default(true)
 });
 
