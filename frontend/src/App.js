@@ -92,8 +92,22 @@ const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      const response = await axios.post(`${API}/auth/login`, { username, password });
-      const { access_token, user: userData } = response.data;
+      // Use fetch instead of axios to avoid any axios configuration issues
+      const response = await fetch(`${API}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Login failed');
+      }
+      
+      const data = await response.json();
+      const { access_token, user: userData } = data;
       
       localStorage.setItem('token', access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
@@ -102,7 +116,7 @@ const AuthProvider = ({ children }) => {
       toast.success('Login successful!');
       return true;
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Login failed');
+      toast.error(error.message || 'Login failed');
       return false;
     }
   };
