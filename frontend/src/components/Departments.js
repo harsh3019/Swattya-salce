@@ -40,7 +40,7 @@ export const Departments = () => {
 
   return (
     <div className="space-y-6">
-      <DataTable
+      <PermissionDataTable
         data={crud.data}
         columns={columns}
         loading={crud.loading}
@@ -53,12 +53,13 @@ export const Departments = () => {
         setCurrentPage={crud.setCurrentPage}
         totalPages={crud.totalPages}
         onSort={crud.handleSort}
-        onExport={crud.exportToCSV}
         onView={crud.openViewDialog}
         onEdit={crud.openEditDialog}
         onDelete={crud.handleDelete}
         onAdd={crud.openCreateDialog}
         title="Departments"
+        modulePath="/departments"
+        entityName="departments"
       />
 
       {/* Create/Edit Dialog */}
