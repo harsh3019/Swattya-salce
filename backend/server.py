@@ -1198,12 +1198,13 @@ async def startup_event():
 async def initialize_rbac_system():
     """Initialize complete RBAC system with permissions, modules, menus, and roles"""
     
-    # 1. Create default permissions
+    # 1. Create default permissions (standardized naming)
     permissions_data = [
-        {"name": "view", "description": "View/List records"},
-        {"name": "add", "description": "Create new records"},
-        {"name": "edit", "description": "Update existing records"},
-        {"name": "delete", "description": "Delete records"}
+        {"name": "View", "description": "View and list records"},
+        {"name": "Add", "description": "Create new records"},
+        {"name": "Edit", "description": "Update existing records"},
+        {"name": "Delete", "description": "Delete records (soft delete)"},
+        {"name": "Export", "description": "Export data to Excel/CSV"}
     ]
     
     created_permissions = {}
