@@ -420,10 +420,13 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: User = 
     if not updated_user:
         raise HTTPException(status_code=404, detail="User not found after update")
     updated_user.pop('_id', None)
-    updated_user.pop('password_hash', None)  # Don't return password
     
     await log_activity("user_management", "users", "update", "success", current_user.id, {"user_id": user_id})
-    return User(**parse_from_mongo(updated_user))
+    
+    # Create response without password_hash
+    user_response = updated_user.copy()
+    user_response.pop('password_hash', None)
+    return parse_from_mongo(user_response)
 
 @api_router.delete("/users/{user_id}")
 async def delete_user(user_id: str, current_user: User = Depends(get_current_user)):
