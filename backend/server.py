@@ -605,6 +605,11 @@ async def update_user(user_id: str, user_data: UserUpdate, current_user: User = 
 @api_router.delete("/users/{user_id}")
 async def delete_user(user_id: str, current_user: User = Depends(get_current_user)):
     """Soft delete user"""
+    # Check delete permission
+    has_permission = await check_permission(current_user, "User Management", "Users", "delete")
+    if not has_permission:
+        raise HTTPException(status_code=403, detail="Insufficient permissions to delete users")
+    
     existing = await db.users.find_one({"id": user_id, "is_active": True})
     if not existing:
         raise HTTPException(status_code=404, detail="User not found")
