@@ -630,6 +630,7 @@ export const Users = () => {
         onDelete={crud.handleDelete}
         onAdd={crud.openCreateDialog}
         title="Users"
+        modulePath="/users"
       />
 
       {/* Create/Edit Dialog */}
