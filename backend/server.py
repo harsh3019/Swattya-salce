@@ -110,7 +110,7 @@ class Department(BaseAuditModel):
     name: str
 
 class Designation(BaseAuditModel):
-    name:   
+    name: str
 
 class ActivityLog(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
