@@ -14,6 +14,11 @@ import { Menus } from './components/Menus';
 import { RolePermissions } from './components/RolePermissions';
 import { ActivityLogs } from './components/ActivityLogs';
 
+// Import new RBAC components
+import DynamicSidebar from './components/DynamicSidebar';
+import ForbiddenPage from './components/ForbiddenPage';
+import { PermissionProvider } from './contexts/PermissionContext';
+
 // Import Shadcn components
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
