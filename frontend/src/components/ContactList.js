@@ -487,8 +487,8 @@ export const ContactList = () => {
           <div>
             <Label>Status</Label>
             <Select 
-              value={filters.is_active === null ? '' : filters.is_active.toString()} 
-              onValueChange={(value) => setFilters(prev => ({...prev, is_active: value === '' ? null : value === 'true'}))}
+              value={filters.is_active === null ? 'all' : filters.is_active.toString()} 
+              onValueChange={(value) => setFilters(prev => ({...prev, is_active: value === 'all' ? null : value === 'true'}))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="All" />
