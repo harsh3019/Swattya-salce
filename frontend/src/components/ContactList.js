@@ -460,7 +460,7 @@ export const ContactList = () => {
                 <SelectValue placeholder="All" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All</SelectItem>
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="true">SPOC Only</SelectItem>
                 <SelectItem value="false">Non-SPOC</SelectItem>
               </SelectContent>
