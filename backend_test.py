@@ -728,7 +728,7 @@ class SawayattaERPTester:
         domestic_company = {
             "company_name": f"TechCorp Solutions Pvt Ltd {datetime.now().strftime('%H%M%S')}",
             "domestic_international": "Domestic",
-            "gst_number": f"27ABCDE{datetime.now().strftime('%H%M%S')}Z1Z5",
+            "gst_number": f"27ABCDE{datetime.now().strftime('%H%M')}Z1Z5",  # Fixed length
             "pan_number": f"ABCDE{datetime.now().strftime('%H%M')}F",
             "company_type_id": company_type_id,
             "account_type_id": account_type_id,
