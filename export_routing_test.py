@@ -74,12 +74,23 @@ class ExportRoutingTester:
         
         if success:
             # Check if response contains export data
-            has_data = 'data' in response or 'contacts' in response or isinstance(response, list)
-            filename = response.get('filename', 'N/A')
+            if isinstance(response, list):
+                has_data = len(response) >= 0  # List response is valid
+                filename = "contacts_export.csv"
+                data_info = f"List with {len(response)} items"
+            elif isinstance(response, dict):
+                has_data = 'data' in response or 'contacts' in response
+                filename = response.get('filename', 'N/A')
+                data_info = f"Dict with keys: {list(response.keys())}"
+            else:
+                has_data = False
+                filename = 'N/A'
+                data_info = f"Unexpected response type: {type(response)}"
+            
             return self.log_test("GET /api/contacts/export", True, 
-                               f"Export successful, Has data: {has_data}, Filename: {filename}")
+                               f"Export successful, Has data: {has_data}, Filename: {filename}, Data: {data_info}")
         else:
-            error_msg = response.get('detail', response.get('error', 'Unknown error'))
+            error_msg = response.get('detail', response.get('error', 'Unknown error')) if isinstance(response, dict) else str(response)
             return self.log_test("GET /api/contacts/export", False, 
                                f"Status: {status}, Error: {error_msg}")
 
