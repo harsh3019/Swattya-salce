@@ -1061,20 +1061,7 @@ async def get_companies(current_user: User = Depends(get_current_user)):
     companies = await db.companies.find({"is_active": True}).to_list(length=None)
     return [prepare_for_json(company) for company in companies]
 
-@api_router.post("/companies")
-async def create_company_old(company_data: dict, current_user: User = Depends(get_current_user)):
-    """Create new company (old endpoint - deprecated)"""
-    company_dict = company_data
-    company_dict['created_by'] = current_user.id
-    company_dict['id'] = str(uuid.uuid4())
-    company_dict['created_at'] = datetime.now(timezone.utc)
-    company_dict['updated_at'] = datetime.now(timezone.utc)
-    company_dict = prepare_for_mongo(company_dict)
-    await db.companies.insert_one(company_dict)
-    
-    await log_activity("sales", "companies", "create", "success", current_user.id, {"company_id": company_dict["id"]})
-    
-    return prepare_for_json(company_dict)
+# Old company endpoint removed - using new company registration endpoint
 
 @api_router.get("/companies/{company_id}")
 async def get_company(company_id: str, current_user: User = Depends(get_current_user)):
