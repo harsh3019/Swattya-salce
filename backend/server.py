@@ -2047,7 +2047,7 @@ async def check_company_access(current_user: User):
 @api_router.get("/companies")
 async def get_companies(current_user: User = Depends(get_current_user)):
     await check_company_access(current_user)
-    companies = await db.companies.find().to_list(None)
+    companies = await db.companies.find({"$or": [{"is_active": True}, {"active_status": True}]}).to_list(None)
     return [prepare_for_json(c) for c in companies]
 
 @api_router.get("/companies/{company_id}")
