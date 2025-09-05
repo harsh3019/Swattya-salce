@@ -2132,6 +2132,125 @@ async def create_company(company_data: CompanyCreate, current_user: User = Depen
     
     return prepare_for_json(company_dict)
 
+@api_router.put("/companies/{company_id}")
+async def update_company(company_id: str, company_data: CompanyCreate, current_user: User = Depends(get_current_user)):
+    await check_company_access(current_user)
+    
+    # Check if company exists
+    existing_company = await db.companies.find_one({"id": company_id})
+    if not existing_company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    
+    # Check for duplicates (excluding current company)
+    existing = await db.companies.find_one({
+        "$and": [
+            {"id": {"$ne": company_id}},
+            {"$or": [
+                {"name": company_data.company_name},
+                {"gst_number": company_data.gst_number} if company_data.gst_number else {},
+                {"pan_number": company_data.pan_number} if company_data.pan_number else {},
+            ]}
+        ]
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Company with this name, GST, or PAN already exists")
+    
+    # Validate India-specific requirements
+    if company_data.domestic_international == "Domestic":
+        if not company_data.gst_number and not company_data.pan_number:
+            raise HTTPException(status_code=400, detail="GST or PAN number is required for domestic companies")
+    
+    # Calculate score and lead status
+    score = await calculate_company_score(company_data)
+    lead_status = "hot" if score >= 70 else "cold"
+    
+    # Map CompanyCreate fields to Company model fields
+    update_dict = {
+        "name": company_data.company_name,
+        "domestic_international": company_data.domestic_international,
+        "gst_number": company_data.gst_number,
+        "pan_number": company_data.pan_number,
+        "vat_number": company_data.vat_number,
+        "company_type_id": company_data.company_type_id,
+        "account_type_id": company_data.account_type_id,
+        "region_id": company_data.region_id,
+        "business_type_id": company_data.business_type_id,
+        "industry_id": company_data.industry_id,
+        "sub_industry_id": company_data.sub_industry_id,
+        "website": company_data.website,
+        "is_child": company_data.is_child,
+        "parent_company_id": company_data.parent_company_id,
+        "employee_count": company_data.employee_count,
+        "address": company_data.address,
+        "country_id": company_data.country_id,
+        "state_id": company_data.state_id,
+        "city_id": company_data.city_id,
+        "turnover": [t.dict() for t in company_data.turnover],
+        "profit": [p.dict() for p in company_data.profit],
+        "annual_revenue": company_data.annual_revenue,
+        "revenue_currency": company_data.revenue_currency,
+        "company_profile": company_data.company_profile,
+        "score": score,
+        "lead_status": lead_status,
+        "valid_gst": company_data.valid_gst,
+        "active_status": company_data.active_status,
+        "parent_linkage_valid": company_data.parent_linkage_valid,
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    # Remove specific None values that should not be stored
+    fields_to_remove_if_none = ['gst_number', 'pan_number', 'vat_number', 'website', 'parent_company_id', 'company_profile']
+    for field in fields_to_remove_if_none:
+        if update_dict.get(field) is None:
+            update_dict.pop(field, None)
+    
+    await db.companies.update_one({"id": company_id}, {"$set": update_dict})
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="UPDATE",
+        resource_type="Company",
+        resource_id=company_id,
+        details=f"Updated company: {update_dict['name']}"
+    )
+    
+    # Get updated company
+    updated_company = await db.companies.find_one({"id": company_id})
+    return prepare_for_json(updated_company)
+
+@api_router.delete("/companies/{company_id}")
+async def delete_company(company_id: str, current_user: User = Depends(get_current_user)):
+    await check_company_access(current_user)
+    
+    # Check if company exists
+    company = await db.companies.find_one({"id": company_id})
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    
+    # Soft delete - mark as inactive
+    await db.companies.update_one(
+        {"id": company_id}, 
+        {
+            "$set": {
+                "is_active": False,
+                "active_status": False,
+                "updated_at": datetime.now(timezone.utc)
+            }
+        }
+    )
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="DELETE",
+        resource_type="Company",
+        resource_id=company_id,
+        details=f"Deleted company: {company.get('name', 'Unknown')}"
+    )
+    
+    return {"message": "Company deleted successfully"}
+
 async def calculate_company_score(company_data: CompanyCreate) -> int:
     """Calculate company score based on various factors"""
     score = 0
