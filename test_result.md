@@ -201,12 +201,15 @@ frontend:
     working: "NA"
     file: "frontend/src/components/CompanyRegistration.js"
     stuck_count: 0
-    priority: "high"
+    priority: "medium"
     needs_retesting: true
     status_history:
         - working: "NA"
           agent: "testing"
           comment: "Need to test Step 2 functionality: Address input field, cascading dropdowns for Country->State->City selection, form validation, and step progression."
+        - working: "NA"
+          agent: "testing"
+          comment: "PARTIAL TESTING: Form structure for Step 2 verified - address textarea field present, cascading dropdown structure (Country->State->City) implemented in UI. However, full testing of step progression and cascading dropdown functionality requires master data to be loaded from backend APIs. Form progression logic appears functional but needs backend data validation."
 
   - task: "Company Registration Step 3 - Financials"
     implemented: true
