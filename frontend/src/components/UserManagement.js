@@ -130,14 +130,18 @@ const useCRUD = (endpoint, schema) => {
 
   const createItem = async (itemData) => {
     try {
+      console.log('🔍 createItem called with data:', itemData);
+      console.log('🔍 API endpoint:', `${API}/${endpoint}`);
       setError('');
       const response = await axios.post(`${API}/${endpoint}`, itemData);
+      console.log('✅ createItem response:', response.data);
       setData(prev => [...prev, response.data]);
       toast.success('Item created successfully');
       setIsDialogOpen(false);
       form.reset();
       return true;
     } catch (err) {
+      console.error('❌ createItem error:', err);
       const errorMsg = err.response?.data?.detail || 'Failed to create item';
       setError(errorMsg);
       toast.error(errorMsg);
