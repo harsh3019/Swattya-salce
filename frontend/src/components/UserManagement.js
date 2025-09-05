@@ -43,10 +43,13 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 // Validation Schemas
-const userSchema = z.object({
+// Create dynamic schema based on mode
+const createUserSchema = (isEditing = false) => z.object({
   username: z.string().min(3, 'Username must be at least 3 characters'),
   email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters').optional(),
+  password: isEditing 
+    ? z.string().optional().or(z.literal(''))
+    : z.string().min(6, 'Password must be at least 6 characters'),
   role_id: z.string().optional(),
   department_id: z.string().optional(),
   designation_id: z.string().optional(),
