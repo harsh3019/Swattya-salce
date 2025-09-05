@@ -258,11 +258,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "User CRUD Operations - Form submission not working"
     - "Permission Context Integration - Timing issues with 403 errors"
     - "Masters CRUD Operations (Permissions, Modules, Menus) - Missing Edit/Delete buttons"
   stuck_tasks:
-    - "User CRUD Operations"
     - "Masters CRUD Operations (Permissions, Modules, Menus)"
   test_all: false
   test_priority: "high_first"
