@@ -117,17 +117,69 @@ const CompanyRegistration = () => {
     name: 'profit'
   });
 
-  // Load from localStorage on mount
+  // Load from localStorage on mount or load existing company for editing
   useEffect(() => {
-    const savedData = localStorage.getItem('companyRegistrationDraft');
-    if (savedData) {
-      const parsed = JSON.parse(savedData);
-      form.reset(parsed.formData);
-      setCurrentStep(parsed.currentStep);
-      setUploadedDocuments(parsed.documents || []);
+    if (isEditing) {
+      loadExistingCompany();
+    } else {
+      const savedData = localStorage.getItem('companyRegistrationDraft');
+      if (savedData) {
+        const parsed = JSON.parse(savedData);
+        form.reset(parsed.formData);
+        setCurrentStep(parsed.currentStep);
+        setUploadedDocuments(parsed.documents || []);
+      }
     }
     fetchMasterData();
-  }, []);
+  }, [id]);
+
+  const loadExistingCompany = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(`${API}/companies/${id}`);
+      const company = response.data;
+      
+      // Map company data to form format
+      const formData = {
+        company_name: company.name,
+        domestic_international: company.domestic_international,
+        gst_number: company.gst_number || '',
+        pan_number: company.pan_number || '',
+        vat_number: company.vat_number || '',
+        company_type_id: company.company_type_id,
+        account_type_id: company.account_type_id,
+        region_id: company.region_id,
+        business_type_id: company.business_type_id,
+        industry_id: company.industry_id,
+        sub_industry_id: company.sub_industry_id,
+        website: company.website || '',
+        is_child: company.is_child || false,
+        parent_company_id: company.parent_company_id || '',
+        employee_count: company.employee_count,
+        address: company.address,
+        country_id: company.country_id,
+        state_id: company.state_id,
+        city_id: company.city_id,
+        turnover: company.turnover || [],
+        profit: company.profit || [],
+        annual_revenue: company.annual_revenue,
+        revenue_currency: company.revenue_currency,
+        company_profile: company.company_profile || '',
+        valid_gst: company.valid_gst || false,
+        active_status: company.active_status !== undefined ? company.active_status : true,
+        parent_linkage_valid: company.parent_linkage_valid !== undefined ? company.parent_linkage_valid : true
+      };
+      
+      form.reset(formData);
+      setUploadedDocuments(company.documents || []);
+      
+    } catch (error) {
+      toast.error('Failed to load company data');
+      navigate('/companies');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Auto-save to localStorage
   useEffect(() => {
