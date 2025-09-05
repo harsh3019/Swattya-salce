@@ -602,6 +602,362 @@ class SawayattaERPTester:
         else:
             return self.log_test("Standardized Permissions", False, f"Status: {status}")
 
+    def test_master_data_apis(self):
+        """Test all master data APIs for company registration"""
+        print("\n🏢 Testing Master Data APIs...")
+        
+        master_data_endpoints = [
+            ('company-types', 'Company Types'),
+            ('account-types', 'Account Types'),
+            ('regions', 'Regions'),
+            ('business-types', 'Business Types'),
+            ('industries', 'Industries'),
+            ('sub-industries', 'Sub Industries'),
+            ('countries', 'Countries'),
+            ('states', 'States'),
+            ('cities', 'Cities'),
+            ('currencies', 'Currencies')
+        ]
+        
+        all_success = True
+        master_data = {}
+        
+        for endpoint, name in master_data_endpoints:
+            success, status, response = self.make_request('GET', endpoint)
+            if success and isinstance(response, list) and len(response) > 0:
+                master_data[endpoint] = response
+                self.log_test(f"GET {name}", True, f"Found {len(response)} items")
+            else:
+                self.log_test(f"GET {name}", False, f"Status: {status}, Count: {len(response) if isinstance(response, list) else 0}")
+                all_success = False
+        
+        # Store master data for company creation tests
+        self.master_data = master_data
+        return all_success
+
+    def test_cascading_dropdowns(self):
+        """Test cascading dropdown functionality"""
+        print("\n🔗 Testing Cascading Dropdowns...")
+        
+        if not hasattr(self, 'master_data'):
+            return self.log_test("Cascading Dropdowns", False, "Master data not available")
+        
+        all_success = True
+        
+        # Test industry -> sub-industry cascading
+        if 'industries' in self.master_data and self.master_data['industries']:
+            tech_industry = next((i for i in self.master_data['industries'] if i['name'] == 'Technology'), None)
+            if tech_industry:
+                success, status, response = self.make_request('GET', f"sub-industries?industry_id={tech_industry['id']}")
+                if success and isinstance(response, list):
+                    self.log_test("Industry->Sub-Industry Cascading", True, f"Found {len(response)} sub-industries for Technology")
+                else:
+                    self.log_test("Industry->Sub-Industry Cascading", False, f"Status: {status}")
+                    all_success = False
+        
+        # Test country -> state cascading
+        if 'countries' in self.master_data and self.master_data['countries']:
+            india = next((c for c in self.master_data['countries'] if c['name'] == 'India'), None)
+            if india:
+                success, status, response = self.make_request('GET', f"states?country_id={india['id']}")
+                if success and isinstance(response, list):
+                    self.log_test("Country->State Cascading", True, f"Found {len(response)} states for India")
+                    # Store states for city testing
+                    self.india_states = response
+                else:
+                    self.log_test("Country->State Cascading", False, f"Status: {status}")
+                    all_success = False
+        
+        # Test state -> city cascading
+        if hasattr(self, 'india_states') and self.india_states:
+            maharashtra = next((s for s in self.india_states if s['name'] == 'Maharashtra'), None)
+            if maharashtra:
+                success, status, response = self.make_request('GET', f"cities?state_id={maharashtra['id']}")
+                if success and isinstance(response, list):
+                    self.log_test("State->City Cascading", True, f"Found {len(response)} cities for Maharashtra")
+                else:
+                    self.log_test("State->City Cascading", False, f"Status: {status}")
+                    all_success = False
+        
+        return all_success
+
+    def test_company_creation_complete_data(self):
+        """Test company creation with complete data"""
+        print("\n🏢 Testing Company Creation with Complete Data...")
+        
+        if not hasattr(self, 'master_data'):
+            return self.log_test("Company Creation Complete Data", False, "Master data not available")
+        
+        # Get required master data IDs
+        try:
+            company_type_id = self.master_data['company-types'][0]['id']
+            account_type_id = self.master_data['account-types'][0]['id']
+            region_id = self.master_data['regions'][0]['id']
+            business_type_id = self.master_data['business-types'][0]['id']
+            
+            # Get Technology industry and its sub-industry
+            tech_industry = next(i for i in self.master_data['industries'] if i['name'] == 'Technology')
+            industry_id = tech_industry['id']
+            
+            # Get sub-industries for Technology
+            success, status, sub_industries = self.make_request('GET', f"sub-industries?industry_id={industry_id}")
+            if not success or not sub_industries:
+                return self.log_test("Company Creation Complete Data", False, "Could not get sub-industries")
+            sub_industry_id = sub_industries[0]['id']
+            
+            # Get India and its state/city
+            india = next(c for c in self.master_data['countries'] if c['name'] == 'India')
+            country_id = india['id']
+            
+            success, status, states = self.make_request('GET', f"states?country_id={country_id}")
+            if not success or not states:
+                return self.log_test("Company Creation Complete Data", False, "Could not get states")
+            state_id = states[0]['id']
+            
+            success, status, cities = self.make_request('GET', f"cities?state_id={state_id}")
+            if not success or not cities:
+                return self.log_test("Company Creation Complete Data", False, "Could not get cities")
+            city_id = cities[0]['id']
+            
+            currency = 'INR'
+            
+        except (IndexError, KeyError, StopIteration) as e:
+            return self.log_test("Company Creation Complete Data", False, f"Missing master data: {e}")
+        
+        # Test 1: Domestic company with complete data
+        domestic_company = {
+            "company_name": f"TechCorp Solutions Pvt Ltd {datetime.now().strftime('%H%M%S')}",
+            "domestic_international": "Domestic",
+            "gst_number": f"27ABCDE{datetime.now().strftime('%H%M%S')}Z1Z5",
+            "pan_number": f"ABCDE{datetime.now().strftime('%H%M')}F",
+            "company_type_id": company_type_id,
+            "account_type_id": account_type_id,
+            "region_id": region_id,
+            "business_type_id": business_type_id,
+            "industry_id": industry_id,
+            "sub_industry_id": sub_industry_id,
+            "website": "https://techcorp.example.com",
+            "is_child": False,
+            "employee_count": 250,
+            "address": "123 Tech Park, Sector 5, Electronic City, Bangalore",
+            "country_id": country_id,
+            "state_id": state_id,
+            "city_id": city_id,
+            "turnover": [
+                {"year": 2023, "revenue": 50000000, "currency": "INR"},
+                {"year": 2022, "revenue": 40000000, "currency": "INR"}
+            ],
+            "profit": [
+                {"year": 2023, "profit": 8000000, "currency": "INR"},
+                {"year": 2022, "profit": 6000000, "currency": "INR"}
+            ],
+            "annual_revenue": 50000000,
+            "revenue_currency": currency,
+            "company_profile": "Leading technology solutions provider specializing in enterprise software development and cloud services.",
+            "valid_gst": True,
+            "active_status": True,
+            "parent_linkage_valid": True
+        }
+        
+        success, status, response = self.make_request('POST', 'companies', domestic_company, 200)
+        if success and 'id' in response:
+            company_id = response['id']
+            self.created_items['domestic_company_id'] = company_id
+            
+            # Verify scoring algorithm worked
+            score = response.get('score', 0)
+            lead_status = response.get('lead_status', '')
+            
+            domestic_success = self.log_test("CREATE Domestic Company", True, 
+                                           f"Company ID: {company_id}, Score: {score}, Lead Status: {lead_status}")
+            
+            # Verify company appears in GET /api/companies
+            success, status, companies_list = self.make_request('GET', 'companies')
+            company_found = any(c.get('id') == company_id for c in companies_list) if success else False
+            list_success = self.log_test("Company in List", company_found, f"Company found in companies list")
+            
+        else:
+            domestic_success = self.log_test("CREATE Domestic Company", False, f"Status: {status}, Response: {response}")
+            list_success = False
+        
+        # Test 2: International company
+        international_company = {
+            "company_name": f"Global Tech Inc {datetime.now().strftime('%H%M%S')}",
+            "domestic_international": "International",
+            "vat_number": f"GB{datetime.now().strftime('%H%M%S')}123456",
+            "company_type_id": company_type_id,
+            "account_type_id": account_type_id,
+            "region_id": region_id,
+            "business_type_id": business_type_id,
+            "industry_id": industry_id,
+            "sub_industry_id": sub_industry_id,
+            "website": "https://globaltech.example.com",
+            "is_child": False,
+            "employee_count": 500,
+            "address": "456 Innovation Drive, Silicon Valley, California",
+            "country_id": country_id,  # Using same for simplicity
+            "state_id": state_id,
+            "city_id": city_id,
+            "turnover": [],
+            "profit": [],
+            "annual_revenue": 100000000,
+            "revenue_currency": "USD",
+            "company_profile": "Global technology company focused on AI and machine learning solutions.",
+            "valid_gst": False,
+            "active_status": True,
+            "parent_linkage_valid": True
+        }
+        
+        success, status, response = self.make_request('POST', 'companies', international_company, 200)
+        if success and 'id' in response:
+            company_id = response['id']
+            self.created_items['international_company_id'] = company_id
+            
+            score = response.get('score', 0)
+            lead_status = response.get('lead_status', '')
+            
+            international_success = self.log_test("CREATE International Company", True, 
+                                                f"Company ID: {company_id}, Score: {score}, Lead Status: {lead_status}")
+        else:
+            international_success = self.log_test("CREATE International Company", False, f"Status: {status}, Response: {response}")
+        
+        return domestic_success and list_success and international_success
+
+    def test_company_validation(self):
+        """Test company creation validation"""
+        print("\n✅ Testing Company Validation...")
+        
+        if not hasattr(self, 'master_data'):
+            return self.log_test("Company Validation", False, "Master data not available")
+        
+        # Get basic required IDs
+        try:
+            company_type_id = self.master_data['company-types'][0]['id']
+            account_type_id = self.master_data['account-types'][0]['id']
+            region_id = self.master_data['regions'][0]['id']
+            business_type_id = self.master_data['business-types'][0]['id']
+            industry_id = self.master_data['industries'][0]['id']
+            sub_industry_id = self.master_data['sub-industries'][0]['id'] if 'sub-industries' in self.master_data else industry_id
+            country_id = self.master_data['countries'][0]['id']
+            state_id = self.master_data['states'][0]['id'] if 'states' in self.master_data else country_id
+            city_id = self.master_data['cities'][0]['id'] if 'cities' in self.master_data else state_id
+        except (IndexError, KeyError):
+            return self.log_test("Company Validation", False, "Missing master data for validation tests")
+        
+        all_success = True
+        
+        # Test 1: Duplicate company name validation
+        if 'domestic_company_id' in self.created_items:
+            duplicate_company = {
+                "company_name": f"TechCorp Solutions Pvt Ltd {datetime.now().strftime('%H%M%S')}",  # Same name pattern
+                "domestic_international": "Domestic",
+                "gst_number": f"27XYZTE{datetime.now().strftime('%H%M%S')}Z1Z5",
+                "pan_number": f"XYZTE{datetime.now().strftime('%H%M')}F",
+                "company_type_id": company_type_id,
+                "account_type_id": account_type_id,
+                "region_id": region_id,
+                "business_type_id": business_type_id,
+                "industry_id": industry_id,
+                "sub_industry_id": sub_industry_id,
+                "employee_count": 100,
+                "address": "Different address for duplicate test",
+                "country_id": country_id,
+                "state_id": state_id,
+                "city_id": city_id,
+                "annual_revenue": 1000000,
+                "revenue_currency": "INR",
+                "valid_gst": True,
+                "active_status": True,
+                "parent_linkage_valid": True
+            }
+            
+            # This should succeed since we're using a different timestamp
+            success, status, response = self.make_request('POST', 'companies', duplicate_company, 200)
+            duplicate_success = self.log_test("Duplicate Name Handling", success, f"Status: {status}")
+        else:
+            duplicate_success = True  # Skip if no company was created
+        
+        # Test 2: India-specific GST/PAN validation
+        domestic_no_gst_pan = {
+            "company_name": f"Test Validation Company {datetime.now().strftime('%H%M%S')}",
+            "domestic_international": "Domestic",
+            # No GST or PAN provided
+            "company_type_id": company_type_id,
+            "account_type_id": account_type_id,
+            "region_id": region_id,
+            "business_type_id": business_type_id,
+            "industry_id": industry_id,
+            "sub_industry_id": sub_industry_id,
+            "employee_count": 50,
+            "address": "Test address for validation",
+            "country_id": country_id,
+            "state_id": state_id,
+            "city_id": city_id,
+            "annual_revenue": 500000,
+            "revenue_currency": "INR",
+            "valid_gst": False,
+            "active_status": True,
+            "parent_linkage_valid": True
+        }
+        
+        success, status, response = self.make_request('POST', 'companies', domestic_no_gst_pan, 400)
+        gst_validation_success = self.log_test("India GST/PAN Validation", success, f"Correctly rejected domestic company without GST/PAN")
+        
+        # Test 3: Required field validation
+        incomplete_company = {
+            "company_name": f"Incomplete Company {datetime.now().strftime('%H%M%S')}",
+            "domestic_international": "Domestic",
+            # Missing many required fields
+            "company_type_id": company_type_id,
+            "employee_count": 10
+        }
+        
+        success, status, response = self.make_request('POST', 'companies', incomplete_company, 422)
+        required_fields_success = self.log_test("Required Fields Validation", success, f"Correctly rejected incomplete company data")
+        
+        return duplicate_success and gst_validation_success and required_fields_success
+
+    def test_company_api_responses(self):
+        """Test company API response formats"""
+        print("\n📋 Testing Company API Responses...")
+        
+        all_success = True
+        
+        # Test GET /api/companies response format
+        success, status, response = self.make_request('GET', 'companies')
+        if success and isinstance(response, list):
+            companies_list_success = self.log_test("GET Companies List", True, f"Found {len(response)} companies")
+            
+            # Check response structure if companies exist
+            if response:
+                company = response[0]
+                required_fields = ['id', 'name', 'created_at']
+                has_required = all(field in company for field in required_fields)
+                structure_success = self.log_test("Company Response Structure", has_required, 
+                                                f"Required fields present: {has_required}")
+            else:
+                structure_success = True  # No companies to check structure
+        else:
+            companies_list_success = self.log_test("GET Companies List", False, f"Status: {status}")
+            structure_success = False
+        
+        # Test GET specific company if we created one
+        if 'domestic_company_id' in self.created_items:
+            company_id = self.created_items['domestic_company_id']
+            success, status, response = self.make_request('GET', f'companies/{company_id}')
+            if success and isinstance(response, dict):
+                # Check for scoring fields
+                has_score = 'score' in response
+                has_lead_status = 'lead_status' in response
+                scoring_success = self.log_test("Company Scoring Fields", has_score and has_lead_status,
+                                              f"Score: {has_score}, Lead Status: {has_lead_status}")
+            else:
+                scoring_success = self.log_test("GET Specific Company", False, f"Status: {status}")
+        else:
+            scoring_success = True  # Skip if no company was created
+        
+        return companies_list_success and structure_success and scoring_success
+
     def run_all_tests(self):
         """Run all backend tests"""
         print("🚀 Starting Sawayatta ERP Backend API Tests")
