@@ -660,15 +660,11 @@ export const Users = () => {
             </Alert>
           )}
 
-          <form onSubmit={(e) => {
-            console.log('🔍 Form submitted - edit mode:', !!crud.editingItem);
-            console.log('🔍 Form data before submission:', crud.form.getValues());
-            console.log('🔍 Form errors:', crud.form.formState.errors);
-            return crud.form.handleSubmit((data) => {
-              console.log('🔍 handleSubmit called with data:', data);
-              return crud.handleSubmit(data);
-            })(e);
-          }} className="space-y-4">
+          <form onSubmit={crud.form.handleSubmit((data) => {
+            console.log('🔍 handleSubmit callback executed with data:', data);
+            console.log('🔍 Edit mode:', !!crud.editingItem);
+            return crud.handleSubmit(data);
+          })} className="space-y-4">
             <div>
               <Label htmlFor="username">Username *</Label>
               <Input
