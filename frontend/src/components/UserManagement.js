@@ -699,7 +699,7 @@ export const Users = () => {
               <Label htmlFor="role_id">Role</Label>
               <Select 
                 onValueChange={(value) => crud.form.setValue('role_id', value)}
-                defaultValue={crud.editingItem?.role_id}
+                value={crud.form.watch('role_id') || ''}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select role" />
@@ -718,7 +718,7 @@ export const Users = () => {
               <Label htmlFor="department_id">Department</Label>
               <Select 
                 onValueChange={(value) => crud.form.setValue('department_id', value)}
-                defaultValue={crud.editingItem?.department_id}
+                value={crud.form.watch('department_id') || ''}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select department" />
@@ -737,7 +737,7 @@ export const Users = () => {
               <Label htmlFor="designation_id">Designation</Label>
               <Select 
                 onValueChange={(value) => crud.form.setValue('designation_id', value)}
-                defaultValue={crud.editingItem?.designation_id}
+                value={crud.form.watch('designation_id') || ''}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select designation" />
@@ -754,7 +754,7 @@ export const Users = () => {
 
             <div>
               <Label htmlFor="status">Status</Label>
-              <Select onValueChange={(value) => crud.form.setValue('status', value)} defaultValue="active">
+              <Select onValueChange={(value) => crud.form.setValue('status', value)} value={crud.form.watch('status') || 'active'}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
