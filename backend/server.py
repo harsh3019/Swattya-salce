@@ -2427,7 +2427,7 @@ class ContactUpdate(BaseModel):
 
 class ContactBulkUpdate(BaseModel):
     contact_ids: List[str] = Field(..., min_items=1)
-    action: str = Field(..., regex=r"^(activate|deactivate)$")
+    action: str = Field(..., pattern=r"^(activate|deactivate)$")
 
 # ================ CONTACT MANAGEMENT ENDPOINTS ================
 
