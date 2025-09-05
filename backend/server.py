@@ -2121,8 +2121,11 @@ async def create_company(company_data: CompanyCreate, current_user: User = Depen
         "updated_at": datetime.now(timezone.utc)
     }
     
-    # Remove None values
-    company_dict = {k: v for k, v in company_dict.items() if v is not None}
+    # Remove only specific None values that should not be stored
+    fields_to_remove_if_none = ['gst_number', 'pan_number', 'vat_number', 'website', 'parent_company_id', 'company_profile']
+    for field in fields_to_remove_if_none:
+        if company_dict.get(field) is None:
+            company_dict.pop(field, None)
     
     await db.companies.insert_one(company_dict)
     
