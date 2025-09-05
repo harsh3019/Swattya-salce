@@ -13,6 +13,7 @@ import { Modules } from './components/Modules';
 import { Menus } from './components/Menus';
 import { RolePermissions } from './components/RolePermissions';
 import { ActivityLogs } from './components/ActivityLogs';
+import CompanyRegistration from './components/CompanyRegistration';
 
 // Import new RBAC components
 import DynamicSidebar from './components/DynamicSidebar';
