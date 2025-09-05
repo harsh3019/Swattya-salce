@@ -2102,7 +2102,7 @@ async def create_company(company_data: CompanyCreate, current_user: User = Depen
     )
     
     # Log email notification attempt
-    logger.info(f"Email notification attempt: New company '{company.name}' created by {current_user.username}")
+    logger.info(f"Email notification attempt: New company '{company.company_name}' created by {current_user.username}")
     
     return prepare_for_json(company.dict())
 
