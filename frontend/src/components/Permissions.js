@@ -88,6 +88,7 @@ export const Permissions = () => {
         onAdd={crud.openCreateDialog}
         title="Permissions"
         modulePath="/permissions"
+        entityName="permissions"
       />
 
       {/* Create/Edit Dialog */}
