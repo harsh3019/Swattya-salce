@@ -1216,7 +1216,7 @@ const CompanyRegistration = () => {
                 </Button>
               ) : (
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? 'Submitting...' : 'Submit Registration'}
+                  {isLoading ? (isEditing ? 'Updating...' : 'Submitting...') : (isEditing ? 'Update Company' : 'Submit Registration')}
                 </Button>
               )}
             </div>
