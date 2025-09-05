@@ -249,7 +249,13 @@ const useCRUD = (endpoint, schema) => {
   const openEditDialog = (item) => {
     setEditingItem(item);
     setError('');
-    form.reset(item);
+    // Reset with proper default values for controlled components
+    form.reset({
+      ...item,
+      status: item.status || 'active',
+      is_active: item.is_active !== undefined ? item.is_active : true,
+      password: '' // Don't populate password field for security
+    });
     setIsDialogOpen(true);
   };
 
