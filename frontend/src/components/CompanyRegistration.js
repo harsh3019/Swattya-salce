@@ -181,19 +181,21 @@ const CompanyRegistration = () => {
     }
   };
 
-  // Auto-save to localStorage
+  // Auto-save to localStorage (only for new companies, not editing)
   useEffect(() => {
-    const subscription = form.watch((data) => {
-      const draftData = {
-        formData: data,
-        currentStep,
-        documents: uploadedDocuments,
-        lastSaved: new Date().toISOString()
-      };
-      localStorage.setItem('companyRegistrationDraft', JSON.stringify(draftData));
-    });
-    return () => subscription.unsubscribe();
-  }, [currentStep, uploadedDocuments, form]);
+    if (!isEditing) {
+      const subscription = form.watch((data) => {
+        const draftData = {
+          formData: data,
+          currentStep,
+          documents: uploadedDocuments,
+          lastSaved: new Date().toISOString()
+        };
+        localStorage.setItem('companyRegistrationDraft', JSON.stringify(draftData));
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [currentStep, uploadedDocuments, form, isEditing]);
 
   const fetchMasterData = async () => {
     try {
