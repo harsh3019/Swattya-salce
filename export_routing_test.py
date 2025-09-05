@@ -129,7 +129,7 @@ class ExportRoutingTester:
             return self.log_test("GET /api/contacts/{id}", True, 
                                f"Contact retrieved: {contact_name}, Email: {contact_email}")
         else:
-            error_msg = response.get('detail', response.get('error', 'Unknown error'))
+            error_msg = response.get('detail', response.get('error', 'Unknown error')) if isinstance(response, dict) else str(response)
             return self.log_test("GET /api/contacts/{id}", False, 
                                f"Status: {status}, Error: {error_msg}")
 
