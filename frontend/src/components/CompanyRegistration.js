@@ -69,6 +69,10 @@ const companySchema = z.object({
 });
 
 const CompanyRegistration = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const isEditing = !!id;
+  
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
