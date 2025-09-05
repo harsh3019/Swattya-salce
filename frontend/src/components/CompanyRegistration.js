@@ -370,16 +370,21 @@ const CompanyRegistration = () => {
         documents: uploadedDocuments
       };
 
-      const response = await axios.post(`${API}/companies`, companyData);
-      
-      // Clear localStorage draft
-      localStorage.removeItem('companyRegistrationDraft');
+      let response;
+      if (isEditing) {
+        response = await axios.put(`${API}/companies/${id}`, companyData);
+        toast.success('Company updated successfully!');
+      } else {
+        response = await axios.post(`${API}/companies`, companyData);
+        toast.success('Company registered successfully!');
+        // Clear localStorage draft only for new companies
+        localStorage.removeItem('companyRegistrationDraft');
+      }
       
       setSuccess(true);
-      toast.success('Company registered successfully!');
       
     } catch (error) {
-      const errorMsg = error.response?.data?.detail || 'Failed to register company';
+      const errorMsg = error.response?.data?.detail || `Failed to ${isEditing ? 'update' : 'register'} company`;
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {
