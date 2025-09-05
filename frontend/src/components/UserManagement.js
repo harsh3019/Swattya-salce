@@ -534,18 +534,8 @@ export const Users = () => {
   const [roles, setRoles] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [designations, setDesignations] = useState([]);
-  const [editingItem, setEditingItem] = useState(null);
 
-  // Create form with dynamic schema
-  const form = useForm({
-    resolver: zodResolver(createUserSchema(!!editingItem)),
-    defaultValues: {
-      status: 'active',
-      is_active: true
-    }
-  });
-
-  const crud = useCRUD('users', createUserSchema(false)); // Use create schema for basic CRUD
+  const crud = useCRUD('users', userSchema);
 
   useEffect(() => {
     const fetchRelatedData = async () => {
