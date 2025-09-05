@@ -2147,42 +2147,47 @@ async def calculate_company_score(company_data: CompanyCreate) -> int:
     """Calculate company score based on various factors"""
     score = 0
     
-    # Industry score (40 points)
-    industry = await db.industries.find_one({"id": company_data.industry_id})
-    if industry:
-        # High-value industries get more points
-        high_value_industries = ["Technology", "Finance", "Healthcare", "Manufacturing"]
-        if industry.get("name") in high_value_industries:
-            score += 40
-        else:
+    try:
+        # Industry score (40 points)
+        industry = await db.industries.find_one({"id": company_data.industry_id})
+        if industry:
+            # High-value industries get more points
+            high_value_industries = ["Technology", "Finance", "Healthcare", "Manufacturing"]
+            if industry.get("name") in high_value_industries:
+                score += 40
+            else:
+                score += 20
+        
+        # Sub-industry score (20 points)
+        sub_industry = await db.sub_industries.find_one({"id": company_data.sub_industry_id})
+        if sub_industry:
             score += 20
-    
-    # Sub-industry score (20 points)
-    sub_industry = await db.sub_industries.find_one({"id": company_data.sub_industry_id})
-    if sub_industry:
-        score += 20
-    
-    # Revenue score (25 points)
-    if company_data.annual_revenue >= 10000000:  # 10M+
-        score += 25
-    elif company_data.annual_revenue >= 1000000:  # 1M+
-        score += 15
-    elif company_data.annual_revenue >= 100000:  # 100K+
-        score += 10
-    else:
-        score += 5
-    
-    # Employee count score (15 points)
-    if company_data.employee_count >= 1000:
-        score += 15
-    elif company_data.employee_count >= 100:
-        score += 12
-    elif company_data.employee_count >= 50:
-        score += 8
-    else:
-        score += 5
-    
-    return min(score, 100)  # Cap at 100
+        
+        # Revenue score (25 points)
+        if company_data.annual_revenue >= 10000000:  # 10M+
+            score += 25
+        elif company_data.annual_revenue >= 1000000:  # 1M+
+            score += 15
+        elif company_data.annual_revenue >= 100000:  # 100K+
+            score += 10
+        else:
+            score += 5
+        
+        # Employee count score (15 points)
+        if company_data.employee_count >= 1000:
+            score += 15
+        elif company_data.employee_count >= 100:
+            score += 12
+        elif company_data.employee_count >= 50:
+            score += 8
+        else:
+            score += 5
+        
+        logger.info(f"Calculated score: {score} for company: {company_data.company_name}")
+        return min(score, 100)  # Cap at 100
+    except Exception as e:
+        logger.error(f"Error calculating company score: {e}")
+        return 0
 
 # File upload endpoint
 @api_router.post("/companies/upload-document")
