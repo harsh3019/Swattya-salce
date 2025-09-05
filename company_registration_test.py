@@ -292,7 +292,7 @@ class CompanyRegistrationTester:
         # Test high-value company (should get hot status)
         high_value_company = self.create_test_company_data()
         if high_value_company:
-            high_value_company['name'] = f"HighValue Corp {datetime.now().strftime('%H%M%S')}"
+            high_value_company['company_name'] = f"HighValue Corp {datetime.now().strftime('%H%M%S')}"
             high_value_company['annual_revenue'] = 15000000.0  # 15M
             high_value_company['employee_count'] = 1500
             high_value_company['gst_number'] = f"27HIVAL{datetime.now().strftime('%H%M%S')}Z1Z5"
