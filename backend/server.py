@@ -1078,11 +1078,10 @@ async def create_company_old(company_data: dict, current_user: User = Depends(ge
 
 @api_router.get("/companies/{company_id}")
 async def get_company(company_id: str, current_user: User = Depends(get_current_user)):
-    """Get company by ID"""
-    company = await db.companies.find_one({"id": company_id, "is_active": True})
+    await check_company_access(current_user)
+    company = await db.companies.find_one({"id": company_id, "$or": [{"is_active": True}, {"active_status": True}]})
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
-    
     return prepare_for_json(company)
 
 # Contacts CRUD
