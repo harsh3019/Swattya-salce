@@ -453,8 +453,8 @@ export const ContactList = () => {
           <div>
             <Label>SPOC</Label>
             <Select 
-              value={filters.spoc === null ? '' : filters.spoc.toString()} 
-              onValueChange={(value) => setFilters(prev => ({...prev, spoc: value === '' ? null : value === 'true'}))}
+              value={filters.spoc === null ? 'all' : filters.spoc.toString()} 
+              onValueChange={(value) => setFilters(prev => ({...prev, spoc: value === 'all' ? null : value === 'true'}))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="All" />
