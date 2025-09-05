@@ -491,10 +491,15 @@ function App() {
               {/* Sales Routes */}
               <Route path="/companies" element={
                 <ProtectedRoute>
-                  <CompaniesPage />
+                  <CompanyList />
                 </ProtectedRoute>
               } />
               <Route path="/company/add" element={
+                <ProtectedRoute>
+                  <CompanyRegistration />
+                </ProtectedRoute>
+              } />
+              <Route path="/company/edit/:id" element={
                 <ProtectedRoute>
                   <CompanyRegistration />
                 </ProtectedRoute>
