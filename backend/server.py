@@ -1921,7 +1921,7 @@ class Company(BaseAuditModel):
     
     # Scoring & Lead Status
     score: int = Field(default=0, ge=0, le=100)
-    lead_status: str = Field(default="cold", regex=r"^(hot|cold)$")
+    lead_status: str = Field(default="cold", pattern=r"^(hot|cold)$")
     
     # Checklist validation
     valid_gst: bool = False
