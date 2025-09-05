@@ -2098,7 +2098,7 @@ async def create_company(company_data: CompanyCreate, current_user: User = Depen
         action="CREATE",
         resource_type="Company",
         resource_id=company.id,
-        details=f"Created company: {company.name}"
+        details=f"Created company: {company.company_name}"
     )
     
     # Log email notification attempt
