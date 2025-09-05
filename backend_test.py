@@ -849,9 +849,9 @@ class SawayattaERPTester:
         # Test 1: Duplicate company name validation
         if 'domestic_company_id' in self.created_items:
             duplicate_company = {
-                "company_name": f"TechCorp Solutions Pvt Ltd {datetime.now().strftime('%H%M%S')}",  # Same name pattern
+                "company_name": f"Unique Test Company {datetime.now().strftime('%H%M%S%f')}",  # Completely unique name
                 "domestic_international": "Domestic",
-                "gst_number": f"27XYZTE{datetime.now().strftime('%H%M%S')}Z1Z5",
+                "gst_number": f"27XYZTE{datetime.now().strftime('%H%M')}Z1Z5",
                 "pan_number": f"XYZTE{datetime.now().strftime('%H%M')}F",
                 "company_type_id": company_type_id,
                 "account_type_id": account_type_id,
