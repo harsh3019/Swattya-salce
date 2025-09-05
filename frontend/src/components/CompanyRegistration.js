@@ -426,8 +426,10 @@ const CompanyRegistration = () => {
     <div className="max-w-4xl mx-auto p-6">
       <Card>
         <CardHeader>
-          <CardTitle>Company Registration</CardTitle>
-          <CardDescription>Register a new company in the system</CardDescription>
+          <CardTitle>{isEditing ? 'Edit Company' : 'Company Registration'}</CardTitle>
+          <CardDescription>
+            {isEditing ? 'Update company information' : 'Register a new company in the system'}
+          </CardDescription>
           
           {/* Progress Bar */}
           <div className="mt-4">
