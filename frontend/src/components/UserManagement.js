@@ -665,6 +665,13 @@ export const Users = () => {
             console.log('🔍 Edit mode:', !!crud.editingItem);
             return crud.handleSubmit(data);
           })} className="space-y-4">
+            {/* Hidden inputs for controlled components to ensure they're registered */}
+            <input type="hidden" {...crud.form.register('role_id')} />
+            <input type="hidden" {...crud.form.register('department_id')} />
+            <input type="hidden" {...crud.form.register('designation_id')} />
+            <input type="hidden" {...crud.form.register('status')} />
+            <input type="hidden" {...crud.form.register('is_active')} />
+            
             <div>
               <Label htmlFor="username">Username *</Label>
               <Input
