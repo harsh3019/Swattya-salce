@@ -433,8 +433,8 @@ export const ContactList = () => {
           <div>
             <Label>Designation</Label>
             <Select 
-              value={filters.designation_id} 
-              onValueChange={(value) => setFilters(prev => ({...prev, designation_id: value}))}
+              value={filters.designation_id || 'all'} 
+              onValueChange={(value) => setFilters(prev => ({...prev, designation_id: value === 'all' ? '' : value}))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="All Designations" />
