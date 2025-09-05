@@ -192,15 +192,54 @@ frontend:
 
   - task: "Permission Context Integration"
     implemented: true
-    working: true
+    working: false
     file: "frontend/src/contexts/PermissionContext.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
         - working: true
           agent: "testing"
           comment: "PERMISSIONS WORKING: PermissionContext successfully fetches 70 permissions from /api/auth/permissions. Permission-based sidebar visibility works correctly - modules only show when user has proper View permissions. Integration between PermissionContext and DynamicSidebar is functioning as designed."
+        - working: false
+          agent: "testing"
+          comment: "PERMISSION TIMING ISSUES: While permissions eventually load (70 permissions), there are consistent 403 errors on initial /api/auth/permissions calls causing PermissionContext to clear permissions before reloading. This creates a race condition affecting button visibility. The API calls succeed eventually but the timing issue needs to be fixed."
+
+  - task: "User CRUD Operations"
+    implemented: true
+    working: false
+    file: "frontend/src/components/UserManagement.js"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "CRITICAL: User creation form FAILS SILENTLY. Add User button visible, dialog opens, form accepts input (username: testuser123, email: testuser123@example.com, password: password123), but when submitted NO API call is made to POST /api/users. Database check confirms no new user created. Form submission handler not properly connected to API. This is the primary issue reported by user."
+
+  - task: "Masters CRUD Operations (Roles, Departments)"
+    implemented: true
+    working: true
+    file: "frontend/src/components/Roles.js, frontend/src/components/Departments.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "WORKING: Roles and Departments pages display correctly with Add buttons visible and Edit/Delete buttons showing for existing records (1 edit button, 1 delete button each). These use PermissionDataTable component and appear to be functioning correctly for button visibility."
+
+  - task: "Masters CRUD Operations (Permissions, Modules, Menus)"
+    implemented: true
+    working: false
+    file: "frontend/src/components/Permissions.js, frontend/src/components/Modules.js, frontend/src/components/Menus.js"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "PARTIAL FAILURE: Add buttons are visible for Permissions, Modules, and Menus pages, but Edit/Delete buttons are NOT showing (0 edit buttons, 0 delete buttons) despite data being present. These pages use regular DataTable component instead of PermissionDataTable. This confirms user report of 'Add/Edit/Delete buttons not showing despite having permissions for permissions, modules, and menus masters'."
 
 metadata:
   created_by: "testing_agent"
