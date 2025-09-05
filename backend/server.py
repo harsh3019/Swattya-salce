@@ -2202,3 +2202,6 @@ async def export_companies(current_user: User = Depends(get_current_user)):
     
     companies = await db.companies.find().to_list(None)
     return [prepare_for_json(c) for c in companies]
+
+# Include router after all endpoints are defined
+app.include_router(api_router)
