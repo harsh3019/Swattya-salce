@@ -1055,12 +1055,6 @@ async def delete_role(role_id: str, current_user: User = Depends(get_current_use
 # ================ SALES MODULE ENDPOINTS ================
 
 # Companies CRUD
-@api_router.get("/companies")
-async def get_companies(current_user: User = Depends(get_current_user)):
-    """Get all companies"""
-    companies = await db.companies.find({"is_active": True}).to_list(length=None)
-    return [prepare_for_json(company) for company in companies]
-
 # Old company endpoint removed - using new company registration endpoint
 
 # Contacts CRUD
