@@ -2081,6 +2081,8 @@ async def create_company(company_data: CompanyCreate, current_user: User = Depen
     score = await calculate_company_score(company_data)
     lead_status = "hot" if score >= 70 else "cold"
     
+    logger.info(f"Creating company: {company_data.company_name}, Score: {score}, Lead Status: {lead_status}")
+    
     # Map CompanyCreate fields to Company model fields
     company_dict = {
         # Use company_name as name for the Company model
