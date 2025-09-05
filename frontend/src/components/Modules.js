@@ -9,7 +9,8 @@ import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import { Alert, AlertDescription } from './ui/alert';
 import { AlertCircle } from 'lucide-react';
-import { useCRUD, DataTable, FormError } from './UserManagement';
+import { useCRUD, FormError } from './UserManagement';
+import PermissionDataTable from './PermissionDataTable';
 import * as z from 'zod';
 
 const moduleSchema = z.object({
