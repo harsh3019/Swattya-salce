@@ -668,16 +668,7 @@ export const Users = () => {
             </Alert>
           )}
 
-          <form onSubmit={(e) => {
-            console.log('🔍 Form submit event triggered');
-            console.log('🔍 Form validation errors:', crud.form.formState.errors);
-            return crud.form.handleSubmit((data) => {
-              console.log('🔍 Form validation passed, calling handleSubmit with data:', data);
-              return crud.handleSubmit(data);
-            }, (errors) => {
-              console.error('❌ Form validation failed:', errors);
-            })(e);
-          }} className="space-y-4">
+          <form onSubmit={crud.form.handleSubmit(crud.handleSubmit)} className="space-y-4">
             <div>
               <Label htmlFor="username">Username *</Label>
               <Input
