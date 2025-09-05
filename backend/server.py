@@ -1888,7 +1888,7 @@ class CompanyDocument(BaseModel):
 class Company(BaseAuditModel):
     # General Info
     name: str = Field(..., min_length=3, max_length=100)
-    domestic_international: str = Field(..., regex=r"^(Domestic|International)$")
+    domestic_international: str = Field(..., pattern=r"^(Domestic|International)$")
     gst_number: Optional[str] = Field(None, max_length=15)
     pan_number: Optional[str] = Field(None, max_length=10)
     vat_number: Optional[str] = Field(None, max_length=20)
