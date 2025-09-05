@@ -179,7 +179,7 @@ class CompanyRegistrationTester:
         timestamp = datetime.now().strftime('%H%M%S')
         
         return {
-            "name": f"TechCorp Solutions Pvt Ltd {timestamp}",
+            "company_name": f"TechCorp Solutions Pvt Ltd {timestamp}",
             "domestic_international": "Domestic",
             "gst_number": f"27ABCDE{timestamp}Z1Z5",
             "pan_number": f"ABCDE{timestamp}F",
