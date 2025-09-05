@@ -2080,16 +2080,48 @@ async def create_company(company_data: CompanyCreate, current_user: User = Depen
     score = await calculate_company_score(company_data)
     lead_status = "hot" if score >= 70 else "cold"
     
-    # Create company
-    company = Company(
-        **company_data.dict(),
-        score=score,
-        lead_status=lead_status,
-        created_by=current_user.id
-    )
+    # Map CompanyCreate fields to Company model fields
+    company_dict = {
+        # Use company_name as name for the Company model
+        "name": company_data.company_name,
+        "domestic_international": company_data.domestic_international,
+        "gst_number": company_data.gst_number,
+        "pan_number": company_data.pan_number,
+        "vat_number": company_data.vat_number,
+        "company_type_id": company_data.company_type_id,
+        "account_type_id": company_data.account_type_id,
+        "region_id": company_data.region_id,
+        "business_type_id": company_data.business_type_id,
+        "industry_id": company_data.industry_id,
+        "sub_industry_id": company_data.sub_industry_id,
+        "website": company_data.website,
+        "is_child": company_data.is_child,
+        "parent_company_id": company_data.parent_company_id,
+        "employee_count": company_data.employee_count,
+        "address": company_data.address,
+        "country_id": company_data.country_id,
+        "state_id": company_data.state_id,
+        "city_id": company_data.city_id,
+        "turnover": [t.dict() for t in company_data.turnover],
+        "profit": [p.dict() for p in company_data.profit],
+        "annual_revenue": company_data.annual_revenue,
+        "revenue_currency": company_data.revenue_currency,
+        "company_profile": company_data.company_profile,
+        "documents": [],
+        "score": score,
+        "lead_status": lead_status,
+        "valid_gst": company_data.valid_gst,
+        "active_status": company_data.active_status,
+        "parent_linkage_valid": company_data.parent_linkage_valid,
+        "created_by": current_user.id,
+        "id": str(uuid.uuid4()),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc)
+    }
     
-    company_dict = prepare_for_mongo(company.dict())
-    company_dict.pop('_id', None)
+    # Remove None values
+    company_dict = {k: v for k, v in company_dict.items() if v is not None}
+    
     await db.companies.insert_one(company_dict)
     
     # Log audit trail
@@ -2097,14 +2129,14 @@ async def create_company(company_data: CompanyCreate, current_user: User = Depen
         user_id=current_user.id,
         action="CREATE",
         resource_type="Company",
-        resource_id=company.id,
-        details=f"Created company: {company.company_name}"
+        resource_id=company_dict["id"],
+        details=f"Created company: {company_dict['name']}"
     )
     
     # Log email notification attempt
-    logger.info(f"Email notification attempt: New company '{company.company_name}' created by {current_user.username}")
+    logger.info(f"Email notification attempt: New company '{company_dict['name']}' created by {current_user.username}")
     
-    return prepare_for_json(company.dict())
+    return prepare_for_json(company_dict)
 
 async def calculate_company_score(company_data: CompanyCreate) -> int:
     """Calculate company score based on various factors"""
