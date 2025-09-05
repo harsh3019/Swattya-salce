@@ -44,7 +44,7 @@ export const Modules = () => {
 
   return (
     <div className="space-y-6">
-      <DataTable
+      <PermissionDataTable
         data={crud.data}
         columns={columns}
         loading={crud.loading}
