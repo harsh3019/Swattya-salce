@@ -231,12 +231,15 @@ frontend:
     working: "NA"
     file: "frontend/src/components/CompanyRegistration.js"
     stuck_count: 0
-    priority: "high"
+    priority: "medium"
     needs_retesting: true
     status_history:
         - working: "NA"
           agent: "testing"
           comment: "Need to test Step 4 functionality: Company profile text input, file upload functionality (simulate PDF upload), document validation (file size, type), uploaded documents display, and document removal functionality."
+        - working: "NA"
+          agent: "testing"
+          comment: "PARTIAL TESTING: Form structure for Step 4 verified - company profile textarea field implemented, file upload area with drag-and-drop interface present, document validation logic implemented (file size, type restrictions), uploaded documents display functionality coded. However, full testing requires completing previous steps and backend API for document upload endpoint."
 
   - task: "Company Registration Step 5 - Review & Submit"
     implemented: true
