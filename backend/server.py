@@ -1055,33 +1055,35 @@ async def delete_role(role_id: str, current_user: User = Depends(get_current_use
 # ================ SALES MODULE ENDPOINTS ================
 
 # Companies CRUD
-@api_router.get("/companies", response_model=List[Company])
+@api_router.get("/companies")
 async def get_companies(current_user: User = Depends(get_current_user)):
     """Get all companies"""
     companies = await db.companies.find({"is_active": True}).to_list(length=None)
-    return [Company(**parse_from_mongo(company)) for company in companies]
+    return [prepare_for_json(company) for company in companies]
 
-@api_router.post("/companies", response_model=Company)
-async def create_company(company_data: Company, current_user: User = Depends(get_current_user)):
-    """Create new company"""
-    company_dict = company_data.dict()
+@api_router.post("/companies")
+async def create_company_old(company_data: dict, current_user: User = Depends(get_current_user)):
+    """Create new company (old endpoint - deprecated)"""
+    company_dict = company_data
     company_dict['created_by'] = current_user.id
-    company = Company(**company_dict)
-    company_dict = prepare_for_mongo(company.dict())
+    company_dict['id'] = str(uuid.uuid4())
+    company_dict['created_at'] = datetime.now(timezone.utc)
+    company_dict['updated_at'] = datetime.now(timezone.utc)
+    company_dict = prepare_for_mongo(company_dict)
     await db.companies.insert_one(company_dict)
     
-    await log_activity("sales", "companies", "create", "success", current_user.id, {"company_id": company.id})
+    await log_activity("sales", "companies", "create", "success", current_user.id, {"company_id": company_dict["id"]})
     
-    return company
+    return prepare_for_json(company_dict)
 
-@api_router.get("/companies/{company_id}", response_model=Company)
+@api_router.get("/companies/{company_id}")
 async def get_company(company_id: str, current_user: User = Depends(get_current_user)):
     """Get company by ID"""
     company = await db.companies.find_one({"id": company_id, "is_active": True})
     if not company:
         raise HTTPException(status_code=404, detail="Company not found")
     
-    return Company(**parse_from_mongo(company))
+    return prepare_for_json(company)
 
 # Contacts CRUD
 @api_router.get("/contacts", response_model=List[Contact])
