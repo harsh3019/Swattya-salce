@@ -1063,14 +1063,6 @@ async def get_companies(current_user: User = Depends(get_current_user)):
 
 # Old company endpoint removed - using new company registration endpoint
 
-@api_router.get("/companies/{company_id}")
-async def get_company(company_id: str, current_user: User = Depends(get_current_user)):
-    await check_company_access(current_user)
-    company = await db.companies.find_one({"id": company_id, "$or": [{"is_active": True}, {"active_status": True}]})
-    if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
-    return prepare_for_json(company)
-
 # Contacts CRUD
 @api_router.get("/contacts", response_model=List[Contact])
 async def get_contacts(current_user: User = Depends(get_current_user)):
