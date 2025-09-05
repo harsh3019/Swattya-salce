@@ -1932,7 +1932,7 @@ class Company(BaseAuditModel):
 
 class CompanyCreate(BaseModel):
     # General Info
-    name: str = Field(..., min_length=3, max_length=100)
+    company_name: str = Field(..., min_length=3, max_length=100)
     domestic_international: str = Field(..., pattern=r"^(Domestic|International)$")
     gst_number: Optional[str] = Field(None, max_length=15)
     pan_number: Optional[str] = Field(None, max_length=10)
