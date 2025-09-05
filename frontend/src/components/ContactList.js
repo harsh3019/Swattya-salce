@@ -470,8 +470,8 @@ export const ContactList = () => {
           <div>
             <Label>Decision Maker</Label>
             <Select 
-              value={filters.decision_maker === null ? '' : filters.decision_maker.toString()} 
-              onValueChange={(value) => setFilters(prev => ({...prev, decision_maker: value === '' ? null : value === 'true'}))}
+              value={filters.decision_maker === null ? 'all' : filters.decision_maker.toString()} 
+              onValueChange={(value) => setFilters(prev => ({...prev, decision_maker: value === 'all' ? null : value === 'true'}))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="All" />
