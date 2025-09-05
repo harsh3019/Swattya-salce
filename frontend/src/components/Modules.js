@@ -106,22 +106,10 @@ export const Modules = () => {
               <FormError error={crud.form.formState.errors.description} />
             </div>
 
-            <div>
-              <Label htmlFor="status">Status</Label>
-              <Select onValueChange={(value) => crud.form.setValue('status', value)} defaultValue="active">
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
             <div className="flex items-center space-x-2">
               <Switch
-                {...crud.form.register('is_active')}
+                onCheckedChange={(checked) => crud.form.setValue('is_active', checked)}
+                checked={crud.form.watch('is_active')}
                 id="is_active"
                 defaultChecked={true}
               />
@@ -153,7 +141,7 @@ export const Modules = () => {
           {crud.viewingItem && (
             <div className="space-y-3">
               <div>
-                <Label className="font-medium">Module Name:</Label>
+                <Label className="font-medium">Name:</Label>
                 <p className="text-sm text-gray-600">{crud.viewingItem.name}</p>
               </div>
               <div>
@@ -161,15 +149,15 @@ export const Modules = () => {
                 <p className="text-sm text-gray-600">{crud.viewingItem.description || 'No description'}</p>
               </div>
               <div>
-                <Label className="font-medium">Active:</Label>
+                <Label className="font-medium">Status:</Label>
                 <Badge variant={crud.viewingItem.is_active ? 'default' : 'destructive'}>
-                  {crud.viewingItem.is_active ? 'Yes' : 'No'}
+                  {crud.viewingItem.is_active ? 'Active' : 'Inactive'}
                 </Badge>
               </div>
               <div>
                 <Label className="font-medium">Created:</Label>
                 <p className="text-sm text-gray-600">
-                  {new Date(crud.viewingItem.created_at).toLocaleString()}
+                  {new Date(crud.viewingItem.created_at).toLocaleDateString()}
                 </p>
               </div>
             </div>

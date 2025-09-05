@@ -75,7 +75,7 @@ export const Permissions = () => {
         error={crud.error}
         searchTerm={crud.searchTerm}
         setSearchTerm={crud.setSearchTerm}
-        sortField={crud.sortField}
+        sortField={crud.sortDirection}
         sortDirection={crud.sortDirection}
         currentPage={crud.currentPage}
         setCurrentPage={crud.setCurrentPage}
@@ -110,41 +110,49 @@ export const Permissions = () => {
 
           <form onSubmit={crud.form.handleSubmit(crud.handleSubmit)} className="space-y-4">
             <div>
-              <Label htmlFor="name">Permission Name *</Label>
+              <Label htmlFor="key">Permission Key *</Label>
               <Input
-                {...crud.form.register('name')}
-                id="name"
-                placeholder="e.g., view, add, edit, delete"
+                {...crud.form.register('key')}
+                id="key"
+                placeholder="Enter permission key"
               />
-              <FormError error={crud.form.formState.errors.name} />
+              <FormError error={crud.form.formState.errors.key} />
             </div>
 
             <div>
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="label">Permission Label *</Label>
               <Input
-                {...crud.form.register('description')}
-                id="description"
-                placeholder="e.g., View records, Create new records"
+                {...crud.form.register('label')}
+                id="label"
+                placeholder="Enter permission label"
               />
-              <FormError error={crud.form.formState.errors.description} />
+              <FormError error={crud.form.formState.errors.label} />
             </div>
 
             <div>
-              <Label htmlFor="status">Status</Label>
-              <Select onValueChange={(value) => crud.form.setValue('status', value)} defaultValue="active">
+              <Label htmlFor="module_id">Module *</Label>
+              <Select 
+                onValueChange={(value) => crud.form.setValue('module_id', value)}
+                defaultValue={crud.editingItem?.module_id}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue placeholder="Select module" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
+                  {modules.map((module) => (
+                    <SelectItem key={module.id} value={module.id}>
+                      {module.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              <FormError error={crud.form.formState.errors.module_id} />
             </div>
 
             <div className="flex items-center space-x-2">
               <Switch
-                {...crud.form.register('is_active')}
+                onCheckedChange={(checked) => crud.form.setValue('is_active', checked)}
+                checked={crud.form.watch('is_active')}
                 id="is_active"
                 defaultChecked={true}
               />
@@ -176,7 +184,7 @@ export const Permissions = () => {
           {crud.viewingItem && (
             <div className="space-y-3">
               <div>
-                <Label className="font-medium">Permission Key:</Label>
+                <Label className="font-medium">Key:</Label>
                 <p className="text-sm text-gray-600">{crud.viewingItem.key}</p>
               </div>
               <div>
@@ -188,16 +196,10 @@ export const Permissions = () => {
                 <p className="text-sm text-gray-600">{getModuleName(crud.viewingItem.module_id)}</p>
               </div>
               <div>
-                <Label className="font-medium">Active:</Label>
+                <Label className="font-medium">Status:</Label>
                 <Badge variant={crud.viewingItem.is_active ? 'default' : 'destructive'}>
-                  {crud.viewingItem.is_active ? 'Yes' : 'No'}
+                  {crud.viewingItem.is_active ? 'Active' : 'Inactive'}
                 </Badge>
-              </div>
-              <div>
-                <Label className="font-medium">Created:</Label>
-                <p className="text-sm text-gray-600">
-                  {new Date(crud.viewingItem.created_at).toLocaleString()}
-                </p>
               </div>
             </div>
           )}
