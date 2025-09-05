@@ -502,7 +502,6 @@ function App() {
                 <ProtectedRoute>
                   <ContactsPage />
                 </ProtectedRoute>
-              } />Route>
               } />
               <Route path="/" element={<HomeRoute />} />
             </Routes>
