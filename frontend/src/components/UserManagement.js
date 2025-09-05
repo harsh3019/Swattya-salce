@@ -262,20 +262,10 @@ const useCRUD = (endpoint, schema) => {
   };
 
   const handleSubmit = async (data) => {
-    console.log('🔍 Form submitted with data:', data);
-    console.log('🔍 Editing item:', editingItem ? 'Yes' : 'No');
-    
-    try {
-      if (editingItem) {
-        console.log('🔍 Calling updateItem...');
-        return await updateItem(editingItem.id, data);
-      } else {
-        console.log('🔍 Calling createItem...');
-        return await createItem(data);
-      }
-    } catch (error) {
-      console.error('❌ Error in handleSubmit:', error);
-      return false;
+    if (editingItem) {
+      return await updateItem(editingItem.id, data);
+    } else {
+      return await createItem(data);
     }
   };
 
