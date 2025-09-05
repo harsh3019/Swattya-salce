@@ -420,7 +420,7 @@ export const ContactList = () => {
                 <SelectValue placeholder="All Companies" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Companies</SelectItem>
+                <SelectItem value="all">All Companies</SelectItem>
                 {masterData.companies?.map((company) => (
                   <SelectItem key={company.id} value={company.id}>
                     {company.name}
