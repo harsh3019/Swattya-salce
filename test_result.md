@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "User reports multiple CRUD operation issues: 1) Cannot create users after filling Add User form, 2) Same issue for other masters (role, department, designation, permission, menus, modules), 3) Add/Edit/Delete buttons not showing despite having permissions for permissions, modules, and menus masters. Suggests disabling permission checkboxes for masters that shouldn't be editable."
+user_problem_statement: "Test the comprehensive Company Registration multi-step form that was just built. Test coverage includes: 1) Access Control & Navigation to /company/add route, 2) Multi-Step Form Testing (5 Steps): General Info, Location, Financials, Documents & Profile, Review & Submit, 3) Key Features: Progress bar updates, Step labels, Form validation, Auto-save to localStorage, Error messages, Success page, 4) UI/UX Testing: Responsive design, Accessibility features, Professional styling with Shadcn UI components, Loading states during API calls."
 
 backend:
   - task: "Admin Authentication"
