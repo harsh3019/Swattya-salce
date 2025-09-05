@@ -440,7 +440,7 @@ export const ContactList = () => {
                 <SelectValue placeholder="All Designations" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Designations</SelectItem>
+                <SelectItem value="all">All Designations</SelectItem>
                 {masterData.designations?.map((designation) => (
                   <SelectItem key={designation.id} value={designation.id}>
                     {designation.name}
