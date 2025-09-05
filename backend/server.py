@@ -2381,14 +2381,14 @@ class Contact(BaseAuditModel):
 class ContactCreate(BaseModel):
     # Basic Info
     company_id: str = Field(..., description="Reference to company")
-    salutation: str = Field(..., regex=r"^(Mr\.|Ms\.|Mrs\.|Dr\.|Prof\.)$")
+    salutation: str = Field(..., pattern=r"^(Mr\.|Ms\.|Mrs\.|Dr\.|Prof\.)$")
     first_name: str = Field(..., min_length=1, max_length=50)
     middle_name: Optional[str] = Field(None, max_length=50)
     last_name: Optional[str] = Field(None, max_length=50)
     
     # Contact Details
-    email: str = Field(..., regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-    primary_phone: str = Field(..., min_length=10, max_length=15, regex=r'^\+?[\d\s\-\(\)]{10,15}$')
+    email: str = Field(..., pattern=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    primary_phone: str = Field(..., min_length=10, max_length=15, pattern=r'^\+?[\d\s\-\(\)]{10,15}$')
     designation_id: Optional[str] = None
     decision_maker: bool = Field(default=False)
     spoc: bool = Field(default=False)
