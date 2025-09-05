@@ -1795,6 +1795,31 @@ async def initialize_company_master_data():
     ]
     await db.currencies.insert_many(currencies)
     
+    # Designations
+    designations = [
+        {"id": str(uuid.uuid4()), "name": "Chief Executive Officer", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Chief Technology Officer", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Chief Financial Officer", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Managing Director", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "General Manager", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Assistant General Manager", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Deputy General Manager", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Senior Manager", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Manager", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Assistant Manager", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Senior Executive", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Executive", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Senior Associate", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Associate", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Team Lead", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Senior Analyst", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Analyst", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Consultant", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Senior Consultant", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Director", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    ]
+    await db.designations.insert_many(designations)
+    
     logger.info("Company registration master data initialized successfully")
 
 @app.on_event("shutdown")
