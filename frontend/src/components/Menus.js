@@ -173,7 +173,8 @@ export const Menus = () => {
 
             <div className="flex items-center space-x-2">
               <Switch
-                {...crud.form.register('is_active')}
+                onCheckedChange={(checked) => crud.form.setValue('is_active', checked)}
+                checked={crud.form.watch('is_active')}
                 id="is_active"
                 defaultChecked={true}
               />
