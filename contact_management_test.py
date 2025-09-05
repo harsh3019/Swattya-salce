@@ -491,14 +491,20 @@ class ContactManagementTester:
         
         # Test SPOC filter
         success, status, response = self.make_request('GET', 'contacts?spoc=true')
-        spoc_filter = self.log_test("SPOC Filter", success, 
-                                  f"SPOC filter returned {len(response.get('contacts', [])) if success else 0} results")
+        if success and isinstance(response, dict) and 'contacts' in response:
+            spoc_count = len(response['contacts'])
+        else:
+            spoc_count = 0
+        spoc_filter = self.log_test("SPOC Filter", success, f"SPOC filter returned {spoc_count} results")
         all_success = all_success and spoc_filter
         
         # Test decision maker filter
         success, status, response = self.make_request('GET', 'contacts?decision_maker=true')
-        decision_maker_filter = self.log_test("Decision Maker Filter", success, 
-                                            f"Decision maker filter returned {len(response.get('contacts', [])) if success else 0} results")
+        if success and isinstance(response, dict) and 'contacts' in response:
+            decision_count = len(response['contacts'])
+        else:
+            decision_count = 0
+        decision_maker_filter = self.log_test("Decision Maker Filter", success, f"Decision maker filter returned {decision_count} results")
         all_success = all_success and decision_maker_filter
         
         # Test export functionality
