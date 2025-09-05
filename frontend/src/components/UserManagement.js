@@ -664,6 +664,8 @@ export const Users = () => {
             console.log('🔍 handleSubmit callback executed with data:', data);
             console.log('🔍 Edit mode:', !!crud.editingItem);
             return crud.handleSubmit(data);
+          }, (errors) => {
+            console.error('❌ Form validation errors:', errors);
           })} className="space-y-4">
             <div>
               <Label htmlFor="username">Username *</Label>
