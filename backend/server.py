@@ -1646,6 +1646,175 @@ async def initialize_rbac_system():
     user_dict.pop('_id', None)
     await db.users.insert_one(user_dict)
 
+    # Initialize company registration master data
+    await initialize_company_master_data()
+
+async def initialize_company_master_data():
+    """Initialize master data for company registration"""
+    
+    # Check if data already exists
+    if await db.company_types.count_documents({}) > 0:
+        return
+    
+    logger.info("Initializing company registration master data...")
+    
+    # Company Types
+    company_types = [
+        {"id": str(uuid.uuid4()), "name": "Private Limited", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Public Limited", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Partnership", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Sole Proprietorship", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "LLP", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    ]
+    await db.company_types.insert_many(company_types)
+    
+    # Account Types
+    account_types = [
+        {"id": str(uuid.uuid4()), "name": "Customer", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Prospect", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Partner", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Vendor", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    ]
+    await db.account_types.insert_many(account_types)
+    
+    # Regions
+    regions = [
+        {"id": str(uuid.uuid4()), "name": "North India", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "South India", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "East India", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "West India", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Central India", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Northeast India", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    ]
+    await db.regions.insert_many(regions)
+    
+    # Business Types
+    business_types = [
+        {"id": str(uuid.uuid4()), "name": "B2B", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "B2C", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "B2G", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "C2C", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    ]
+    await db.business_types.insert_many(business_types)
+    
+    # Industries
+    industries_data = [
+        {"id": str(uuid.uuid4()), "name": "Technology", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Finance", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Healthcare", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Manufacturing", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Retail", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Education", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Real Estate", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Agriculture", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    ]
+    await db.industries.insert_many(industries_data)
+    
+    # Sub-Industries
+    tech_id = next(i["id"] for i in industries_data if i["name"] == "Technology")
+    finance_id = next(i["id"] for i in industries_data if i["name"] == "Finance")
+    healthcare_id = next(i["id"] for i in industries_data if i["name"] == "Healthcare")
+    manufacturing_id = next(i["id"] for i in industries_data if i["name"] == "Manufacturing")
+    
+    sub_industries = [
+        # Technology sub-industries
+        {"id": str(uuid.uuid4()), "name": "Software Development", "industry_id": tech_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Cloud Services", "industry_id": tech_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "AI/ML", "industry_id": tech_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Cybersecurity", "industry_id": tech_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        
+        # Finance sub-industries
+        {"id": str(uuid.uuid4()), "name": "Banking", "industry_id": finance_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Insurance", "industry_id": finance_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Investment", "industry_id": finance_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Fintech", "industry_id": finance_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        
+        # Healthcare sub-industries
+        {"id": str(uuid.uuid4()), "name": "Pharmaceuticals", "industry_id": healthcare_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Medical Devices", "industry_id": healthcare_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Telemedicine", "industry_id": healthcare_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        
+        # Manufacturing sub-industries
+        {"id": str(uuid.uuid4()), "name": "Automotive", "industry_id": manufacturing_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Electronics", "industry_id": manufacturing_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Textiles", "industry_id": manufacturing_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    ]
+    await db.sub_industries.insert_many(sub_industries)
+    
+    # Countries
+    countries = [
+        {"id": str(uuid.uuid4()), "name": "India", "code": "IN", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "United States", "code": "US", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "United Kingdom", "code": "GB", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Canada", "code": "CA", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Australia", "code": "AU", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Germany", "code": "DE", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "France", "code": "FR", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Japan", "code": "JP", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Singapore", "code": "SG", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    ]
+    await db.countries.insert_many(countries)
+    
+    # States (focusing on India)
+    india_id = next(c["id"] for c in countries if c["name"] == "India")
+    us_id = next(c["id"] for c in countries if c["name"] == "United States")
+    
+    states = [
+        # Indian states
+        {"id": str(uuid.uuid4()), "name": "Maharashtra", "country_id": india_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Karnataka", "country_id": india_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Tamil Nadu", "country_id": india_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Gujarat", "country_id": india_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Delhi", "country_id": india_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Haryana", "country_id": india_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Punjab", "country_id": india_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Rajasthan", "country_id": india_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Uttar Pradesh", "country_id": india_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "West Bengal", "country_id": india_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        
+        # US states (sample)
+        {"id": str(uuid.uuid4()), "name": "California", "country_id": us_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "New York", "country_id": us_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Texas", "country_id": us_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    ]
+    await db.states.insert_many(states)
+    
+    # Cities (focusing on major Indian cities)
+    maharashtra_id = next(s["id"] for s in states if s["name"] == "Maharashtra")
+    karnataka_id = next(s["id"] for s in states if s["name"] == "Karnataka")
+    delhi_id = next(s["id"] for s in states if s["name"] == "Delhi")
+    gujarat_id = next(s["id"] for s in states if s["name"] == "Gujarat")
+    
+    cities = [
+        # Maharashtra cities
+        {"id": str(uuid.uuid4()), "name": "Mumbai", "state_id": maharashtra_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Pune", "state_id": maharashtra_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Nagpur", "state_id": maharashtra_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        
+        # Karnataka cities
+        {"id": str(uuid.uuid4()), "name": "Bangalore", "state_id": karnataka_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Mysore", "state_id": karnataka_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        
+        # Delhi cities
+        {"id": str(uuid.uuid4()), "name": "New Delhi", "state_id": delhi_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Gurgaon", "state_id": delhi_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        
+        # Gujarat cities
+        {"id": str(uuid.uuid4()), "name": "Ahmedabad", "state_id": gujarat_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Surat", "state_id": gujarat_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    ]
+    await db.cities.insert_many(cities)
+    
+    # Currencies
+    currencies = [
+        {"id": str(uuid.uuid4()), "code": "INR", "name": "Indian Rupee", "symbol": "₹", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "code": "USD", "name": "US Dollar", "symbol": "$", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "code": "EUR", "name": "Euro", "symbol": "€", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    ]
+    await db.currencies.insert_many(currencies)
+    
+    logger.info("Company registration master data initialized successfully")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
