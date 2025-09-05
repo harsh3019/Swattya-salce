@@ -1510,9 +1510,6 @@ async def get_activity_logs(current_user: User = Depends(get_current_user)):
         result.append(ActivityLog(**parse_from_mongo(log)))
     return result
 
-# Include router
-app.include_router(api_router)
-
 # ================ STARTUP EVENT ================
 
 @app.on_event("startup")
