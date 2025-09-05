@@ -8,12 +8,21 @@ import os
 
 class AuthSidebarTester:
     def __init__(self):
-        # Get backend URL from environment or use default
-        backend_url = os.environ.get('REACT_APP_BACKEND_URL', 'https://None.preview.emergentagent.com')
+        # Get backend URL from frontend .env file
+        try:
+            with open('/app/frontend/.env', 'r') as f:
+                env_content = f.read()
+                for line in env_content.split('\n'):
+                    if line.startswith('REACT_APP_BACKEND_URL='):
+                        backend_url = line.split('=', 1)[1]
+                        break
+                else:
+                    backend_url = 'http://localhost:8001'
+        except:
+            backend_url = 'http://localhost:8001'
         
-        # Fix the None issue if present
-        if 'None' in backend_url:
-            # Try to get from supervisor or use a reasonable default
+        # Fix the None issue if present or use internal URL for testing
+        if 'None' in backend_url or not backend_url.startswith('http'):
             backend_url = 'http://localhost:8001'
         
         self.base_url = backend_url
