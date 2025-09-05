@@ -493,10 +493,16 @@ function App() {
                   <CompaniesPage />
                 </ProtectedRoute>
               } />
+              <Route path="/company/add" element={
+                <ProtectedRoute>
+                  <CompanyRegistration />
+                </ProtectedRoute>
+              } />
               <Route path="/contacts" element={
                 <ProtectedRoute>
                   <ContactsPage />
                 </ProtectedRoute>
+              } />Route>
               } />
               <Route path="/" element={<HomeRoute />} />
             </Routes>
