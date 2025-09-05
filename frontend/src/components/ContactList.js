@@ -413,8 +413,8 @@ export const ContactList = () => {
           <div>
             <Label>Company</Label>
             <Select 
-              value={filters.company_id} 
-              onValueChange={(value) => setFilters(prev => ({...prev, company_id: value}))}
+              value={filters.company_id || 'all'} 
+              onValueChange={(value) => setFilters(prev => ({...prev, company_id: value === 'all' ? '' : value}))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="All Companies" />
