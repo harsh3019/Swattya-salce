@@ -2080,9 +2080,12 @@ async def create_company(company_data: CompanyCreate, current_user: User = Depen
     score = await calculate_company_score(company_data)
     lead_status = "hot" if score >= 70 else "cold"
     
-    # Create company
+    # Create company - map CompanyCreate fields to Company fields
+    company_dict = company_data.dict()
+    company_dict['company_name'] = company_dict.pop('name')  # Map name to company_name
+    
     company = Company(
-        **company_data.dict(),
+        **company_dict,
         score=score,
         lead_status=lead_status,
         created_by=current_user.id
