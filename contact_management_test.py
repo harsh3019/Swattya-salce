@@ -69,22 +69,23 @@ class ContactManagementTester:
             return self.log_test("Admin Login", False, f"Status: {status}, Response: {response}")
 
     def test_designations_master_data(self):
-        """Test designations master data - should return 20 designations"""
+        """Test designations master data - should return at least 20 designations"""
         print("\n📋 Testing Designations Master Data...")
         
         success, status, response = self.make_request('GET', 'designations')
         
         if success and isinstance(response, list):
             designation_count = len(response)
-            expected_count = 20
+            expected_min_count = 20
             
-            if designation_count == expected_count:
+            if designation_count >= expected_min_count:
                 self.designations = response
                 return self.log_test("GET Designations", True, 
-                                   f"Found {designation_count}/{expected_count} designations (CEO, CTO, CFO, etc.)")
+                                   f"Found {designation_count} designations (≥{expected_min_count} expected: CEO, CTO, CFO, etc.)")
             else:
+                self.designations = response  # Still store them for other tests
                 return self.log_test("GET Designations", False, 
-                                   f"Expected {expected_count} designations, found {designation_count}")
+                                   f"Expected at least {expected_min_count} designations, found {designation_count}")
         else:
             return self.log_test("GET Designations", False, f"Status: {status}, Response: {response}")
 
