@@ -782,7 +782,7 @@ class SawayattaERPTester:
         
         # Test 2: International company
         international_company = {
-            "company_name": f"Global Tech Inc {datetime.now().strftime('%H%M%S')}",
+            "company_name": f"Global Tech International Inc {datetime.now().strftime('%H%M%S')}",
             "domestic_international": "International",
             "vat_number": f"GB{datetime.now().strftime('%H%M%S')}123456",
             "company_type_id": company_type_id,
