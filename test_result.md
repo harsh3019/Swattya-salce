@@ -166,110 +166,89 @@ backend:
           comment: "RBAC logic working correctly. Sidebar endpoint properly filters menus based on View permissions. Admin has View permissions for all 15 menus across 3 modules. Permission checking logic in get_sidebar_navigation() function works as expected."
 
 frontend:
-  - task: "Frontend Authentication Flow"
+  - task: "Company Registration Multi-Step Form Access"
     implemented: true
-    working: true
-    file: "frontend/src/App.js"
+    working: "NA"
+    file: "frontend/src/components/CompanyRegistration.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-        - working: true
+        - working: "NA"
           agent: "testing"
-          comment: "AUTHENTICATION WORKING: Login flow tested successfully. Admin credentials (admin/admin123) work correctly. JWT token is properly stored in localStorage and axios Authorization header is set. Login redirects to dashboard as expected. Fixed REACT_APP_BACKEND_URL from incorrect external URL to http://localhost:8001."
+          comment: "Starting comprehensive testing of Company Registration multi-step form. Need to verify access control, navigation to /company/add route, and RBAC permissions for admin user."
 
-  - task: "Sidebar Display and Navigation"
+  - task: "Company Registration Step 1 - General Info"
     implemented: true
-    working: true
-    file: "frontend/src/components/DynamicSidebar.js"
+    working: "NA"
+    file: "frontend/src/components/CompanyRegistration.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-        - working: true
+        - working: "NA"
           agent: "testing"
-          comment: "SIDEBAR WORKING PERFECTLY: After fixing backend URL, sidebar displays correctly with all 3 modules (User Management, Sales, System). Sidebar API calls work (200 status), permissions API returns 70 permissions, modules expand properly showing menu items (Users, Roles, Departments, etc.), and navigation to Users page works correctly. The issue was the incorrect REACT_APP_BACKEND_URL configuration."
+          comment: "Need to test Step 1 functionality: Company name input, business type selection (Domestic/International), GST/PAN/VAT number fields, cascading dropdowns for company type, account type, region, business type, industry->sub-industry, employee count, and 'Is Child Company' checkbox functionality."
 
-  - task: "Permission Context Integration"
+  - task: "Company Registration Step 2 - Location"
     implemented: true
-    working: false
-    file: "frontend/src/contexts/PermissionContext.js"
-    stuck_count: 1
-    priority: "high"
-    needs_retesting: false
-    status_history:
-        - working: true
-          agent: "testing"
-          comment: "PERMISSIONS WORKING: PermissionContext successfully fetches 70 permissions from /api/auth/permissions. Permission-based sidebar visibility works correctly - modules only show when user has proper View permissions. Integration between PermissionContext and DynamicSidebar is functioning as designed."
-        - working: false
-          agent: "testing"
-          comment: "PERMISSION TIMING ISSUES: While permissions eventually load (70 permissions), there are consistent 403 errors on initial /api/auth/permissions calls causing PermissionContext to clear permissions before reloading. This creates a race condition affecting button visibility. The API calls succeed eventually but the timing issue needs to be fixed."
-
-  - task: "User CRUD Operations"
-    implemented: true
-    working: false
-    file: "frontend/src/components/UserManagement.js"
-    stuck_count: 4
-    priority: "high"
-    needs_retesting: false
-    status_history:
-        - working: false
-          agent: "testing"
-          comment: "CRITICAL: User creation form FAILS SILENTLY. Add User button visible, dialog opens, form accepts input (username: testuser123, email: testuser123@example.com, password: password123), but when submitted NO API call is made to POST /api/users. Database check confirms no new user created. Form submission handler not properly connected to API. This is the primary issue reported by user."
-        - working: false
-          agent: "testing"
-          comment: "CONFIRMED CRITICAL ISSUE (2025-01-27): Comprehensive testing with debug logging confirms form submission is completely broken. When Create button clicked: ❌ NO console logs appear (debug logs with 🔍 never triggered), ❌ NO API calls made to POST /api/users, ❌ NO handleSubmit function execution, ❌ NO createItem function calls, ❌ Dialog remains open indicating failure, ❌ No toast messages. The react-hook-form onSubmit handler is not being triggered at all. This is a complete form submission failure, not just an API issue. Root cause: Form submission logic is disconnected from the actual form element."
-        - working: false
-          agent: "testing"
-          comment: "ROOT CAUSE IDENTIFIED (2025-09-05): Enhanced debugging reveals exact issue! Form submission IS triggered (✅ '🔍 Form submit event triggered'), but validation FAILS on is_active field. Console shows: '❌ Form validation failed: {is_active: Object}'. The Switch component (lines 784-790 in UserManagement.js) incorrectly uses {...crud.form.register('is_active')} which doesn't work with Radix UI Switch components. Switch returns object instead of boolean, causing Zod schema validation failure. SOLUTION: Replace Switch registration with controlled component using onCheckedChange={(checked) => crud.form.setValue('is_active', checked)} and checked={crud.form.watch('is_active')} props."
-        - working: true
-          agent: "testing"
-          comment: "✅ USER CREATION FIXED AND WORKING (2025-09-05): Comprehensive testing confirms the Switch component fix has resolved the issue! Test results: ✅ Add User dialog opens correctly, ✅ Form accepts all input (username: newuser001, email: newuser001@example.com, password: password123), ✅ Switch component works properly (checked state), ✅ API call made successfully (POST /api/users), ✅ Dialog closes after submission, ✅ Success toast appears ('Item created successfully'), ✅ New user appears in table (user count increased from 1 to 2), ✅ No form validation errors. The Switch component now uses controlled approach with onCheckedChange and checked props instead of register(), fixing the Zod validation issue. User creation functionality is fully operational."
-        - working: false
-          agent: "testing"
-          comment: "❌ USER UPDATE FUNCTIONALITY BROKEN (2025-09-05): Comprehensive testing reveals critical issue with user update functionality. Test results: ✅ Edit dialog opens correctly when clicking Edit button, ✅ Fields are pre-populated with existing data (username: 'admin', email: 'admin@sawayatta.com'), ✅ Form accepts modifications (email changed to 'updated_test@example.com'), ✅ Update button is enabled and clickable, ❌ NO PUT API call is made when Update button is clicked, ❌ Dialog remains open after submission, ❌ No success toast appears, ❌ No data updates in table. Form validation shows 5 initial validation errors, form validity returns true, but form submission handler is not triggering the API call. This is similar to the previous user creation issue but affects the update functionality specifically. The form element exists but has no submit handler attached."
-        - working: false
-          agent: "testing"
-          comment: "❌ USER UPDATE FUNCTIONALITY CONFIRMED BROKEN (2025-01-27): Comprehensive re-testing confirms the user update functionality is completely broken. Test results: ✅ Login successful and Users page accessible, ✅ Users table displays 5 users with proper data, ✅ Edit dialog opens correctly with 'Edit User' title, ✅ Form fields are pre-populated (username: 'admin', email: 'admin@sawayatta.com'), ✅ Form accepts modifications (email changed to 'test_update@example.com'), ✅ Update button is enabled and clickable, ❌ NO PUT API call is made to /api/users/{id} when Update button is clicked, ❌ Dialog remains open after clicking Update, ❌ No success toast appears, ❌ No data updates in table. Network monitoring confirms zero API calls. This is identical to the previous user creation issue - the form submission handler is not properly connected to trigger the updateItem function. The issue is in the form onSubmit handler not being triggered despite the button click."
-        - working: false
-          agent: "testing"
-          comment: "❌ HIDDEN INPUT REGISTRATION FIX FAILED (2025-09-05): Comprehensive testing of the hidden input registration fix confirms it has NOT resolved the user update functionality issue. Test results: ✅ Navigate to /users page successful, ✅ Edit dialog opens correctly with 'Edit User' title, ✅ Form fields pre-populated (Username: 'admin', Email: 'admin@sawayatta.com'), ✅ Email field successfully modified to 'updated_test@example.com', ✅ Update button found and clicked, ❌ CRITICAL: Debug message '🔍 handleSubmit callback executed with data:' NEVER appears in console logs, ❌ NO PUT API call made to /api/users/{id}, ❌ Dialog remains open after Update button click, ❌ No success toast appears. The hidden input fields added at lines 669-673 (role_id, department_id, designation_id, status, is_active) have not fixed the core issue. The react-hook-form handleSubmit callback function is still completely not being executed despite the Update button click. The form submission logic needs a different approach - the current onSubmit handler at lines 663-667 is fundamentally broken and not triggering the handleSubmit callback chain."
-        - working: false
-          agent: "testing"
-          comment: "❌ USER UPDATE FUNCTIONALITY ROOT CAUSE IDENTIFIED (2025-09-05): Comprehensive testing with debug logging reveals the exact issue! Debug messages captured: ✅ '🔍 Form submitted - edit mode: true' (form submission triggered), ✅ '🔍 Form data before submission: {id: ad442646-b47c-412b-ab24-0f3918610cd3, is_active: true, ...}' (form data captured), ✅ '🔍 Form errors: {}' (no validation errors), ❌ MISSING: '🔍 handleSubmit called with data:' (react-hook-form handleSubmit callback not executed). ROOT CAUSE: The form submission event is triggered and validation passes, but the react-hook-form's handleSubmit callback function is not being executed. The issue is in the form submission handler chain (lines 663-671 in UserManagement.js) - the form element detects the submit event but the handleSubmit callback with the actual data is not being invoked. This prevents the crud.handleSubmit function from being called, which means no PUT API call is made. URGENT: Fix the react-hook-form handleSubmit callback execution in the form onSubmit handler."
-        - working: false
-          agent: "testing"
-          comment: "❌ USER UPDATE FUNCTIONALITY CONFIRMED BROKEN (2025-01-27): Comprehensive testing confirms the handleSubmit callback issue persists. Test results: ✅ Edit dialog opens correctly with 'Edit User' title, ✅ Form fields pre-populated (Username: 'admin', Email: 'admin@sawayatta.com'), ✅ Email field successfully modified to 'updated_test@example.com', ✅ Update button found and clicked, ❌ CRITICAL: '🔍 handleSubmit callback executed with data:' debug message NEVER appears in console logs, ❌ NO PUT API call made to /api/users/{id}, ❌ Dialog remains open after Update button click, ❌ No success toast appears. The react-hook-form handleSubmit callback function is completely not being executed despite the Update button click. This confirms the main agent's fix attempt has not resolved the core issue - the form onSubmit handler at lines 663-667 is not properly triggering the handleSubmit callback chain. The form submission logic needs to be completely reviewed and fixed."
-        - working: false
-          agent: "testing"
-          comment: "❌ CONTROLLER PATTERN FIX FAILED (2025-01-27): Comprehensive testing of the Controller pattern fix confirms it has NOT resolved the user update functionality issue. Test results: ✅ Login successful with admin credentials, ✅ Navigation to /users page successful, ✅ Users table displays 5 users correctly, ✅ Edit dialog opens with 'Edit User' title, ✅ Form fields pre-populated (Username: 'admin', Email: 'admin@sawayatta.com'), ✅ Email field successfully modified to 'updated_test_user@example.com', ✅ Update button found and clicked successfully, ❌ CRITICAL FAILURE: Debug message '🔍 handleSubmit callback executed with data:' NEVER appears in console logs, ❌ NO PUT API call made to /api/users/{id}, ❌ Dialog remains open after Update button click (indicating submission failure), ❌ No success toast appears. The Controller pattern implementation for all form fields (role_id, department_id, designation_id, status, is_active) has not fixed the core issue. The react-hook-form handleSubmit callback function is still completely not being executed despite the Update button click. ROOT CAUSE PERSISTS: The form onSubmit handler at lines 663-667 in UserManagement.js is fundamentally broken and not triggering the handleSubmit callback chain. This confirms that the issue is NOT with individual field registration but with the core form submission mechanism itself."
-
-  - task: "Masters CRUD Operations (Roles, Departments)"
-    implemented: true
-    working: true
-    file: "frontend/src/components/Roles.js, frontend/src/components/Departments.js"
+    working: "NA"
+    file: "frontend/src/components/CompanyRegistration.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-        - working: true
+        - working: "NA"
           agent: "testing"
-          comment: "WORKING: Roles and Departments pages display correctly with Add buttons visible and Edit/Delete buttons showing for existing records (1 edit button, 1 delete button each). These use PermissionDataTable component and appear to be functioning correctly for button visibility."
+          comment: "Need to test Step 2 functionality: Address input field, cascading dropdowns for Country->State->City selection, form validation, and step progression."
 
-  - task: "Masters CRUD Operations (Permissions, Modules, Menus)"
+  - task: "Company Registration Step 3 - Financials"
     implemented: true
-    working: true
-    file: "frontend/src/components/Permissions.js, frontend/src/components/Modules.js, frontend/src/components/Menus.js"
-    stuck_count: 1
+    working: "NA"
+    file: "frontend/src/components/CompanyRegistration.js"
+    stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-        - working: false
+        - working: "NA"
           agent: "testing"
-          comment: "PARTIAL FAILURE: Add buttons are visible for Permissions, Modules, and Menus pages, but Edit/Delete buttons are NOT showing (0 edit buttons, 0 delete buttons) despite data being present. These pages use regular DataTable component instead of PermissionDataTable. This confirms user report of 'Add/Edit/Delete buttons not showing despite having permissions for permissions, modules, and menus masters'."
-        - working: true
+          comment: "Need to test Step 3 functionality: Annual revenue input, currency selection, 'Add Turnover' functionality with multi-year entries, 'Add Profit' functionality with multi-year entries, and form validation."
+
+  - task: "Company Registration Step 4 - Documents & Profile"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/CompanyRegistration.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
           agent: "testing"
-          comment: "✅ ISSUE RESOLVED (2025-09-05): Comprehensive testing confirms the PermissionDataTable fix has successfully resolved the Edit/Delete button visibility issue! Test results: ✅ PERMISSIONS PAGE: 1 Add button, 5 Edit buttons, 5 Delete buttons (matches 5 data rows perfectly), ✅ MODULES PAGE: 1 Add button, 3 Edit buttons, 3 Delete buttons (matches 3 data rows perfectly), ✅ MENUS PAGE: 1 Add button, 10 Edit buttons, 10 Delete buttons (matches 10 data rows perfectly). All three pages now use PermissionDataTable component and display Edit/Delete buttons correctly in the Actions column. The fix has completely resolved the user-reported issue of missing Edit/Delete buttons for permissions, modules, and menus masters."
+          comment: "Need to test Step 4 functionality: Company profile text input, file upload functionality (simulate PDF upload), document validation (file size, type), uploaded documents display, and document removal functionality."
+
+  - task: "Company Registration Step 5 - Review & Submit"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/CompanyRegistration.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Need to test Step 5 functionality: Checklist items verification, submission blocking until all checklist items are checked, registration summary display, final form submission, company creation API call, and success page display."
+
+  - task: "Company Registration Form Features"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/CompanyRegistration.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Need to test key features: Progress bar updates correctly (20%, 40%, 60%, 80%, 100%), step labels highlight correctly, form validation on each step, auto-save to localStorage functionality, error messages display properly, and responsive design for different screen sizes."
 
 metadata:
   created_by: "testing_agent"
