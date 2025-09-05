@@ -462,8 +462,11 @@ class ContactManagementTester:
         
         # Test search functionality
         success, status, response = self.make_request('GET', 'contacts?search=test')
-        search_test = self.log_test("Search Functionality", success, 
-                                  f"Search returned {len(response.get('contacts', [])) if success else 0} results")
+        if success and isinstance(response, dict) and 'contacts' in response:
+            search_count = len(response['contacts'])
+        else:
+            search_count = 0
+        search_test = self.log_test("Search Functionality", success, f"Search returned {search_count} results")
         all_success = all_success and search_test
         
         # Test filtering by company
