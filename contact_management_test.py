@@ -472,8 +472,11 @@ class ContactManagementTester:
         # Test filtering by company
         if self.companies:
             success, status, response = self.make_request('GET', f'contacts?company_id={self.companies[0]["id"]}')
-            filter_test = self.log_test("Company Filter", success, 
-                                      f"Company filter returned {len(response.get('contacts', [])) if success else 0} results")
+            if success and isinstance(response, dict) and 'contacts' in response:
+                filter_count = len(response['contacts'])
+            else:
+                filter_count = 0
+            filter_test = self.log_test("Company Filter", success, f"Company filter returned {filter_count} results")
             all_success = all_success and filter_test
         
         # Test filtering by designation
