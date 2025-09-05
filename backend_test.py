@@ -989,6 +989,13 @@ class SawayattaERPTester:
         test_results.append(("Add Module to Role", self.test_add_module_to_role()))
         test_results.append(("Export Functionality", self.test_export_functionality()))
         
+        # Test Company Registration functionality (FOCUS OF THIS TEST)
+        test_results.append(("Master Data APIs", self.test_master_data_apis()))
+        test_results.append(("Cascading Dropdowns", self.test_cascading_dropdowns()))
+        test_results.append(("Company Creation Complete Data", self.test_company_creation_complete_data()))
+        test_results.append(("Company Validation", self.test_company_validation()))
+        test_results.append(("Company API Responses", self.test_company_api_responses()))
+        
         # Print summary
         print("\n" + "=" * 60)
         print(f"📊 TEST SUMMARY")
@@ -998,6 +1005,39 @@ class SawayattaERPTester:
         print(f"Success Rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
         
         print(f"\n📋 MODULE TEST RESULTS:")
+        for test_name, result in test_results:
+            status = "✅ PASSED" if result else "❌ FAILED"
+            print(f"   {test_name}: {status}")
+        
+        return self.tests_passed == self.tests_run
+
+    def run_company_tests_only(self):
+        """Run only company creation tests as requested"""
+        print("🚀 Starting Company Creation API Tests")
+        print("=" * 60)
+        
+        # Test authentication first
+        if not self.test_login():
+            print("\n❌ Authentication failed. Cannot proceed with other tests.")
+            return False
+        
+        # Test Company Registration functionality (FOCUS OF THIS TEST)
+        test_results = []
+        test_results.append(("Master Data APIs", self.test_master_data_apis()))
+        test_results.append(("Cascading Dropdowns", self.test_cascading_dropdowns()))
+        test_results.append(("Company Creation Complete Data", self.test_company_creation_complete_data()))
+        test_results.append(("Company Validation", self.test_company_validation()))
+        test_results.append(("Company API Responses", self.test_company_api_responses()))
+        
+        # Print summary
+        print("\n" + "=" * 60)
+        print(f"📊 COMPANY CREATION TEST SUMMARY")
+        print(f"Tests Run: {self.tests_run}")
+        print(f"Tests Passed: {self.tests_passed}")
+        print(f"Tests Failed: {self.tests_run - self.tests_passed}")
+        print(f"Success Rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        print(f"\n📋 COMPANY TEST RESULTS:")
         for test_name, result in test_results:
             status = "✅ PASSED" if result else "❌ FAILED"
             print(f"   {test_name}: {status}")
