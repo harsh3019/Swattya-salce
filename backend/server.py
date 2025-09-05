@@ -2602,7 +2602,10 @@ async def create_contact(contact_data: ContactCreate, current_user: User = Depen
         raise HTTPException(status_code=400, detail="Possible duplicate contact detected. Review and confirm.")
     
     # Verify company exists
-    company = await db.companies.find_one({"id": contact_data.company_id, "is_active": True})
+    company = await db.companies.find_one({
+        "id": contact_data.company_id, 
+        "$or": [{"is_active": True}, {"active_status": True}]
+    })
     if not company:
         raise HTTPException(status_code=400, detail="Company not found or inactive")
     
