@@ -262,9 +262,7 @@ metadata:
 test_plan:
   current_focus:
     - "Permission Context Integration - Timing issues with 403 errors"
-    - "Masters CRUD Operations (Permissions, Modules, Menus) - Missing Edit/Delete buttons"
-  stuck_tasks:
-    - "Masters CRUD Operations (Permissions, Modules, Menus)"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
