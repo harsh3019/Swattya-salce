@@ -14,6 +14,7 @@ import { Menus } from './components/Menus';
 import { RolePermissions } from './components/RolePermissions';
 import { ActivityLogs } from './components/ActivityLogs';
 import CompanyRegistration from './components/CompanyRegistration';
+import { CompanyList } from './components/CompanyList';
 
 // Import new RBAC components
 import DynamicSidebar from './components/DynamicSidebar';
