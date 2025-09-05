@@ -477,7 +477,7 @@ export const ContactList = () => {
                 <SelectValue placeholder="All" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All</SelectItem>
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="true">Decision Makers</SelectItem>
                 <SelectItem value="false">Non-Decision Makers</SelectItem>
               </SelectContent>
