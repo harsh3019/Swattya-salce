@@ -605,7 +605,7 @@ async def logout(current_user: User = Depends(get_current_user)):
     return {"message": "Logged out successfully"}
 
 @api_router.get("/auth/permissions")
-async def get_user_permissions(current_user: User = Depends(get_current_user)):
+async def get_current_user_permissions(current_user: User = Depends(get_current_user)):
     """Get current user's permissions"""
     if not current_user.role_id:
         return {"permissions": []}
