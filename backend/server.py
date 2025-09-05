@@ -1057,26 +1057,6 @@ async def delete_role(role_id: str, current_user: User = Depends(get_current_use
 # Companies CRUD
 # Old company endpoint removed - using new company registration endpoint
 
-# Contacts CRUD
-@api_router.get("/contacts", response_model=List[Contact])
-async def get_contacts(current_user: User = Depends(get_current_user)):
-    """Get all contacts"""
-    contacts = await db.contacts.find({"is_active": True}).to_list(length=None)
-    return [Contact(**parse_from_mongo(contact)) for contact in contacts]
-
-@api_router.post("/contacts", response_model=Contact)
-async def create_contact(contact_data: Contact, current_user: User = Depends(get_current_user)):
-    """Create new contact"""
-    contact_dict = contact_data.dict()
-    contact_dict['created_by'] = current_user.id
-    contact = Contact(**contact_dict)
-    contact_dict = prepare_for_mongo(contact.dict())
-    await db.contacts.insert_one(contact_dict)
-    
-    await log_activity("sales", "contacts", "create", "success", current_user.id, {"contact_id": contact.id})
-    
-    return contact
-
 # ================ COMPLETE USER MANAGEMENT ENDPOINTS ================
 
 # Departments CRUD
