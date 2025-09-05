@@ -482,8 +482,11 @@ class ContactManagementTester:
         # Test filtering by designation
         if self.designations:
             success, status, response = self.make_request('GET', f'contacts?designation_id={self.designations[0]["id"]}')
-            designation_filter = self.log_test("Designation Filter", success, 
-                                             f"Designation filter returned {len(response.get('contacts', [])) if success else 0} results")
+            if success and isinstance(response, dict) and 'contacts' in response:
+                designation_count = len(response['contacts'])
+            else:
+                designation_count = 0
+            designation_filter = self.log_test("Designation Filter", success, f"Designation filter returned {designation_count} results")
             all_success = all_success and designation_filter
         
         # Test SPOC filter
