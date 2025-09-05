@@ -478,7 +478,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Contact List Page Implementation"
+    - "Contact Management Backend APIs"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
