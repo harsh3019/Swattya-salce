@@ -2849,42 +2849,5 @@ async def bulk_update_contacts(bulk_data: ContactBulkUpdate, current_user: User 
         logger.error(f"Failed to bulk update contacts: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to update contacts. Try again.")
 
-@api_router.get("/contacts/export")
-async def export_contacts(
-    company_id: Optional[str] = None,
-    designation_id: Optional[str] = None,
-    spoc: Optional[bool] = None,
-    decision_maker: Optional[bool] = None,
-    is_active: Optional[bool] = None,
-    current_user: User = Depends(get_current_user)
-):
-    await check_contact_access(current_user)
-    
-    # Check export permission
-    user_permissions = await get_user_permissions(current_user.id)
-    has_export = any(
-        p.get("module") == "Sales" and p.get("menu") == "Contacts" and p.get("permission") == "Export"
-        for p in user_permissions
-    )
-    if not has_export:
-        raise HTTPException(status_code=403, detail="Export permission required")
-    
-    # Build query (same as get_contacts)
-    query = {"is_deleted": {"$ne": True}}
-    
-    if company_id:
-        query["company_id"] = company_id
-    if designation_id:
-        query["designation_id"] = designation_id
-    if spoc is not None:
-        query["spoc"] = spoc
-    if decision_maker is not None:
-        query["decision_maker"] = decision_maker
-    if is_active is not None:
-        query["is_active"] = is_active
-    
-    contacts = await db.contacts.find(query).to_list(None)
-    return [prepare_for_json(c) for c in contacts]
-
 # Include router after all endpoints are defined
 app.include_router(api_router)
