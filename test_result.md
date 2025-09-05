@@ -207,9 +207,9 @@ frontend:
 
   - task: "User CRUD Operations"
     implemented: true
-    working: true
+    working: false
     file: "frontend/src/components/UserManagement.js"
-    stuck_count: 2
+    stuck_count: 3
     priority: "high"
     needs_retesting: false
     status_history:
@@ -225,6 +225,9 @@ frontend:
         - working: true
           agent: "testing"
           comment: "✅ USER CREATION FIXED AND WORKING (2025-09-05): Comprehensive testing confirms the Switch component fix has resolved the issue! Test results: ✅ Add User dialog opens correctly, ✅ Form accepts all input (username: newuser001, email: newuser001@example.com, password: password123), ✅ Switch component works properly (checked state), ✅ API call made successfully (POST /api/users), ✅ Dialog closes after submission, ✅ Success toast appears ('Item created successfully'), ✅ New user appears in table (user count increased from 1 to 2), ✅ No form validation errors. The Switch component now uses controlled approach with onCheckedChange and checked props instead of register(), fixing the Zod validation issue. User creation functionality is fully operational."
+        - working: false
+          agent: "testing"
+          comment: "❌ USER UPDATE FUNCTIONALITY BROKEN (2025-09-05): Comprehensive testing reveals critical issue with user update functionality. Test results: ✅ Edit dialog opens correctly when clicking Edit button, ✅ Fields are pre-populated with existing data (username: 'admin', email: 'admin@sawayatta.com'), ✅ Form accepts modifications (email changed to 'updated_test@example.com'), ✅ Update button is enabled and clickable, ❌ NO PUT API call is made when Update button is clicked, ❌ Dialog remains open after submission, ❌ No success toast appears, ❌ No data updates in table. Form validation shows 5 initial validation errors, form validity returns true, but form submission handler is not triggering the API call. This is similar to the previous user creation issue but affects the update functionality specifically. The form element exists but has no submit handler attached."
 
   - task: "Masters CRUD Operations (Roles, Departments)"
     implemented: true
