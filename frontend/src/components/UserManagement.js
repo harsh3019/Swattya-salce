@@ -708,81 +708,101 @@ export const Users = () => {
 
             <div>
               <Label htmlFor="role_id">Role</Label>
-              <Select 
-                onValueChange={(value) => crud.form.setValue('role_id', value)}
-                value={crud.form.watch('role_id') || ''}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roles.map((role) => (
-                    <SelectItem key={role.id} value={role.id}>
-                      {role.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                name="role_id"
+                control={crud.form.control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roles.map((role) => (
+                        <SelectItem key={role.id} value={role.id}>
+                          {role.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             <div>
               <Label htmlFor="department_id">Department</Label>
-              <Select 
-                onValueChange={(value) => crud.form.setValue('department_id', value)}
-                value={crud.form.watch('department_id') || ''}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select department" />
-                </SelectTrigger>
-                <SelectContent>
-                  {departments.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                name="department_id"
+                control={crud.form.control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {departments.map((dept) => (
+                        <SelectItem key={dept.id} value={dept.id}>
+                          {dept.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             <div>
               <Label htmlFor="designation_id">Designation</Label>
-              <Select 
-                onValueChange={(value) => crud.form.setValue('designation_id', value)}
-                value={crud.form.watch('designation_id') || ''}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select designation" />
-                </SelectTrigger>
-                <SelectContent>
-                  {designations.map((desig) => (
-                    <SelectItem key={desig.id} value={desig.id}>
-                      {desig.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                name="designation_id"
+                control={crud.form.control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select designation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {designations.map((desig) => (
+                        <SelectItem key={desig.id} value={desig.id}>
+                          {desig.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             <div>
               <Label htmlFor="status">Status</Label>
-              <Select onValueChange={(value) => crud.form.setValue('status', value)} value={crud.form.watch('status') || 'active'}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="suspended">Suspended</SelectItem>
-                </SelectContent>
-              </Select>
+              <Controller
+                name="status"
+                control={crud.form.control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value || 'active'}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="suspended">Suspended</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             <div className="flex items-center space-x-2">
-              <Switch
-                onCheckedChange={(checked) => crud.form.setValue('is_active', checked)}
-                checked={crud.form.watch('is_active')}
-                id="is_active"
-                defaultChecked={true}
+              <Controller
+                name="is_active"
+                control={crud.form.control}
+                render={({ field }) => (
+                  <Switch
+                    onCheckedChange={field.onChange}
+                    checked={field.value}
+                    id="is_active"
+                  />
+                )}
               />
               <Label htmlFor="is_active">Is Active</Label>
             </div>
