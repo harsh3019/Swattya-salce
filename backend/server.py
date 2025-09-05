@@ -2403,14 +2403,14 @@ class ContactCreate(BaseModel):
 class ContactUpdate(BaseModel):
     # Basic Info
     company_id: Optional[str] = None
-    salutation: Optional[str] = Field(None, regex=r"^(Mr\.|Ms\.|Mrs\.|Dr\.|Prof\.)$")
+    salutation: Optional[str] = Field(None, pattern=r"^(Mr\.|Ms\.|Mrs\.|Dr\.|Prof\.)$")
     first_name: Optional[str] = Field(None, min_length=1, max_length=50)
     middle_name: Optional[str] = Field(None, max_length=50)
     last_name: Optional[str] = Field(None, max_length=50)
     
     # Contact Details
-    email: Optional[str] = Field(None, regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-    primary_phone: Optional[str] = Field(None, min_length=10, max_length=15, regex=r'^\+?[\d\s\-\(\)]{10,15}$')
+    email: Optional[str] = Field(None, pattern=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    primary_phone: Optional[str] = Field(None, min_length=10, max_length=15, pattern=r'^\+?[\d\s\-\(\)]{10,15}$')
     designation_id: Optional[str] = None
     decision_maker: Optional[bool] = None
     spoc: Optional[bool] = None
