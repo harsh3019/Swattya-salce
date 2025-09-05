@@ -2345,5 +2345,513 @@ async def export_companies(current_user: User = Depends(get_current_user)):
     companies = await db.companies.find().to_list(None)
     return [prepare_for_json(c) for c in companies]
 
+# ================ CONTACT MANAGEMENT MODELS ================
+
+class Designation(BaseAuditModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    is_active: bool = True
+
+class Contact(BaseAuditModel):
+    # Basic Info
+    company_id: str = Field(..., description="Reference to company")
+    salutation: str = Field(..., regex=r"^(Mr\.|Ms\.|Mrs\.|Dr\.|Prof\.)$")
+    first_name: str = Field(..., min_length=1, max_length=50)
+    middle_name: Optional[str] = Field(None, max_length=50)
+    last_name: Optional[str] = Field(None, max_length=50)
+    
+    # Contact Details
+    email: str = Field(..., regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    primary_phone: str = Field(..., min_length=10, max_length=15, regex=r'^\+?[\d\s\-\(\)]{10,15}$')
+    designation_id: Optional[str] = None
+    decision_maker: bool = Field(default=False)
+    spoc: bool = Field(default=False, description="Single Point of Contact")
+    
+    # Additional Info
+    address: Optional[str] = Field(None, max_length=500)
+    country_id: Optional[str] = None
+    city_id: Optional[str] = None
+    comments: Optional[str] = Field(None, max_length=500)
+    option: Optional[str] = Field(None, max_length=100, description="Preferred contact method")
+    
+    # Status fields
+    is_active: bool = Field(default=True)
+    is_deleted: bool = Field(default=False)
+    deleted_at: Optional[datetime] = None
+
+class ContactCreate(BaseModel):
+    # Basic Info
+    company_id: str = Field(..., description="Reference to company")
+    salutation: str = Field(..., regex=r"^(Mr\.|Ms\.|Mrs\.|Dr\.|Prof\.)$")
+    first_name: str = Field(..., min_length=1, max_length=50)
+    middle_name: Optional[str] = Field(None, max_length=50)
+    last_name: Optional[str] = Field(None, max_length=50)
+    
+    # Contact Details
+    email: str = Field(..., regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    primary_phone: str = Field(..., min_length=10, max_length=15, regex=r'^\+?[\d\s\-\(\)]{10,15}$')
+    designation_id: Optional[str] = None
+    decision_maker: bool = Field(default=False)
+    spoc: bool = Field(default=False)
+    
+    # Additional Info
+    address: Optional[str] = Field(None, max_length=500)
+    country_id: Optional[str] = None
+    city_id: Optional[str] = None
+    comments: Optional[str] = Field(None, max_length=500)
+    option: Optional[str] = Field(None, max_length=100)
+
+class ContactUpdate(BaseModel):
+    # Basic Info
+    company_id: Optional[str] = None
+    salutation: Optional[str] = Field(None, regex=r"^(Mr\.|Ms\.|Mrs\.|Dr\.|Prof\.)$")
+    first_name: Optional[str] = Field(None, min_length=1, max_length=50)
+    middle_name: Optional[str] = Field(None, max_length=50)
+    last_name: Optional[str] = Field(None, max_length=50)
+    
+    # Contact Details
+    email: Optional[str] = Field(None, regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    primary_phone: Optional[str] = Field(None, min_length=10, max_length=15, regex=r'^\+?[\d\s\-\(\)]{10,15}$')
+    designation_id: Optional[str] = None
+    decision_maker: Optional[bool] = None
+    spoc: Optional[bool] = None
+    
+    # Additional Info
+    address: Optional[str] = Field(None, max_length=500)
+    country_id: Optional[str] = None
+    city_id: Optional[str] = None
+    comments: Optional[str] = Field(None, max_length=500)
+    option: Optional[str] = Field(None, max_length=100)
+    
+    # Status fields
+    is_active: Optional[bool] = None
+
+class ContactBulkUpdate(BaseModel):
+    contact_ids: List[str] = Field(..., min_items=1)
+    action: str = Field(..., regex=r"^(activate|deactivate)$")
+
+# ================ CONTACT MANAGEMENT ENDPOINTS ================
+
+# Helper function for contact access control
+async def check_contact_access(current_user: User):
+    """Check if user has access to contact operations"""
+    user_permissions = await get_user_permissions(current_user.id)
+    has_contact_access = any(
+        p.get("module") == "Sales" and p.get("menu") == "Contacts" and p.get("permission") in ["View", "Add", "Edit"]
+        for p in user_permissions
+    )
+    if not has_contact_access:
+        raise HTTPException(status_code=403, detail="Access denied. Permission required.")
+    return True
+
+# Designation endpoints
+@api_router.get("/designations")
+async def get_designations(current_user: User = Depends(get_current_user)):
+    designations = await db.designations.find({"is_active": True}).to_list(None)
+    return [prepare_for_json(d) for d in designations]
+
+# Contact similarity matching for duplicate detection
+def calculate_contact_similarity(contact1: dict, contact2: dict) -> float:
+    """Calculate similarity score between two contacts (0-1 scale)"""
+    score = 0.0
+    
+    # Email similarity (40% weight)
+    if contact1.get('email', '').lower() == contact2.get('email', '').lower():
+        score += 0.4
+    
+    # Name similarity (40% weight)
+    name1 = f"{contact1.get('first_name', '')} {contact1.get('last_name', '')}".strip().lower()
+    name2 = f"{contact2.get('first_name', '')} {contact2.get('last_name', '')}".strip().lower()
+    
+    if name1 and name2:
+        # Simple string similarity
+        if name1 == name2:
+            score += 0.4
+        elif len(name1) > 0 and len(name2) > 0:
+            # Check for partial matches
+            words1 = set(name1.split())
+            words2 = set(name2.split())
+            common_words = words1.intersection(words2)
+            if common_words:
+                score += 0.2 * (len(common_words) / max(len(words1), len(words2)))
+    
+    # Company similarity (20% weight)
+    if contact1.get('company_id') == contact2.get('company_id'):
+        score += 0.2
+    
+    return score
+
+async def detect_duplicate_contacts(contact_data: ContactCreate, exclude_id: str = None) -> List[dict]:
+    """Detect potential duplicate contacts using similarity matching"""
+    # Build query to find similar contacts
+    query = {
+        "is_deleted": {"$ne": True},
+        "$or": [
+            {"email": {"$regex": f"^{contact_data.email}$", "$options": "i"}},
+            {
+                "$and": [
+                    {"first_name": {"$regex": f"^{contact_data.first_name}$", "$options": "i"}},
+                    {"company_id": contact_data.company_id}
+                ]
+            }
+        ]
+    }
+    
+    if exclude_id:
+        query["id"] = {"$ne": exclude_id}
+    
+    potential_duplicates = await db.contacts.find(query).to_list(None)
+    
+    # Calculate similarity scores
+    duplicates = []
+    for existing_contact in potential_duplicates:
+        similarity = calculate_contact_similarity(contact_data.dict(), existing_contact)
+        if similarity >= 0.6:  # 60% similarity threshold
+            duplicates.append({
+                "contact": prepare_for_json(existing_contact),
+                "similarity": similarity
+            })
+    
+    return duplicates
+
+# Contact CRUD endpoints
+@api_router.get("/contacts")
+async def get_contacts(
+    company_id: Optional[str] = None,
+    designation_id: Optional[str] = None,
+    spoc: Optional[bool] = None,
+    decision_maker: Optional[bool] = None,
+    is_active: Optional[bool] = None,
+    search: Optional[str] = None,
+    page: int = 1,
+    limit: int = 50,
+    sort_by: str = "created_at",
+    sort_order: str = "desc",
+    current_user: User = Depends(get_current_user)
+):
+    await check_contact_access(current_user)
+    
+    # Build query
+    query = {"is_deleted": {"$ne": True}}
+    
+    if company_id:
+        query["company_id"] = company_id
+    if designation_id:
+        query["designation_id"] = designation_id
+    if spoc is not None:
+        query["spoc"] = spoc
+    if decision_maker is not None:
+        query["decision_maker"] = decision_maker
+    if is_active is not None:
+        query["is_active"] = is_active
+    
+    # Search functionality
+    if search:
+        search_pattern = {"$regex": search, "$options": "i"}
+        query["$or"] = [
+            {"first_name": search_pattern},
+            {"last_name": search_pattern},
+            {"email": search_pattern}
+        ]
+    
+    # Calculate pagination
+    skip = (page - 1) * limit
+    
+    # Get total count
+    total = await db.contacts.count_documents(query)
+    
+    # Get contacts with sorting
+    sort_direction = 1 if sort_order == "asc" else -1
+    contacts = await db.contacts.find(query).sort(sort_by, sort_direction).skip(skip).limit(limit).to_list(None)
+    
+    return {
+        "contacts": [prepare_for_json(c) for c in contacts],
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "total_pages": (total + limit - 1) // limit
+    }
+
+@api_router.get("/contacts/{contact_id}")
+async def get_contact(contact_id: str, current_user: User = Depends(get_current_user)):
+    await check_contact_access(current_user)
+    
+    contact = await db.contacts.find_one({"id": contact_id, "is_deleted": {"$ne": True}})
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    
+    return prepare_for_json(contact)
+
+@api_router.post("/contacts")
+async def create_contact(contact_data: ContactCreate, current_user: User = Depends(get_current_user)):
+    await check_contact_access(current_user)
+    
+    # Check email uniqueness
+    existing_email = await db.contacts.find_one({
+        "email": {"$regex": f"^{contact_data.email}$", "$options": "i"},
+        "is_deleted": {"$ne": True}
+    })
+    if existing_email:
+        raise HTTPException(status_code=400, detail="Email already in use.")
+    
+    # Check SPOC uniqueness per company
+    if contact_data.spoc:
+        existing_spoc = await db.contacts.find_one({
+            "company_id": contact_data.company_id,
+            "spoc": True,
+            "is_deleted": {"$ne": True}
+        })
+        if existing_spoc:
+            raise HTTPException(status_code=400, detail="Another contact is already SPOC for this company.")
+    
+    # Detect potential duplicates
+    duplicates = await detect_duplicate_contacts(contact_data)
+    if duplicates:
+        raise HTTPException(status_code=400, detail="Possible duplicate contact detected. Review and confirm.")
+    
+    # Verify company exists
+    company = await db.companies.find_one({"id": contact_data.company_id, "is_active": True})
+    if not company:
+        raise HTTPException(status_code=400, detail="Company not found or inactive")
+    
+    try:
+        # Create contact
+        contact_dict = {
+            **contact_data.dict(),
+            "id": str(uuid.uuid4()),
+            "created_by": current_user.id,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
+            "is_active": True,
+            "is_deleted": False
+        }
+        
+        await db.contacts.insert_one(contact_dict)
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="CREATE",
+            resource_type="Contact",
+            resource_id=contact_dict["id"],
+            details=f"Created contact: {contact_dict['first_name']} {contact_dict.get('last_name', '')} ({contact_dict['email']})"
+        )
+        
+        return prepare_for_json(contact_dict)
+        
+    except Exception as e:
+        logger.error(f"Failed to create contact: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to save contact. Try again.")
+
+@api_router.put("/contacts/{contact_id}")
+async def update_contact(
+    contact_id: str, 
+    contact_data: ContactUpdate, 
+    force_spoc_update: bool = False,
+    current_user: User = Depends(get_current_user)
+):
+    await check_contact_access(current_user)
+    
+    # Check if contact exists
+    existing_contact = await db.contacts.find_one({"id": contact_id, "is_deleted": {"$ne": True}})
+    if not existing_contact:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    
+    # Prepare update data (only include non-None values)
+    update_data = {k: v for k, v in contact_data.dict().items() if v is not None}
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No data provided for update")
+    
+    # Check email uniqueness if email is being updated
+    if "email" in update_data:
+        existing_email = await db.contacts.find_one({
+            "email": {"$regex": f"^{update_data['email']}$", "$options": "i"},
+            "id": {"$ne": contact_id},
+            "is_deleted": {"$ne": True}
+        })
+        if existing_email:
+            raise HTTPException(status_code=400, detail="Email already in use.")
+    
+    # Check SPOC uniqueness if SPOC is being set to True
+    if "spoc" in update_data and update_data["spoc"]:
+        company_id = update_data.get("company_id", existing_contact["company_id"])
+        existing_spoc = await db.contacts.find_one({
+            "company_id": company_id,
+            "spoc": True,
+            "id": {"$ne": contact_id},
+            "is_deleted": {"$ne": True}
+        })
+        
+        if existing_spoc and not force_spoc_update:
+            raise HTTPException(
+                status_code=409, 
+                detail={
+                    "message": "Another contact is already SPOC for this company.",
+                    "existing_spoc": prepare_for_json(existing_spoc),
+                    "requires_confirmation": True
+                }
+            )
+        elif existing_spoc and force_spoc_update:
+            # Remove SPOC status from existing contact
+            await db.contacts.update_one(
+                {"id": existing_spoc["id"]},
+                {"$set": {"spoc": False, "updated_at": datetime.now(timezone.utc)}}
+            )
+    
+    # Detect potential duplicates if key fields are being updated
+    if any(field in update_data for field in ["email", "first_name", "company_id"]):
+        # Create a merged data object for duplicate detection
+        merged_data = {**existing_contact, **update_data}
+        contact_create_data = ContactCreate(**{k: v for k, v in merged_data.items() if k in ContactCreate.__fields__})
+        
+        duplicates = await detect_duplicate_contacts(contact_create_data, exclude_id=contact_id)
+        if duplicates:
+            raise HTTPException(status_code=400, detail="Possible duplicate contact detected. Review and confirm.")
+    
+    try:
+        # Update contact
+        update_data["updated_at"] = datetime.now(timezone.utc)
+        
+        await db.contacts.update_one(
+            {"id": contact_id},
+            {"$set": update_data}
+        )
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="UPDATE",
+            resource_type="Contact",
+            resource_id=contact_id,
+            details=f"Updated contact: {existing_contact['first_name']} {existing_contact.get('last_name', '')} ({existing_contact['email']})"
+        )
+        
+        # Get updated contact
+        updated_contact = await db.contacts.find_one({"id": contact_id})
+        return prepare_for_json(updated_contact)
+        
+    except Exception as e:
+        logger.error(f"Failed to update contact: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to save contact. Try again.")
+
+@api_router.delete("/contacts/{contact_id}")
+async def delete_contact(contact_id: str, current_user: User = Depends(get_current_user)):
+    await check_contact_access(current_user)
+    
+    # Check if contact exists
+    contact = await db.contacts.find_one({"id": contact_id, "is_deleted": {"$ne": True}})
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    
+    try:
+        # Soft delete - mark as deleted
+        await db.contacts.update_one(
+            {"id": contact_id},
+            {
+                "$set": {
+                    "is_deleted": True,
+                    "deleted_at": datetime.now(timezone.utc),
+                    "updated_at": datetime.now(timezone.utc)
+                }
+            }
+        )
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="DELETE",
+            resource_type="Contact",
+            resource_id=contact_id,
+            details=f"Deleted contact: {contact['first_name']} {contact.get('last_name', '')} ({contact['email']})"
+        )
+        
+        return {"message": "Contact deleted successfully"}
+        
+    except Exception as e:
+        logger.error(f"Failed to delete contact: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete contact. Try again.")
+
+@api_router.post("/contacts/bulk")
+async def bulk_update_contacts(bulk_data: ContactBulkUpdate, current_user: User = Depends(get_current_user)):
+    await check_contact_access(current_user)
+    
+    if not bulk_data.contact_ids:
+        raise HTTPException(status_code=400, detail="No contacts selected")
+    
+    try:
+        # Prepare update based on action
+        if bulk_data.action == "activate":
+            update_data = {"is_active": True}
+        elif bulk_data.action == "deactivate":
+            update_data = {"is_active": False}
+        else:
+            raise HTTPException(status_code=400, detail="Invalid action")
+        
+        update_data["updated_at"] = datetime.now(timezone.utc)
+        
+        # Update contacts
+        result = await db.contacts.update_many(
+            {
+                "id": {"$in": bulk_data.contact_ids},
+                "is_deleted": {"$ne": True}
+            },
+            {"$set": update_data}
+        )
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="BULK_UPDATE",
+            resource_type="Contact",
+            resource_id=",".join(bulk_data.contact_ids),
+            details=f"Bulk {bulk_data.action} on {result.modified_count} contacts"
+        )
+        
+        return {
+            "message": f"Successfully {bulk_data.action}d {result.modified_count} contacts",
+            "updated_count": result.modified_count
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to bulk update contacts: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update contacts. Try again.")
+
+@api_router.get("/contacts/export")
+async def export_contacts(
+    company_id: Optional[str] = None,
+    designation_id: Optional[str] = None,
+    spoc: Optional[bool] = None,
+    decision_maker: Optional[bool] = None,
+    is_active: Optional[bool] = None,
+    current_user: User = Depends(get_current_user)
+):
+    await check_contact_access(current_user)
+    
+    # Check export permission
+    user_permissions = await get_user_permissions(current_user.id)
+    has_export = any(
+        p.get("module") == "Sales" and p.get("menu") == "Contacts" and p.get("permission") == "Export"
+        for p in user_permissions
+    )
+    if not has_export:
+        raise HTTPException(status_code=403, detail="Export permission required")
+    
+    # Build query (same as get_contacts)
+    query = {"is_deleted": {"$ne": True}}
+    
+    if company_id:
+        query["company_id"] = company_id
+    if designation_id:
+        query["designation_id"] = designation_id
+    if spoc is not None:
+        query["spoc"] = spoc
+    if decision_maker is not None:
+        query["decision_maker"] = decision_maker
+    if is_active is not None:
+        query["is_active"] = is_active
+    
+    contacts = await db.contacts.find(query).to_list(None)
+    return [prepare_for_json(c) for c in contacts]
+
 # Include router after all endpoints are defined
 app.include_router(api_router)
