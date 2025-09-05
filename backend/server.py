@@ -1524,6 +1524,11 @@ async def startup_event():
         if not admin_user:
             await initialize_rbac_system()
             logger.info("RBAC system initialized with default admin user: admin/admin123")
+        
+        # Always check and initialize company master data
+        if await db.company_types.count_documents({}) == 0:
+            await initialize_company_master_data()
+            logger.info("Company master data initialized")
             
     except Exception as e:
         logger.error(f"Startup error: {e}")
