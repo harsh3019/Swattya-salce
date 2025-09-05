@@ -400,9 +400,22 @@ const CompanyRegistration = () => {
         <Card>
           <CardContent className="pt-6 text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-green-700 mb-2">Registration Successful!</h2>
-            <p className="text-gray-600 mb-4">Company has been registered successfully.</p>
-            <Button onClick={() => window.location.reload()}>Register Another Company</Button>
+            <h2 className="text-2xl font-bold text-green-700 mb-2">
+              {isEditing ? 'Update Successful!' : 'Registration Successful!'}
+            </h2>
+            <p className="text-gray-600 mb-4">
+              Company has been {isEditing ? 'updated' : 'registered'} successfully.
+            </p>
+            <div className="space-x-4">
+              <Button onClick={() => navigate('/companies')}>
+                View Companies
+              </Button>
+              {!isEditing && (
+                <Button variant="outline" onClick={() => window.location.reload()}>
+                  Register Another Company
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
