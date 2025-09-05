@@ -91,6 +91,7 @@ export const Menus = () => {
         onAdd={crud.openCreateDialog}
         title="Menus"
         modulePath="/menus"
+        entityName="menus"
       />
 
       {/* Create/Edit Dialog */}
