@@ -258,9 +258,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "User CRUD Operations - Update functionality broken"
-  stuck_tasks: 
-    - "User CRUD Operations - Update functionality broken"
+    - "Company Registration Multi-Step Form Access"
+    - "Company Registration Step 1 - General Info"
+    - "Company Registration Step 2 - Location"
+    - "Company Registration Step 3 - Financials"
+    - "Company Registration Step 4 - Documents & Profile"
+    - "Company Registration Step 5 - Review & Submit"
+    - "Company Registration Form Features"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
