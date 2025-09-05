@@ -216,12 +216,15 @@ frontend:
     working: "NA"
     file: "frontend/src/components/CompanyRegistration.js"
     stuck_count: 0
-    priority: "high"
+    priority: "medium"
     needs_retesting: true
     status_history:
         - working: "NA"
           agent: "testing"
           comment: "Need to test Step 3 functionality: Annual revenue input, currency selection, 'Add Turnover' functionality with multi-year entries, 'Add Profit' functionality with multi-year entries, and form validation."
+        - working: "NA"
+          agent: "testing"
+          comment: "PARTIAL TESTING: Form structure for Step 3 verified - annual revenue input field present, 'Add Turnover' and 'Add Profit' buttons implemented and functional in UI. Dynamic field addition logic implemented using useFieldArray. However, full testing of step progression requires completing previous steps and backend API integration for currency data."
 
   - task: "Company Registration Step 4 - Documents & Profile"
     implemented: true
