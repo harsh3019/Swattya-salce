@@ -264,8 +264,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Permission Context Integration - Timing issues with 403 errors"
-  stuck_tasks: []
+    - "User CRUD Operations - Update functionality broken"
+  stuck_tasks: 
+    - "User CRUD Operations - Update functionality broken"
   test_all: false
   test_priority: "high_first"
 
