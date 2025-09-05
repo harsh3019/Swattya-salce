@@ -111,7 +111,10 @@ const useCRUD = (endpoint, schema) => {
 
   const form = useForm({
     resolver: zodResolver(schema),
-    defaultValues: {}
+    defaultValues: {
+      status: 'active',
+      is_active: true
+    }
   });
 
   const fetchData = async () => {
