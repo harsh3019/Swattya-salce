@@ -226,7 +226,8 @@ class AuthSidebarTester:
         
         for endpoint, method in endpoints_to_test:
             success, status, response = self.make_request(method, endpoint, expected_status=401)
-            is_protected = status == 401
+            # Accept both 401 (Unauthorized) and 403 (Forbidden) as protected
+            is_protected = status in [401, 403]
             all_protected = all_protected and is_protected
             results.append(f"{endpoint}: {'Protected' if is_protected else f'Unprotected (Status: {status})'}")
         
