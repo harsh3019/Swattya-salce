@@ -219,6 +219,9 @@ frontend:
         - working: false
           agent: "testing"
           comment: "CONFIRMED CRITICAL ISSUE (2025-01-27): Comprehensive testing with debug logging confirms form submission is completely broken. When Create button clicked: ❌ NO console logs appear (debug logs with 🔍 never triggered), ❌ NO API calls made to POST /api/users, ❌ NO handleSubmit function execution, ❌ NO createItem function calls, ❌ Dialog remains open indicating failure, ❌ No toast messages. The react-hook-form onSubmit handler is not being triggered at all. This is a complete form submission failure, not just an API issue. Root cause: Form submission logic is disconnected from the actual form element."
+        - working: false
+          agent: "testing"
+          comment: "ROOT CAUSE IDENTIFIED (2025-09-05): Enhanced debugging reveals exact issue! Form submission IS triggered (✅ '🔍 Form submit event triggered'), but validation FAILS on is_active field. Console shows: '❌ Form validation failed: {is_active: Object}'. The Switch component (lines 784-790 in UserManagement.js) incorrectly uses {...crud.form.register('is_active')} which doesn't work with Radix UI Switch components. Switch returns object instead of boolean, causing Zod schema validation failure. SOLUTION: Replace Switch registration with controlled component using onCheckedChange={(checked) => crud.form.setValue('is_active', checked)} and checked={crud.form.watch('is_active')} props."
 
   - task: "Masters CRUD Operations (Roles, Departments)"
     implemented: true
