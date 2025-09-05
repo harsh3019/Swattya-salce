@@ -14,7 +14,7 @@ import { Switch } from './ui/switch';
 import { Progress } from './ui/progress';
 import { Alert, AlertDescription } from './ui/alert';
 import { AlertCircle, Upload, Plus, Trash2, CheckCircle } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
