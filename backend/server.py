@@ -2114,6 +2114,7 @@ async def create_company(company_data: CompanyCreate, current_user: User = Depen
         "lead_status": lead_status,
         "valid_gst": company_data.valid_gst,
         "active_status": company_data.active_status,
+        "is_active": True,  # Add is_active for compatibility
         "parent_linkage_valid": company_data.parent_linkage_valid,
         "created_by": current_user.id,
         "id": str(uuid.uuid4()),
