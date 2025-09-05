@@ -2468,12 +2468,6 @@ async def check_contact_access(current_user: User):
         raise HTTPException(status_code=403, detail="Access denied. Permission required.")
     return True
 
-# Designation endpoints
-@api_router.get("/designations")
-async def get_designations(current_user: User = Depends(get_current_user)):
-    designations = await db.designations.find({"is_active": True}).to_list(None)
-    return [prepare_for_json(d) for d in designations]
-
 # Contact similarity matching for duplicate detection
 def calculate_contact_similarity(contact1: dict, contact2: dict) -> float:
     """Calculate similarity score between two contacts (0-1 scale)"""
