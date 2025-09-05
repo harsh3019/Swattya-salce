@@ -386,6 +386,54 @@ def parse_from_mongo(item: dict) -> dict:
         item['close_date'] = datetime.fromisoformat(item['close_date'])
     return item
 
+def prepare_for_json(data: dict) -> dict:
+    """Prepare data for JSON response by removing MongoDB ObjectId and converting dates"""
+    if data is None:
+        return None
+    
+    # Remove MongoDB ObjectId
+    data.pop('_id', None)
+    
+    # Parse from MongoDB format
+    return parse_from_mongo(data)
+
+async def log_audit_trail(user_id: str, action: str, resource_type: str, resource_id: str, details: str):
+    """Log audit trail for important actions"""
+    await log_activity("audit", resource_type.lower(), action.lower(), "success", user_id, {
+        "resource_type": resource_type,
+        "resource_id": resource_id,
+        "details": details
+    })
+
+async def get_user_permissions(user_id: str) -> List[Dict]:
+    """Get user permissions by user ID"""
+    user = await db.users.find_one({"id": user_id, "is_active": True})
+    if not user or not user.get("role_id"):
+        return []
+    
+    # Get all role permissions for this user
+    role_permissions = await db.role_permissions.find({
+        "role_id": user["role_id"],
+        "is_active": True
+    }).to_list(length=None)
+    
+    permissions = []
+    for rp in role_permissions:
+        # Get module, menu, and permission details
+        module = await db.modules.find_one({"id": rp["module_id"], "status": "active"})
+        menu = await db.menus.find_one({"id": rp["menu_id"]})
+        permission = await db.permissions.find_one({"id": rp["permission_id"], "status": "active"})
+        
+        if module and menu and permission:
+            permissions.append({
+                "module": module["name"],
+                "menu": menu["name"],
+                "permission": permission["name"],
+                "path": menu["path"]
+            })
+    
+    return permissions
+
 # ================ NAVIGATION ENDPOINTS ================
 
 @api_router.get("/nav/sidebar")
