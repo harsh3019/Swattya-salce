@@ -2063,7 +2063,7 @@ async def create_company(company_data: CompanyCreate, current_user: User = Depen
     # Check for duplicates
     existing = await db.companies.find_one({
         "$or": [
-            {"company_name": company_data.name},
+            {"company_name": company_data.company_name},
             {"gst_number": company_data.gst_number} if company_data.gst_number else {},
             {"pan_number": company_data.pan_number} if company_data.pan_number else {},
         ]
