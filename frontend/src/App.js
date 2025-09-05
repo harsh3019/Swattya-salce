@@ -508,6 +508,21 @@ function App() {
               } />
               <Route path="/contacts" element={
                 <ProtectedRoute>
+                  <ContactList />
+                </ProtectedRoute>
+              } />
+              <Route path="/contacts/add" element={
+                <ProtectedRoute>
+                  <ContactForm />
+                </ProtectedRoute>
+              } />
+              <Route path="/contacts/edit/:id" element={
+                <ProtectedRoute>
+                  <ContactForm />
+                </ProtectedRoute>
+              } />
+              <Route path="/contacts" element={
+                <ProtectedRoute>
                   <ContactsPage />
                 </ProtectedRoute>
               } />
