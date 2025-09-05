@@ -274,7 +274,7 @@ class CompanyRegistrationTester:
         if domestic_company_no_gst_pan:
             domestic_company_no_gst_pan['gst_number'] = None
             domestic_company_no_gst_pan['pan_number'] = None
-            domestic_company_no_gst_pan['name'] = f"Test No GST PAN {datetime.now().strftime('%H%M%S')}"
+            domestic_company_no_gst_pan['company_name'] = f"Test No GST PAN {datetime.now().strftime('%H%M%S')}"
             
             success, status, response = self.make_request('POST', 'companies', domestic_company_no_gst_pan, 400)
             test_passed = self.log_test("India GST/PAN Validation", success, 
