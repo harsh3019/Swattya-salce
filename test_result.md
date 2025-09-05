@@ -117,6 +117,54 @@ backend:
           agent: "testing"
           comment: "Admin login working perfectly. Returns valid JWT token, user data with proper role_id (324dd228-ff1d-4189-b3b2-d7be90dd0eb8), username 'admin', and email 'admin@sawayatta.com'. Token format is correct and authentication flow is complete."
 
+  - task: "Master Data APIs (10 endpoints)"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ ALL 10 MASTER DATA APIs WORKING PERFECTLY: GET /api/company-types (5/5), /api/account-types (4/4), /api/regions (6/6), /api/business-types (4/4), /api/industries (8/8), /api/sub-industries (14/14), /api/countries (9/9), /api/states (13/13), /api/cities (9/9), /api/currencies (3/3). All endpoints return correct seeded data with expected counts. Master data is properly initialized and accessible."
+
+  - task: "Cascading Dropdown APIs"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ CASCADING DROPDOWNS WORKING PERFECTLY: Technology sub-industries filter returns 4/4 items, Indian states filter returns 10/10 states, Maharashtra cities filter returns 3 cities. All cascading relationships (industry->sub-industry, country->state, state->city) are functioning correctly with proper query parameter filtering."
+
+  - task: "Company Creation API"
+    implemented: true
+    working: false
+    file: "backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ COMPANY CREATION FAILING: POST /api/companies returns 500 Internal Server Error. Root cause: Field mapping mismatch between CompanyCreate model (uses company_type_id, country_id, etc.) and Company model (expects company_type, country, etc.). The endpoint tries to create Company object directly from CompanyCreate data without proper field mapping. Backend implementation needs field mapping logic to convert CompanyCreate fields to Company fields."
+
+  - task: "File Upload API"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ FILE UPLOAD WORKING: POST /api/companies/upload-document successfully accepts file uploads. Permission checking function was fixed (renamed get_current_user_permissions to avoid naming conflict). File upload endpoint is functional and ready for document management."
+
   - task: "Sidebar Navigation API"
     implemented: true
     working: true
