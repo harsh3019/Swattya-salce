@@ -1649,3 +1649,385 @@ async def initialize_rbac_system():
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+# ================ COMPANY REGISTRATION MODELS ================
+
+class CompanyType(BaseAuditModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    is_active: bool = True
+
+class AccountType(BaseAuditModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    is_active: bool = True
+
+class Region(BaseAuditModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    is_active: bool = True
+
+class BusinessType(BaseAuditModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    is_active: bool = True
+
+class Industry(BaseAuditModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    is_active: bool = True
+
+class SubIndustry(BaseAuditModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    industry_id: str
+    is_active: bool = True
+
+class Country(BaseAuditModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    code: str = Field(..., min_length=2, max_length=3)
+    is_active: bool = True
+
+class State(BaseAuditModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    country_id: str
+    is_active: bool = True
+
+class City(BaseAuditModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    state_id: str
+    is_active: bool = True
+
+class Currency(BaseAuditModel):
+    code: str = Field(..., min_length=3, max_length=3)
+    name: str = Field(..., min_length=2, max_length=100)
+    symbol: str = Field(..., max_length=5)
+    is_active: bool = True
+
+class CompanyTurnover(BaseModel):
+    year: int = Field(..., ge=2000, le=2030)
+    revenue: float = Field(..., ge=0)
+    currency: str = Field(..., min_length=3, max_length=3)
+
+class CompanyProfit(BaseModel):
+    year: int = Field(..., ge=2000, le=2030)
+    profit: float
+    currency: str = Field(..., min_length=3, max_length=3)
+
+class CompanyDocument(BaseModel):
+    filename: str
+    original_filename: str
+    file_path: str
+    file_size: int
+    mime_type: str
+    uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Company(BaseAuditModel):
+    # General Info
+    name: str = Field(..., min_length=3, max_length=100)
+    domestic_international: str = Field(..., regex=r"^(Domestic|International)$")
+    gst_number: Optional[str] = Field(None, max_length=15)
+    pan_number: Optional[str] = Field(None, max_length=10)
+    vat_number: Optional[str] = Field(None, max_length=20)
+    company_type_id: str
+    account_type_id: str
+    region_id: str
+    business_type_id: str
+    industry_id: str
+    sub_industry_id: str
+    website: Optional[str] = None
+    is_child: bool = False
+    parent_company_id: Optional[str] = None
+    employee_count: int = Field(..., ge=1)
+    
+    # Location
+    address: str = Field(..., min_length=10, max_length=500)
+    country_id: str
+    state_id: str
+    city_id: str
+    
+    # Financials
+    turnover: List[CompanyTurnover] = []
+    profit: List[CompanyProfit] = []
+    annual_revenue: float = Field(..., ge=0)
+    revenue_currency: str = Field(..., min_length=3, max_length=3)
+    
+    # Documents & Profile
+    company_profile: Optional[str] = None
+    documents: List[CompanyDocument] = []
+    
+    # Scoring & Lead Status
+    score: int = Field(default=0, ge=0, le=100)
+    lead_status: str = Field(default="cold", regex=r"^(hot|cold)$")
+    
+    # Checklist validation
+    valid_gst: bool = False
+    active_status: bool = True
+    parent_linkage_valid: bool = True
+
+class CompanyCreate(BaseModel):
+    # General Info
+    name: str = Field(..., min_length=3, max_length=100)
+    domestic_international: str = Field(..., regex=r"^(Domestic|International)$")
+    gst_number: Optional[str] = Field(None, max_length=15)
+    pan_number: Optional[str] = Field(None, max_length=10)
+    vat_number: Optional[str] = Field(None, max_length=20)
+    company_type_id: str
+    account_type_id: str
+    region_id: str
+    business_type_id: str
+    industry_id: str
+    sub_industry_id: str
+    website: Optional[str] = None
+    is_child: bool = False
+    parent_company_id: Optional[str] = None
+    employee_count: int = Field(..., ge=1)
+    
+    # Location
+    address: str = Field(..., min_length=10, max_length=500)
+    country_id: str
+    state_id: str
+    city_id: str
+    
+    # Financials
+    turnover: List[CompanyTurnover] = []
+    profit: List[CompanyProfit] = []
+    annual_revenue: float = Field(..., ge=0)
+    revenue_currency: str = Field(..., min_length=3, max_length=3)
+    
+    # Documents & Profile
+    company_profile: Optional[str] = None
+    
+    # Checklist validation
+    valid_gst: bool = False
+    active_status: bool = True
+    parent_linkage_valid: bool = True
+
+# ================ COMPANY REGISTRATION ENDPOINTS ================
+
+# Master data endpoints
+@api_router.get("/company-types")
+async def get_company_types(current_user: User = Depends(get_current_user)):
+    types = await db.company_types.find({"is_active": True}).to_list(None)
+    return [prepare_for_json(t) for t in types]
+
+@api_router.get("/account-types")
+async def get_account_types(current_user: User = Depends(get_current_user)):
+    types = await db.account_types.find({"is_active": True}).to_list(None)
+    return [prepare_for_json(t) for t in types]
+
+@api_router.get("/regions")
+async def get_regions(current_user: User = Depends(get_current_user)):
+    regions = await db.regions.find({"is_active": True}).to_list(None)
+    return [prepare_for_json(r) for r in regions]
+
+@api_router.get("/business-types")
+async def get_business_types(current_user: User = Depends(get_current_user)):
+    types = await db.business_types.find({"is_active": True}).to_list(None)
+    return [prepare_for_json(t) for t in types]
+
+@api_router.get("/industries")
+async def get_industries(current_user: User = Depends(get_current_user)):
+    industries = await db.industries.find({"is_active": True}).to_list(None)
+    return [prepare_for_json(i) for i in industries]
+
+@api_router.get("/sub-industries")
+async def get_sub_industries(industry_id: Optional[str] = None, current_user: User = Depends(get_current_user)):
+    query = {"is_active": True}
+    if industry_id:
+        query["industry_id"] = industry_id
+    sub_industries = await db.sub_industries.find(query).to_list(None)
+    return [prepare_for_json(si) for si in sub_industries]
+
+@api_router.get("/countries")
+async def get_countries(current_user: User = Depends(get_current_user)):
+    countries = await db.countries.find({"is_active": True}).to_list(None)
+    return [prepare_for_json(c) for c in countries]
+
+@api_router.get("/states")
+async def get_states(country_id: Optional[str] = None, current_user: User = Depends(get_current_user)):
+    query = {"is_active": True}
+    if country_id:
+        query["country_id"] = country_id
+    states = await db.states.find(query).to_list(None)
+    return [prepare_for_json(s) for s in states]
+
+@api_router.get("/cities")
+async def get_cities(state_id: Optional[str] = None, current_user: User = Depends(get_current_user)):
+    query = {"is_active": True}
+    if state_id:
+        query["state_id"] = state_id
+    cities = await db.cities.find(query).to_list(None)
+    return [prepare_for_json(c) for c in cities]
+
+@api_router.get("/currencies")
+async def get_currencies(current_user: User = Depends(get_current_user)):
+    currencies = await db.currencies.find({"is_active": True}).to_list(None)
+    return [prepare_for_json(c) for c in currencies]
+
+# Company CRUD endpoints with RBAC
+async def check_company_access(current_user: User):
+    """Check if user has access to company operations (Admin or Sales Executive)"""
+    user_permissions = await get_user_permissions(current_user.id)
+    has_company_access = any(
+        p.get("module") == "Sales" and p.get("menu") == "Companies" and p.get("permission") in ["View", "Add", "Edit"]
+        for p in user_permissions
+    )
+    if not has_company_access:
+        raise HTTPException(status_code=403, detail="Access denied. Only Admins and Sales Executives can access companies.")
+    return True
+
+@api_router.get("/companies")
+async def get_companies(current_user: User = Depends(get_current_user)):
+    await check_company_access(current_user)
+    companies = await db.companies.find().to_list(None)
+    return [prepare_for_json(c) for c in companies]
+
+@api_router.get("/companies/{company_id}")
+async def get_company(company_id: str, current_user: User = Depends(get_current_user)):
+    await check_company_access(current_user)
+    company = await db.companies.find_one({"id": company_id})
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    return prepare_for_json(company)
+
+@api_router.post("/companies")
+async def create_company(company_data: CompanyCreate, current_user: User = Depends(get_current_user)):
+    await check_company_access(current_user)
+    
+    # Check for duplicates
+    existing = await db.companies.find_one({
+        "$or": [
+            {"name": company_data.name},
+            {"gst_number": company_data.gst_number} if company_data.gst_number else {},
+            {"pan_number": company_data.pan_number} if company_data.pan_number else {},
+        ]
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Company with this name, GST, or PAN already exists")
+    
+    # Validate India-specific requirements
+    if company_data.domestic_international == "Domestic":
+        if not company_data.gst_number and not company_data.pan_number:
+            raise HTTPException(status_code=400, detail="GST or PAN number is required for domestic companies")
+    
+    # Calculate score and lead status
+    score = await calculate_company_score(company_data)
+    lead_status = "hot" if score >= 70 else "cold"
+    
+    # Create company
+    company = Company(
+        **company_data.dict(),
+        score=score,
+        lead_status=lead_status,
+        created_by=current_user.id
+    )
+    
+    company_dict = prepare_for_mongo(company.dict())
+    company_dict.pop('_id', None)
+    await db.companies.insert_one(company_dict)
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="CREATE",
+        resource_type="Company",
+        resource_id=company.id,
+        details=f"Created company: {company.name}"
+    )
+    
+    # Log email notification attempt
+    logger.info(f"Email notification attempt: New company '{company.name}' created by {current_user.username}")
+    
+    return prepare_for_json(company.dict())
+
+async def calculate_company_score(company_data: CompanyCreate) -> int:
+    """Calculate company score based on various factors"""
+    score = 0
+    
+    # Industry score (40 points)
+    industry = await db.industries.find_one({"id": company_data.industry_id})
+    if industry:
+        # High-value industries get more points
+        high_value_industries = ["Technology", "Finance", "Healthcare", "Manufacturing"]
+        if industry.get("name") in high_value_industries:
+            score += 40
+        else:
+            score += 20
+    
+    # Sub-industry score (20 points)
+    sub_industry = await db.sub_industries.find_one({"id": company_data.sub_industry_id})
+    if sub_industry:
+        score += 20
+    
+    # Revenue score (25 points)
+    if company_data.annual_revenue >= 10000000:  # 10M+
+        score += 25
+    elif company_data.annual_revenue >= 1000000:  # 1M+
+        score += 15
+    elif company_data.annual_revenue >= 100000:  # 100K+
+        score += 10
+    else:
+        score += 5
+    
+    # Employee count score (15 points)
+    if company_data.employee_count >= 1000:
+        score += 15
+    elif company_data.employee_count >= 100:
+        score += 12
+    elif company_data.employee_count >= 50:
+        score += 8
+    else:
+        score += 5
+    
+    return min(score, 100)  # Cap at 100
+
+# File upload endpoint
+@api_router.post("/companies/upload-document")
+async def upload_company_document(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
+    await check_company_access(current_user)
+    
+    # Validate file
+    if file.size > 10 * 1024 * 1024:  # 10MB limit
+        raise HTTPException(status_code=400, detail="File size exceeds 10MB limit")
+    
+    allowed_types = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
+                     "image/png", "image/jpeg"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="File type not allowed. Only PDF, DOCX, PNG, JPG are supported")
+    
+    # Create uploads directory if it doesn't exist
+    upload_dir = Path("uploads/company_documents")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    file_id = str(uuid.uuid4())
+    file_extension = Path(file.filename).suffix
+    filename = f"{file_id}{file_extension}"
+    file_path = upload_dir / filename
+    
+    # Save file
+    with open(file_path, "wb") as buffer:
+        content = await file.read()
+        buffer.write(content)
+    
+    document = CompanyDocument(
+        filename=filename,
+        original_filename=file.filename,
+        file_path=str(file_path),
+        file_size=len(content),
+        mime_type=file.content_type
+    )
+    
+    return document.dict()
+
+# Export companies
+@api_router.get("/companies/export")
+async def export_companies(current_user: User = Depends(get_current_user)):
+    await check_company_access(current_user)
+    
+    # Check export permission
+    user_permissions = await get_user_permissions(current_user.id)
+    has_export = any(
+        p.get("module") == "Sales" and p.get("menu") == "Companies" and p.get("permission") == "Export"
+        for p in user_permissions
+    )
+    if not has_export:
+        raise HTTPException(status_code=403, detail="Export permission required")
+    
+    companies = await db.companies.find().to_list(None)
+    return [prepare_for_json(c) for c in companies]
