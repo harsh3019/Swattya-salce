@@ -2695,10 +2695,10 @@ class LeadProof(BaseModel):
 
 class Lead(BaseAuditModel):
     # Auto-generated Lead ID
-    lead_id: str = Field(..., regex=r'^LEAD-[A-Z0-9]{7}$')
+    lead_id: str = Field(..., pattern=r'^LEAD-[A-Z0-9]{7}$')
     
     # General Info
-    tender_type: str = Field(..., regex=r'^(Tender|Pre-Tender|Non-Tender)$')
+    tender_type: str = Field(..., pattern=r'^(Tender|Pre-Tender|Non-Tender)$')
     sub_tender_type_id: Optional[str] = None
     project_title: str = Field(..., min_length=2, max_length=200)
     company_id: str = Field(..., description="Reference to company")
@@ -2706,17 +2706,17 @@ class Lead(BaseAuditModel):
     partner_id: Optional[str] = None
     
     # Lead Details
-    lead_subtype: str = Field(..., regex=r'^(Direct|Referral)$')
+    lead_subtype: str = Field(..., pattern=r'^(Direct|Referral)$')
     source: str = Field(..., max_length=100)
     product_service_id: str = Field(..., description="Reference to product/service")
     is_enquiry: Optional[bool] = Field(default=False)
-    billing_type: Optional[str] = Field(None, regex=r'^(Prepaid|Postpaid)$')
+    billing_type: Optional[str] = Field(None, pattern=r'^(Prepaid|Postpaid)$')
     expected_orc: Optional[float] = Field(None, ge=0)
     revenue: Optional[float] = Field(None, ge=0)
     competitors: Optional[str] = Field(None, max_length=500)
-    status: str = Field(default="New", regex=r'^(New|Nurturing|Converted)$')
+    status: str = Field(default="New", pattern=r'^(New|Nurturing|Converted)$')
     lead_owner: str = Field(..., description="User ID of lead owner")
-    approval_status: str = Field(default="Pending", regex=r'^(Pending|Approved|Rejected|Escalated)$')
+    approval_status: str = Field(default="Pending", pattern=r'^(Pending|Approved|Rejected|Escalated)$')
     
     # Proofs & Documents
     proofs: List[LeadProof] = []
