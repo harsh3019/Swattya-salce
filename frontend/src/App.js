@@ -17,6 +17,8 @@ import CompanyRegistration from './components/CompanyRegistration';
 import { CompanyList } from './components/CompanyList';
 import ContactForm from './components/ContactForm';
 import { ContactList } from './components/ContactList';
+import ProductServicesList from './components/ProductServicesList';
+import SubTenderTypesList from './components/SubTenderTypesList';
 
 // Import new RBAC components
 import DynamicSidebar from './components/DynamicSidebar';
