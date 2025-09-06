@@ -1838,42 +1838,33 @@ async def initialize_lead_master_data():
     
     logger.info("Initializing Lead Management master data...")
     
-    # Lead Sources
-    lead_sources = [
-        {"id": str(uuid.uuid4()), "name": "Website", "description": "Leads from company website", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Social Media", "description": "Leads from social media platforms", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Email Campaign", "description": "Leads from email marketing campaigns", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Cold Calling", "description": "Leads from cold calling activities", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Referral", "description": "Leads from customer referrals", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Trade Show", "description": "Leads from trade shows and events", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Partner", "description": "Leads from business partners", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Advertisement", "description": "Leads from online/offline advertisements", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    # Product & Services Master Data
+    product_services = [
+        {"id": str(uuid.uuid4()), "name": "Software Development", "description": "Custom software development services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Web Development", "description": "Website and web application development", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Mobile App Development", "description": "iOS and Android mobile application development", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Cloud Services", "description": "Cloud infrastructure and migration services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Digital Marketing", "description": "SEO, SEM, and digital marketing services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Data Analytics", "description": "Business intelligence and data analytics", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Cybersecurity", "description": "Information security and cybersecurity services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "AI/ML Solutions", "description": "Artificial Intelligence and Machine Learning solutions", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "IT Consulting", "description": "Technology consulting and advisory services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "System Integration", "description": "Enterprise system integration services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
     ]
-    await db.lead_sources.insert_many(lead_sources)
+    await db.product_services.insert_many(product_services)
     
-    # Lead Statuses
-    lead_statuses = [
-        {"id": str(uuid.uuid4()), "name": "New", "description": "Newly created lead", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Contacted", "description": "Initial contact made", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Qualified", "description": "Lead has been qualified", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Proposal Sent", "description": "Proposal has been sent", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Negotiation", "description": "In negotiation phase", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Won", "description": "Lead converted to customer", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Lost", "description": "Lead lost to competitor or rejected", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "On Hold", "description": "Lead is on hold", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    # Sub-Tender Types Master Data
+    sub_tender_types = [
+        {"id": str(uuid.uuid4()), "name": "Government - Central", "description": "Central government tenders and contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Government - State", "description": "State government tenders and contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Government - Municipal", "description": "Municipal and local government tenders", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Government - PSU", "description": "Public Sector Undertaking tenders", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Private - Enterprise", "description": "Large private enterprise contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Private - SME", "description": "Small and Medium Enterprise contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Private - Startup", "description": "Startup and emerging company contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Private - International", "description": "International private sector contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
     ]
-    await db.lead_statuses.insert_many(lead_statuses)
-    
-    # Opportunity Stages
-    opportunity_stages = [
-        {"id": str(uuid.uuid4()), "name": "Qualification", "description": "Initial qualification stage", "probability": 10, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Needs Analysis", "description": "Understanding customer needs", "probability": 25, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Proposal", "description": "Proposal preparation and submission", "probability": 50, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Negotiation", "description": "Price and terms negotiation", "probability": 75, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Closed Won", "description": "Successfully closed deal", "probability": 100, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Closed Lost", "description": "Lost the opportunity", "probability": 0, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-    ]
-    await db.opportunity_stages.insert_many(opportunity_stages)
+    await db.sub_tender_types.insert_many(sub_tender_types)
     
     logger.info("Lead Management master data initialized successfully")
 
