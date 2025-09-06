@@ -198,12 +198,19 @@ export const LeadForm = () => {
   };
 
   const handleNext = async (data) => {
+    console.log('Form step data:', data);
+    console.log('Current step:', currentStep);
+    console.log('Form errors:', errors);
+    
     const updatedData = { ...formData, ...data };
     setFormData(updatedData);
     
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     } else {
+      console.log('Attempting final submission with data:', updatedData);
+      console.log('Checklist completed:', checklistItems.every(item => item.checked));
+      console.log('Checklist items:', checklistItems);
       await handleFinalSubmit(updatedData);
     }
   };
