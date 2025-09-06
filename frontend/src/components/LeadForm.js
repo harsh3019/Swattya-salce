@@ -669,7 +669,16 @@ export const LeadForm = () => {
           <Alert className="border-amber-200 bg-amber-50">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
             <AlertDescription className="text-amber-800">
-              Please complete all checklist items to proceed with submission.
+              <strong>Action Required:</strong> Please check all {checklistItems.filter(item => !item.checked).length} remaining checklist items to enable form submission.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {checklistItems.every(item => item.checked) && (
+          <Alert className="border-green-200 bg-green-50">
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              <strong>Ready to Submit:</strong> All checklist items completed. You can now submit the lead.
             </AlertDescription>
           </Alert>
         )}
