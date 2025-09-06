@@ -469,7 +469,7 @@ export const LeadForm = () => {
                 <SelectValue placeholder="Select product/service (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="none">None</SelectItem>
                 {productServices.map(service => (
                   <SelectItem key={service.id} value={service.id}>{service.name}</SelectItem>
                 ))}
