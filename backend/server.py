@@ -2998,6 +2998,436 @@ async def get_lead(lead_id: str, current_user: User = Depends(get_current_user))
     
     return prepare_for_json(lead)
 
+@api_router.post("/leads")
+async def create_lead(lead_data: LeadCreate, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    
+    # Generate unique Lead ID
+    lead_id = await generate_lead_id()
+    
+    # Validate tender type logic
+    if lead_data.tender_type in ["Tender", "Pre-Tender"]:
+        if not lead_data.sub_tender_type_id:
+            raise HTTPException(status_code=400, detail="Sub-Tender Type required for Tender and Pre-Tender leads")
+        if not lead_data.billing_type:
+            raise HTTPException(status_code=400, detail="Billing Type required for Tender and Pre-Tender leads")
+        if not lead_data.expected_orc:
+            raise HTTPException(status_code=400, detail="Expected ORC required for Tender and Pre-Tender leads")
+    
+    # Verify related entities exist
+    company = await db.companies.find_one({
+        "id": lead_data.company_id, 
+        "$or": [{"is_active": True}, {"active_status": True}]
+    })
+    if not company:
+        raise HTTPException(status_code=400, detail="Invalid company")
+    
+    if lead_data.partner_id:
+        partner = await db.partners.find_one({"id": lead_data.partner_id, "is_active": True})
+        if not partner:
+            raise HTTPException(status_code=400, detail="Invalid partner")
+    
+    product_service = await db.product_services.find_one({"id": lead_data.product_service_id, "is_active": True})
+    if not product_service:
+        raise HTTPException(status_code=400, detail="Invalid product/service")
+    
+    if lead_data.sub_tender_type_id:
+        sub_tender = await db.sub_tender_types.find_one({"id": lead_data.sub_tender_type_id, "is_active": True})
+        if not sub_tender:
+            raise HTTPException(status_code=400, detail="Invalid sub-tender type")
+    
+    # Check for conflicts (same project + company)
+    existing_lead = await db.leads.find_one({
+        "project_title": {"$regex": f"^{lead_data.project_title}$", "$options": "i"},
+        "company_id": lead_data.company_id,
+        "is_deleted": {"$ne": True}
+    })
+    if existing_lead:
+        raise HTTPException(status_code=409, detail="Lead conflict detected. Escalated for review.")
+    
+    # Validate checklist completion
+    if not lead_data.checklist_completed:
+        raise HTTPException(status_code=400, detail="Complete all checklist items to proceed")
+    
+    try:
+        lead_dict = {
+            **lead_data.dict(),
+            "lead_id": lead_id,
+            "id": str(uuid.uuid4()),
+            "proofs": [],
+            "documents": [],
+            "converted_to_opportunity": False,
+            "created_by": current_user.id,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
+            "is_active": True,
+            "is_deleted": False
+        }
+        
+        await db.leads.insert_one(lead_dict)
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="CREATE",
+            resource_type="Lead",
+            resource_id=lead_dict["id"],
+            details=f"Created lead: {lead_dict['lead_id']} - {lead_dict['project_title']}"
+        )
+        
+        # Log email notification attempt
+        logger.info(f"Email notification attempt: New lead '{lead_dict['lead_id']}' created by {current_user.username}")
+        
+        return prepare_for_json(lead_dict)
+        
+    except Exception as e:
+        logger.error(f"Failed to create lead: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to create lead")
+
+@api_router.put("/leads/{lead_id}")
+async def update_lead(
+    lead_id: str, 
+    lead_data: LeadUpdate, 
+    current_user: User = Depends(get_current_user)
+):
+    await check_lead_access(current_user)
+    
+    # Check if lead exists
+    existing_lead = await db.leads.find_one({"id": lead_id, "is_deleted": {"$ne": True}})
+    if not existing_lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    
+    # Check if lead is approved - approved leads cannot be edited
+    if existing_lead.get("approval_status") == "Approved":
+        raise HTTPException(status_code=400, detail="Approved leads cannot be edited")
+    
+    # Prepare update data (only include non-None values)
+    update_data = {k: v for k, v in lead_data.dict().items() if v is not None}
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No data provided for update")
+    
+    # Validate tender type logic if being updated
+    if "tender_type" in update_data or "sub_tender_type_id" in update_data:
+        tender_type = update_data.get("tender_type", existing_lead.get("tender_type"))
+        sub_tender_type_id = update_data.get("sub_tender_type_id", existing_lead.get("sub_tender_type_id"))
+        billing_type = update_data.get("billing_type", existing_lead.get("billing_type"))
+        expected_orc = update_data.get("expected_orc", existing_lead.get("expected_orc"))
+        
+        if tender_type in ["Tender", "Pre-Tender"]:
+            if not sub_tender_type_id:
+                raise HTTPException(status_code=400, detail="Sub-Tender Type required for Tender and Pre-Tender leads")
+            if not billing_type:
+                raise HTTPException(status_code=400, detail="Billing Type required for Tender and Pre-Tender leads")
+            if not expected_orc:
+                raise HTTPException(status_code=400, detail="Expected ORC required for Tender and Pre-Tender leads")
+    
+    # Validate related entities if being updated
+    if "company_id" in update_data:
+        company = await db.companies.find_one({
+            "id": update_data["company_id"], 
+            "$or": [{"is_active": True}, {"active_status": True}]
+        })
+        if not company:
+            raise HTTPException(status_code=400, detail="Invalid company")
+    
+    if "partner_id" in update_data and update_data["partner_id"]:
+        partner = await db.partners.find_one({"id": update_data["partner_id"], "is_active": True})
+        if not partner:
+            raise HTTPException(status_code=400, detail="Invalid partner")
+    
+    if "product_service_id" in update_data:
+        product_service = await db.product_services.find_one({"id": update_data["product_service_id"], "is_active": True})
+        if not product_service:
+            raise HTTPException(status_code=400, detail="Invalid product/service")
+    
+    if "sub_tender_type_id" in update_data and update_data["sub_tender_type_id"]:
+        sub_tender = await db.sub_tender_types.find_one({"id": update_data["sub_tender_type_id"], "is_active": True})
+        if not sub_tender:
+            raise HTTPException(status_code=400, detail="Invalid sub-tender type")
+    
+    try:
+        update_data["updated_at"] = datetime.now(timezone.utc)
+        
+        await db.leads.update_one(
+            {"id": lead_id},
+            {"$set": update_data}
+        )
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="UPDATE",
+            resource_type="Lead",
+            resource_id=lead_id,
+            details=f"Updated lead: {existing_lead['lead_id']} - {existing_lead['project_title']}"
+        )
+        
+        # Get updated lead
+        updated_lead = await db.leads.find_one({"id": lead_id})
+        return prepare_for_json(updated_lead)
+        
+    except Exception as e:
+        logger.error(f"Failed to update lead: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update lead")
+
+@api_router.delete("/leads/{lead_id}")
+async def delete_lead(lead_id: str, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    
+    # Check if lead exists
+    lead = await db.leads.find_one({"id": lead_id, "is_deleted": {"$ne": True}})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    
+    try:
+        # Soft delete
+        await db.leads.update_one(
+            {"id": lead_id},
+            {
+                "$set": {
+                    "is_deleted": True,
+                    "deleted_at": datetime.now(timezone.utc),
+                    "updated_at": datetime.now(timezone.utc)
+                }
+            }
+        )
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="DELETE",
+            resource_type="Lead",
+            resource_id=lead_id,
+            details=f"Deleted lead: {lead['lead_id']} - {lead['project_title']}"
+        )
+        
+        return {"message": "Lead deleted successfully"}
+        
+    except Exception as e:
+        logger.error(f"Failed to delete lead: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete lead")
+
+# Lead nurturing and conversion
+@api_router.post("/leads/{lead_id}/nurture")
+async def nurture_lead(lead_id: str, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    
+    # Check if lead exists
+    lead = await db.leads.find_one({"id": lead_id, "is_deleted": {"$ne": True}})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    
+    try:
+        # Update status to Nurturing
+        await db.leads.update_one(
+            {"id": lead_id},
+            {
+                "$set": {
+                    "status": "Nurturing",
+                    "updated_at": datetime.now(timezone.utc)
+                }
+            }
+        )
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="NURTURE",
+            resource_type="Lead",
+            resource_id=lead_id,
+            details=f"Nurtured lead: {lead['lead_id']} - {lead['project_title']}"
+        )
+        
+        # Log email notification attempt
+        logger.info(f"Email notification attempt: Lead '{lead['lead_id']}' nurtured by {current_user.username}")
+        
+        return {"message": "Lead status updated to Nurturing"}
+        
+    except Exception as e:
+        logger.error(f"Failed to nurture lead: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to nurture lead")
+
+@api_router.post("/leads/{lead_id}/convert")
+async def convert_lead_to_opportunity(
+    lead_id: str, 
+    opportunity_date: datetime,
+    current_user: User = Depends(get_current_user)
+):
+    await check_lead_access(current_user)
+    
+    # Check if lead exists
+    lead = await db.leads.find_one({"id": lead_id, "is_deleted": {"$ne": True}})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    
+    # Check if lead is approved
+    if lead.get("approval_status") != "Approved":
+        raise HTTPException(status_code=400, detail="Only approved leads can be converted to opportunities")
+    
+    # Check if already converted
+    if lead.get("converted_to_opportunity"):
+        raise HTTPException(status_code=400, detail="Lead already converted to opportunity")
+    
+    if not opportunity_date:
+        raise HTTPException(status_code=400, detail="Opportunity date required to convert lead")
+    
+    try:
+        # Update lead status
+        await db.leads.update_one(
+            {"id": lead_id},
+            {
+                "$set": {
+                    "status": "Converted",
+                    "converted_to_opportunity": True,
+                    "opportunity_date": opportunity_date,
+                    "updated_at": datetime.now(timezone.utc)
+                }
+            }
+        )
+        
+        # Here you would insert into opportunities table (not implemented in this scope)
+        # await db.opportunities.insert_one(opportunity_data)
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="CONVERT",
+            resource_type="Lead",
+            resource_id=lead_id,
+            details=f"Converted lead to opportunity: {lead['lead_id']} - {lead['project_title']}"
+        )
+        
+        # Log email notification attempt
+        logger.info(f"Email notification attempt: Lead '{lead['lead_id']}' converted to opportunity by {current_user.username}")
+        
+        return {"message": "Lead converted to opportunity successfully"}
+        
+    except Exception as e:
+        logger.error(f"Failed to convert lead: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to convert lead")
+
+# File upload for lead proofs and documents
+@api_router.post("/leads/upload-proof")
+async def upload_lead_proof(file: UploadFile = File(...), current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    
+    # Validate file
+    if file.size > 5 * 1024 * 1024:  # 5MB limit
+        raise HTTPException(status_code=400, detail="File size exceeds 5MB limit")
+    
+    allowed_types = ["application/pdf", "image/png", "image/jpeg", "image/jpg"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="File type not allowed. Only PDF, PNG, JPG are supported")
+    
+    # Create uploads directory if it doesn't exist
+    upload_dir = Path("uploads/lead_proofs")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    file_id = str(uuid.uuid4())
+    file_extension = Path(file.filename).suffix
+    filename = f"{file_id}{file_extension}"
+    file_path = upload_dir / filename
+    
+    # Save file
+    with open(file_path, "wb") as buffer:
+        content = await file.read()
+        buffer.write(content)
+    
+    proof = LeadProof(
+        filename=filename,
+        original_filename=file.filename,
+        file_path=str(file_path),
+        file_size=len(content),
+        mime_type=file.content_type
+    )
+    
+    return proof.dict()
+
+@api_router.post("/leads/upload-document")
+async def upload_lead_document(
+    file: UploadFile = File(...), 
+    document_type: str = "",
+    description: str = "",
+    current_user: User = Depends(get_current_user)
+):
+    await check_lead_access(current_user)
+    
+    # Validate file
+    if file.size > 5 * 1024 * 1024:  # 5MB limit
+        raise HTTPException(status_code=400, detail="File size exceeds 5MB limit")
+    
+    allowed_types = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
+                     "image/png", "image/jpeg"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="File type not allowed. Only PDF, DOCX, PNG, JPG are supported")
+    
+    # Create uploads directory if it doesn't exist
+    upload_dir = Path("uploads/lead_documents")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    file_id = str(uuid.uuid4())
+    file_extension = Path(file.filename).suffix
+    filename = f"{file_id}{file_extension}"
+    file_path = upload_dir / filename
+    
+    # Save file
+    with open(file_path, "wb") as buffer:
+        content = await file.read()
+        buffer.write(content)
+    
+    document = LeadDocument(
+        document_type=document_type,
+        filename=filename,
+        original_filename=file.filename,
+        file_path=str(file_path),
+        file_size=len(content),
+        mime_type=file.content_type,
+        description=description
+    )
+    
+    return document.dict()
+
+# Export leads
+@api_router.get("/leads/export")
+async def export_leads(
+    company_id: Optional[str] = None,
+    partner_id: Optional[str] = None,
+    status: Optional[str] = None,
+    tender_type: Optional[str] = None,
+    approval_status: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    await check_lead_access(current_user)
+    
+    # Check export permission
+    user_permissions = await get_user_permissions(current_user.id)
+    has_export = any(
+        p.get("module") == "Sales" and p.get("menu") == "Leads" and p.get("permission") == "Export"
+        for p in user_permissions
+    )
+    if not has_export:
+        raise HTTPException(status_code=403, detail="Export permission required")
+    
+    # Build query (same as get_leads)
+    query = {"is_deleted": {"$ne": True}}
+    
+    if company_id:
+        query["company_id"] = company_id
+    if partner_id:
+        query["partner_id"] = partner_id
+    if status:
+        query["status"] = status
+    if tender_type:
+        query["tender_type"] = tender_type
+    if approval_status:
+        query["approval_status"] = approval_status
+    
+    leads = await db.leads.find(query).to_list(None)
+    return [prepare_for_json(l) for l in leads]
+
 @api_router.get("/contacts/{contact_id}")
 async def get_contact(contact_id: str, current_user: User = Depends(get_current_user)):
     await check_contact_access(current_user)
