@@ -2801,6 +2801,60 @@ class LeadKPIs(BaseModel):
     approved_leads: int
     escalated_leads: int
 
+# Force initialize Lead Management data endpoint
+@api_router.post("/admin/force-init-lead-data")
+async def force_init_lead_data(current_user: User = Depends(get_current_user)):
+    """Force initialize Lead Management master data (ignores existing data)"""
+    # Only allow admin users
+    if current_user.username != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        logger.info("Force initializing Lead Management master data...")
+        
+        # Product & Services Master Data
+        product_services = [
+            {"id": str(uuid.uuid4()), "name": "Software Development", "description": "Custom software development services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "Web Development", "description": "Website and web application development", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "Mobile App Development", "description": "iOS and Android mobile application development", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "Cloud Services", "description": "Cloud infrastructure and migration services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "Digital Marketing", "description": "SEO, SEM, and digital marketing services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "Data Analytics", "description": "Business intelligence and data analytics", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "Cybersecurity", "description": "Information security and cybersecurity services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "AI/ML Solutions", "description": "Artificial Intelligence and Machine Learning solutions", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "IT Consulting", "description": "Technology consulting and advisory services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "System Integration", "description": "Enterprise system integration services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        ]
+        await db.product_services.insert_many(product_services)
+        
+        # Sub-Tender Types Master Data
+        sub_tender_types = [
+            {"id": str(uuid.uuid4()), "name": "Government - Central", "description": "Central government tenders and contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "Government - State", "description": "State government tenders and contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "Government - Municipal", "description": "Municipal and local government tenders", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "Government - PSU", "description": "Public Sector Undertaking tenders", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "Private - Enterprise", "description": "Large private enterprise contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "Private - SME", "description": "Small and Medium Enterprise contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "Private - Startup", "description": "Startup and emerging company contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "name": "Private - International", "description": "International private sector contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        ]
+        await db.sub_tender_types.insert_many(sub_tender_types)
+        
+        # Check final counts
+        ps_count = await db.product_services.count_documents({"is_active": True})
+        st_count = await db.sub_tender_types.count_documents({"is_active": True})
+        
+        logger.info(f"Force initialized - Product Services: {ps_count}, Sub-Tender Types: {st_count}")
+        
+        return {
+            "message": "Lead Management master data force initialized successfully", 
+            "product_services_count": ps_count,
+            "sub_tender_types_count": st_count
+        }
+    except Exception as e:
+        logger.error(f"Failed to force initialize lead data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Force initialization failed: {str(e)}")
+
 # Temporary initialization endpoint - remove after setup
 @api_router.post("/admin/init-lead-data")
 async def init_lead_data(current_user: User = Depends(get_current_user)):
