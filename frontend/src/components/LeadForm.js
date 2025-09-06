@@ -319,7 +319,7 @@ export const LeadForm = () => {
                   <SelectValue placeholder="Select sub-tender type (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {subTenderTypes.map(type => (
                     <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
                   ))}
