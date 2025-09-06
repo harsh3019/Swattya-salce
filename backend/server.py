@@ -2944,19 +2944,271 @@ async def delete_partner(partner_id: str, current_user: User = Depends(get_curre
         logger.error(f"Failed to delete partner: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to delete partner")
 
-# Product & Services endpoints (backend only)
+# Product & Services CRUD endpoints
 @api_router.get("/product-services")
 async def get_product_services(current_user: User = Depends(get_current_user)):
     await check_lead_access(current_user)
     products = await db.product_services.find({"is_active": True}).to_list(None)
     return [prepare_for_json(p) for p in products]
 
-# Sub-Tender Types endpoints (backend only)
+@api_router.get("/product-services/{product_id}")
+async def get_product_service(product_id: str, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    product = await db.product_services.find_one({"id": product_id, "is_active": True})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product/Service not found")
+    return prepare_for_json(product)
+
+@api_router.post("/product-services")
+async def create_product_service(product_data: ProductServiceCreate, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    
+    # Check name uniqueness
+    existing_name = await db.product_services.find_one({
+        "name": {"$regex": f"^{product_data.name}$", "$options": "i"},
+        "is_active": True
+    })
+    if existing_name:
+        raise HTTPException(status_code=400, detail="Product/Service name already exists")
+    
+    try:
+        product_dict = {
+            **product_data.dict(),
+            "id": str(uuid.uuid4()),
+            "created_by": current_user.id,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        await db.product_services.insert_one(product_dict)
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="CREATE",
+            resource_type="ProductService",
+            resource_id=product_dict["id"],
+            details=f"Created product/service: {product_dict['name']}"
+        )
+        
+        return prepare_for_json(product_dict)
+        
+    except Exception as e:
+        logger.error(f"Failed to create product/service: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to create product/service")
+
+@api_router.put("/product-services/{product_id}")
+async def update_product_service(product_id: str, product_data: ProductServiceUpdate, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    
+    # Check if product exists
+    existing_product = await db.product_services.find_one({"id": product_id, "is_active": True})
+    if not existing_product:
+        raise HTTPException(status_code=404, detail="Product/Service not found")
+    
+    # Check name uniqueness (excluding current product)
+    if product_data.name:
+        existing_name = await db.product_services.find_one({
+            "name": {"$regex": f"^{product_data.name}$", "$options": "i"},
+            "id": {"$ne": product_id},
+            "is_active": True
+        })
+        if existing_name:
+            raise HTTPException(status_code=400, detail="Product/Service name already exists")
+    
+    try:
+        update_data = {k: v for k, v in product_data.dict().items() if v is not None}
+        update_data["updated_at"] = datetime.now(timezone.utc)
+        
+        await db.product_services.update_one(
+            {"id": product_id},
+            {"$set": update_data}
+        )
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="UPDATE",
+            resource_type="ProductService",
+            resource_id=product_id,
+            details=f"Updated product/service: {product_data.name or existing_product['name']}"
+        )
+        
+        updated_product = await db.product_services.find_one({"id": product_id})
+        return prepare_for_json(updated_product)
+        
+    except Exception as e:
+        logger.error(f"Failed to update product/service: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update product/service")
+
+@api_router.delete("/product-services/{product_id}")
+async def delete_product_service(product_id: str, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    
+    # Check if product exists
+    product = await db.product_services.find_one({"id": product_id, "is_active": True})
+    if not product:
+        raise HTTPException(status_code=404, detail="Product/Service not found")
+    
+    # Check if product is being used in any leads
+    leads_using_product = await db.leads.find_one({"product_service_id": product_id, "is_active": True})
+    if leads_using_product:
+        raise HTTPException(status_code=400, detail="Cannot delete product/service as it is being used in leads")
+    
+    try:
+        # Soft delete
+        await db.product_services.update_one(
+            {"id": product_id},
+            {"$set": {"is_active": False, "updated_at": datetime.now(timezone.utc)}}
+        )
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="DELETE",
+            resource_type="ProductService",
+            resource_id=product_id,
+            details=f"Deleted product/service: {product['name']}"
+        )
+        
+        return {"message": "Product/Service deleted successfully"}
+        
+    except Exception as e:
+        logger.error(f"Failed to delete product/service: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete product/service")
+
+# Sub-Tender Types CRUD endpoints
 @api_router.get("/sub-tender-types")
 async def get_sub_tender_types(current_user: User = Depends(get_current_user)):
     await check_lead_access(current_user)
     sub_tenders = await db.sub_tender_types.find({"is_active": True}).to_list(None)
     return [prepare_for_json(st) for st in sub_tenders]
+
+@api_router.get("/sub-tender-types/{sub_tender_id}")
+async def get_sub_tender_type(sub_tender_id: str, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    sub_tender = await db.sub_tender_types.find_one({"id": sub_tender_id, "is_active": True})
+    if not sub_tender:
+        raise HTTPException(status_code=404, detail="Sub-Tender Type not found")
+    return prepare_for_json(sub_tender)
+
+@api_router.post("/sub-tender-types")
+async def create_sub_tender_type(sub_tender_data: SubTenderTypeCreate, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    
+    # Check name uniqueness
+    existing_name = await db.sub_tender_types.find_one({
+        "name": {"$regex": f"^{sub_tender_data.name}$", "$options": "i"},
+        "is_active": True
+    })
+    if existing_name:
+        raise HTTPException(status_code=400, detail="Sub-Tender Type name already exists")
+    
+    try:
+        sub_tender_dict = {
+            **sub_tender_data.dict(),
+            "id": str(uuid.uuid4()),
+            "created_by": current_user.id,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        await db.sub_tender_types.insert_one(sub_tender_dict)
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="CREATE",
+            resource_type="SubTenderType",
+            resource_id=sub_tender_dict["id"],
+            details=f"Created sub-tender type: {sub_tender_dict['name']}"
+        )
+        
+        return prepare_for_json(sub_tender_dict)
+        
+    except Exception as e:
+        logger.error(f"Failed to create sub-tender type: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to create sub-tender type")
+
+@api_router.put("/sub-tender-types/{sub_tender_id}")
+async def update_sub_tender_type(sub_tender_id: str, sub_tender_data: SubTenderTypeUpdate, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    
+    # Check if sub-tender type exists
+    existing_sub_tender = await db.sub_tender_types.find_one({"id": sub_tender_id, "is_active": True})
+    if not existing_sub_tender:
+        raise HTTPException(status_code=404, detail="Sub-Tender Type not found")
+    
+    # Check name uniqueness (excluding current sub-tender type)
+    if sub_tender_data.name:
+        existing_name = await db.sub_tender_types.find_one({
+            "name": {"$regex": f"^{sub_tender_data.name}$", "$options": "i"},
+            "id": {"$ne": sub_tender_id},
+            "is_active": True
+        })
+        if existing_name:
+            raise HTTPException(status_code=400, detail="Sub-Tender Type name already exists")
+    
+    try:
+        update_data = {k: v for k, v in sub_tender_data.dict().items() if v is not None}
+        update_data["updated_at"] = datetime.now(timezone.utc)
+        
+        await db.sub_tender_types.update_one(
+            {"id": sub_tender_id},
+            {"$set": update_data}
+        )
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="UPDATE",
+            resource_type="SubTenderType",
+            resource_id=sub_tender_id,
+            details=f"Updated sub-tender type: {sub_tender_data.name or existing_sub_tender['name']}"
+        )
+        
+        updated_sub_tender = await db.sub_tender_types.find_one({"id": sub_tender_id})
+        return prepare_for_json(updated_sub_tender)
+        
+    except Exception as e:
+        logger.error(f"Failed to update sub-tender type: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update sub-tender type")
+
+@api_router.delete("/sub-tender-types/{sub_tender_id}")
+async def delete_sub_tender_type(sub_tender_id: str, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    
+    # Check if sub-tender type exists
+    sub_tender = await db.sub_tender_types.find_one({"id": sub_tender_id, "is_active": True})
+    if not sub_tender:
+        raise HTTPException(status_code=404, detail="Sub-Tender Type not found")
+    
+    # Check if sub-tender type is being used in any leads
+    leads_using_sub_tender = await db.leads.find_one({"sub_tender_type_id": sub_tender_id, "is_active": True})
+    if leads_using_sub_tender:
+        raise HTTPException(status_code=400, detail="Cannot delete sub-tender type as it is being used in leads")
+    
+    try:
+        # Soft delete
+        await db.sub_tender_types.update_one(
+            {"id": sub_tender_id},
+            {"$set": {"is_active": False, "updated_at": datetime.now(timezone.utc)}}
+        )
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="DELETE",
+            resource_type="SubTenderType",
+            resource_id=sub_tender_id,
+            details=f"Deleted sub-tender type: {sub_tender['name']}"
+        )
+        
+        return {"message": "Sub-Tender Type deleted successfully"}
+        
+    except Exception as e:
+        logger.error(f"Failed to delete sub-tender type: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete sub-tender type")
 
 # Lead CRUD endpoints
 @api_router.get("/leads")
