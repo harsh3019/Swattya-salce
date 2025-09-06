@@ -522,10 +522,7 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Lead Management Product Services CRUD APIs"
-    - "Lead Management Sub-Tender Types CRUD APIs"
-    - "Partner Management CRUD APIs"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
