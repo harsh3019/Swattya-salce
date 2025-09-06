@@ -223,12 +223,15 @@ export const LeadForm = () => {
 
   const handleFinalSubmit = async (finalData) => {
     try {
+      console.log('Starting final submission...');
       setSubmitting(true);
       
       const submitData = {
         ...finalData,
         checklist_completed: checklistItems.every(item => item.checked),
       };
+      
+      console.log('Submit data before processing:', submitData);
       
       // Convert "none" values to null/undefined for optional fields
       if (submitData.sub_tender_type_id === "none") {
@@ -245,10 +248,15 @@ export const LeadForm = () => {
         submitData.lead_id = generateLeadId();
       }
       
+      console.log('Final submit data:', submitData);
+      
       const url = isEdit ? `${API}/leads/${id}` : `${API}/leads`;
       const method = isEdit ? 'put' : 'post';
       
-      await axios[method](url, submitData);
+      console.log(`Making ${method.toUpperCase()} request to:`, url);
+      
+      const response = await axios[method](url, submitData);
+      console.log('API response:', response.data);
       
       // Clear localStorage
       localStorage.removeItem('leadFormData');
@@ -257,9 +265,10 @@ export const LeadForm = () => {
       navigate('/leads');
       
     } catch (err) {
+      console.error('Submit error details:', err);
+      console.error('Error response:', err.response?.data);
       const errorMsg = err.response?.data?.detail || `Failed to ${isEdit ? 'update' : 'create'} lead`;
       toast.error(errorMsg);
-      console.error('Submit error:', err);
     } finally {
       setSubmitting(false);
     }
