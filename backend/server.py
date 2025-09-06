@@ -621,18 +621,21 @@ async def get_current_user_permissions(current_user: User = Depends(get_current_
     
     permissions = []
     for rp in role_permissions:
-        # Get module, menu, and permission details
-        module = await db.modules.find_one({"id": rp["module_id"], "status": "active"})
+        # Get menu and permission details first
         menu = await db.menus.find_one({"id": rp["menu_id"]})
         permission = await db.permissions.find_one({"id": rp["permission_id"], "status": "active"})
         
-        if module and menu and permission:
-            permissions.append({
-                "module": module["name"],
-                "menu": menu["name"],
-                "permission": permission["name"],
-                "path": menu["path"]
-            })
+        if menu and permission:
+            # Get module details from menu
+            module = await db.modules.find_one({"id": menu["module_id"], "status": "active"})
+            
+            if module:
+                permissions.append({
+                    "module": module["name"],
+                    "menu": menu["name"],
+                    "permission": permission["name"],
+                    "path": menu["path"]
+                })
     
     return {"permissions": permissions}
 
