@@ -2801,6 +2801,17 @@ class LeadKPIs(BaseModel):
     approved_leads: int
     escalated_leads: int
 
+# Temporary initialization endpoint - remove after setup
+@api_router.post("/admin/init-lead-data")
+async def init_lead_data(current_user: User = Depends(get_current_user)):
+    """Manually initialize Lead Management master data"""
+    # Only allow admin users
+    if current_user.username != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    await initialize_lead_master_data()
+    return {"message": "Lead Management master data initialized successfully"}
+
 # ================ LEAD MANAGEMENT ENDPOINTS ================
 
 # Helper function for lead access control
