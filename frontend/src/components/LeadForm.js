@@ -77,7 +77,23 @@ export const LeadForm = () => {
   
   // Form state
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    // Step 1 defaults
+    tender_type: '',
+    project_title: '',
+    company_id: '',
+    state: '',
+    sub_tender_type_id: 'none',
+    partner_id: 'none',
+    // Step 2 defaults
+    lead_subtype: '',
+    source: '',
+    product_service_id: 'none',
+    expected_orc: '',
+    revenue: '',
+    competitors: '',
+    lead_owner: '',
+  });
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   
