@@ -50,11 +50,11 @@ const step2Schema = z.object({
   lead_subtype: z.enum(['Direct', 'Referral'], {
     required_error: 'Lead subtype is required'
   }),
-  source: z.string().max(100, 'Source must be less than 100 characters').optional(),
+  source: z.string().optional(),
   product_service_id: z.string().optional(),
   expected_orc: z.coerce.number().min(0, 'Expected ORC must be non-negative').optional(),
   revenue: z.coerce.number().min(0, 'Revenue must be non-negative').optional(),
-  competitors: z.string().max(500, 'Competitors must be less than 500 characters').optional(),
+  competitors: z.string().optional(),
   lead_owner: z.string().min(1, 'Lead owner is required'),
 });
 
