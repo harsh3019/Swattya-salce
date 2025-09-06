@@ -402,7 +402,7 @@ export const LeadForm = () => {
                 <SelectValue placeholder="Select partner (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="none">None</SelectItem>
                 {partners.map(partner => (
                   <SelectItem key={partner.id} value={partner.id}>{partner.name}</SelectItem>
                 ))}
