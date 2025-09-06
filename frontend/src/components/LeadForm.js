@@ -223,6 +223,17 @@ export const LeadForm = () => {
         checklist_completed: checklistItems.every(item => item.checked),
       };
       
+      // Convert "none" values to null/undefined for optional fields
+      if (submitData.sub_tender_type_id === "none") {
+        submitData.sub_tender_type_id = null;
+      }
+      if (submitData.partner_id === "none") {
+        submitData.partner_id = null;
+      }
+      if (submitData.product_service_id === "none") {
+        submitData.product_service_id = null;
+      }
+      
       if (!isEdit) {
         submitData.lead_id = generateLeadId();
       }
