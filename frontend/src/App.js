@@ -522,18 +522,6 @@ function App() {
                 </ProtectedRoute>
               } />
               
-              {/* Lead Management Master Routes */}
-              <Route path="/product-services" element={
-                <ProtectedRoute>
-                  <ProductServicesList />
-                </ProtectedRoute>
-              } />
-              <Route path="/sub-tender-types" element={
-                <ProtectedRoute>
-                  <SubTenderTypesList />
-                </ProtectedRoute>
-              } />
-              
               <Route path="/" element={<HomeRoute />} />
             </Routes>
           </BrowserRouter>
