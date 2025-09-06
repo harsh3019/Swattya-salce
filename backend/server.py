@@ -2803,6 +2803,108 @@ class LeadKPIs(BaseModel):
     approved_leads: int
     escalated_leads: int
 
+# Add new menus for Lead Management (temporary endpoint)
+@api_router.post("/admin/add-lead-menus")
+async def add_lead_menus(current_user: User = Depends(get_current_user)):
+    """Add new menus for Lead Management"""
+    if current_user.username != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        # Get Sales module ID
+        sales_module = await db.modules.find_one({"name": "Sales"})
+        if not sales_module:
+            raise HTTPException(status_code=404, detail="Sales module not found")
+        
+        # Get permissions
+        permissions = await db.permissions.find({}).to_list(None)
+        permission_map = {p["name"]: p["id"] for p in permissions}
+        
+        # Check if menus already exist
+        existing_product_menu = await db.menus.find_one({"name": "Product Services"})
+        existing_subtender_menu = await db.menus.find_one({"name": "Sub-Tender Types"})
+        
+        new_menus = []
+        
+        if not existing_product_menu:
+            product_menu = Menu(
+                name="Product Services",
+                path="/product-services", 
+                module_id=sales_module["id"],
+                order_index=4,
+                created_by="system"
+            )
+            product_dict = prepare_for_mongo(product_menu.dict())
+            product_dict.pop('_id', None)
+            await db.menus.insert_one(product_dict)
+            new_menus.append("Product Services")
+            
+            # Add permissions for this menu
+            super_admin_role = await db.roles.find_one({"name": "Super Admin"})
+            if super_admin_role:
+                for perm_name in ["View", "Add", "Edit", "Delete", "Export"]:
+                    if perm_name in permission_map:
+                        role_perm = {
+                            "id": str(uuid.uuid4()),
+                            "role_id": super_admin_role["id"],
+                            "menu_id": product_menu.id,
+                            "permission_id": permission_map[perm_name],
+                            "created_by": "system",
+                            "created_at": datetime.now(timezone.utc),
+                            "updated_at": datetime.now(timezone.utc),
+                            "is_active": True
+                        }
+                        await db.role_permissions.insert_one(role_perm)
+        
+        if not existing_subtender_menu:
+            subtender_menu = Menu(
+                name="Sub-Tender Types",
+                path="/sub-tender-types",
+                module_id=sales_module["id"], 
+                order_index=5,
+                created_by="system"
+            )
+            subtender_dict = prepare_for_mongo(subtender_menu.dict())
+            subtender_dict.pop('_id', None)
+            await db.menus.insert_one(subtender_dict)
+            new_menus.append("Sub-Tender Types")
+            
+            # Add permissions for this menu
+            super_admin_role = await db.roles.find_one({"name": "Super Admin"})
+            if super_admin_role:
+                for perm_name in ["View", "Add", "Edit", "Delete", "Export"]:
+                    if perm_name in permission_map:
+                        role_perm = {
+                            "id": str(uuid.uuid4()),
+                            "role_id": super_admin_role["id"],
+                            "menu_id": subtender_menu.id,
+                            "permission_id": permission_map[perm_name],
+                            "created_by": "system",
+                            "created_at": datetime.now(timezone.utc),
+                            "updated_at": datetime.now(timezone.utc),
+                            "is_active": True
+                        }
+                        await db.role_permissions.insert_one(role_perm)
+        
+        # Update order index for existing Leads and Opportunities menus
+        await db.menus.update_one(
+            {"name": "Leads"},
+            {"$set": {"order_index": 6}}
+        )
+        await db.menus.update_one(
+            {"name": "Opportunities"},
+            {"$set": {"order_index": 7}}
+        )
+        
+        return {
+            "message": f"Successfully added {len(new_menus)} new menus",
+            "menus_added": new_menus
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to add lead menus: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to add menus: {str(e)}")
+
 # Force initialize Lead Management data endpoint
 @api_router.post("/admin/force-init-lead-data")
 async def force_init_lead_data(current_user: User = Depends(get_current_user)):
