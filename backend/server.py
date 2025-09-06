@@ -1799,34 +1799,6 @@ async def initialize_company_master_data():
     ]
     await db.designations.insert_many(designations)
     
-    # Product & Services Master Data
-    product_services = [
-        {"id": str(uuid.uuid4()), "name": "Software Development", "description": "Custom software development services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Web Development", "description": "Website and web application development", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Mobile App Development", "description": "iOS and Android mobile application development", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Cloud Services", "description": "Cloud infrastructure and migration services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Digital Marketing", "description": "SEO, SEM, and digital marketing services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Data Analytics", "description": "Business intelligence and data analytics", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Cybersecurity", "description": "Information security and cybersecurity services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "AI/ML Solutions", "description": "Artificial Intelligence and Machine Learning solutions", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "IT Consulting", "description": "Technology consulting and advisory services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "System Integration", "description": "Enterprise system integration services", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-    ]
-    await db.product_services.insert_many(product_services)
-    
-    # Sub-Tender Types Master Data
-    sub_tender_types = [
-        {"id": str(uuid.uuid4()), "name": "Government - Central", "description": "Central government tenders and contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Government - State", "description": "State government tenders and contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Government - Municipal", "description": "Municipal and local government tenders", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Government - PSU", "description": "Public Sector Undertaking tenders", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Private - Enterprise", "description": "Large private enterprise contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Private - SME", "description": "Small and Medium Enterprise contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Private - Startup", "description": "Startup and emerging company contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-        {"id": str(uuid.uuid4()), "name": "Private - International", "description": "International private sector contracts", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
-    ]
-    await db.sub_tender_types.insert_many(sub_tender_types)
-    
     logger.info("Company registration master data initialized successfully")
 
 async def initialize_lead_master_data():
