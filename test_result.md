@@ -514,7 +514,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Contact Management Backend APIs"
+    - "Lead Management Product Services CRUD APIs"
+    - "Lead Management Sub-Tender Types CRUD APIs"
+    - "Partner Management CRUD APIs"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
