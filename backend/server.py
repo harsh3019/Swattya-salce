@@ -2634,15 +2634,15 @@ async def export_contacts(
 class Partner(BaseAuditModel):
     first_name: str = Field(..., min_length=1, max_length=50)
     last_name: str = Field(..., min_length=1, max_length=50)
-    email: str = Field(..., regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-    phone_number: str = Field(..., min_length=10, max_length=15, regex=r'^\+?[\d\s\-\(\)]{10,15}$')
+    email: str = Field(..., pattern=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    phone_number: str = Field(..., min_length=10, max_length=15, pattern=r'^\+?[\d\s\-\(\)]{10,15}$')
     is_active: bool = Field(default=True)
 
 class PartnerCreate(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=50)
     last_name: str = Field(..., min_length=1, max_length=50)
-    email: str = Field(..., regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-    phone_number: str = Field(..., min_length=10, max_length=15, regex=r'^\+?[\d\s\-\(\)]{10,15}$')
+    email: str = Field(..., pattern=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    phone_number: str = Field(..., min_length=10, max_length=15, pattern=r'^\+?[\d\s\-\(\)]{10,15}$')
     is_active: bool = Field(default=True)
 
 class ProductService(BaseAuditModel):
