@@ -2759,23 +2759,23 @@ class LeadCreate(BaseModel):
 
 class LeadUpdate(BaseModel):
     # Allow partial updates
-    tender_type: Optional[str] = Field(None, regex=r'^(Tender|Pre-Tender|Non-Tender)$')
+    tender_type: Optional[str] = Field(None, pattern=r'^(Tender|Pre-Tender|Non-Tender)$')
     sub_tender_type_id: Optional[str] = None
     project_title: Optional[str] = Field(None, min_length=2, max_length=200)
     company_id: Optional[str] = None
     state: Optional[str] = Field(None, max_length=100)
     partner_id: Optional[str] = None
-    lead_subtype: Optional[str] = Field(None, regex=r'^(Direct|Referral)$')
+    lead_subtype: Optional[str] = Field(None, pattern=r'^(Direct|Referral)$')
     source: Optional[str] = Field(None, max_length=100)
     product_service_id: Optional[str] = None
     is_enquiry: Optional[bool] = None
-    billing_type: Optional[str] = Field(None, regex=r'^(Prepaid|Postpaid)$')
+    billing_type: Optional[str] = Field(None, pattern=r'^(Prepaid|Postpaid)$')
     expected_orc: Optional[float] = Field(None, ge=0)
     revenue: Optional[float] = Field(None, ge=0)
     competitors: Optional[str] = Field(None, max_length=500)
-    status: Optional[str] = Field(None, regex=r'^(New|Nurturing|Converted)$')
+    status: Optional[str] = Field(None, pattern=r'^(New|Nurturing|Converted)$')
     lead_owner: Optional[str] = None
-    approval_status: Optional[str] = Field(None, regex=r'^(Pending|Approved|Rejected|Escalated)$')
+    approval_status: Optional[str] = Field(None, pattern=r'^(Pending|Approved|Rejected|Escalated)$')
     checklist_completed: Optional[bool] = None
     opportunity_date: Optional[datetime] = None
 
