@@ -1,52 +1,59 @@
 <analysis>
-The AI engineer successfully built the Sawayatta ERP system incrementally. Starting from an initial React/FastAPI/MongoDB setup, JWT authentication was implemented, overcoming early challenges like syntax errors and MongoDB ObjectId serialization. The core User Management module was then developed with full CRUD, rich UI components, and validation. Subsequent iterations focused on fixing backend update logic and refining frontend data display. The most significant development involved implementing a comprehensive RBAC system, including a dynamic sidebar, permission enforcement on all CRUD operations, and an advanced Role-Permission Matrix UI. The engineer meticulously addressed reported bugs and performed extensive testing after each major phase. Currently, the system is mostly functional, but the engineer is debugging a frontend issue where the login UI gets stuck, and permission fetching sometimes results in 403 errors, despite the backend logic appearing correct. The focus is on refining the frontend's authentication and permission loading sequence.
+The AI engineer successfully progressed the Sawayatta ERP project through several critical phases. Initially, the focus was on stabilizing the existing application by resolving fundamental frontend issues, specifically the broken authentication flow, incorrect  configurations, and non-functional permission-based UI elements. This involved iterative debugging, including leveraging the  and  to diagnose complex  and environmental issues. Post-stabilization, two major modules were developed: Company Registration and Contact Management. Both entailed comprehensive full-stack development—defining backend models and APIs with RBAC, and building responsive, multi-step frontend forms and listing pages with advanced features like AI duplicate detection and SPOC enforcement. The project is currently in the initial backend development phase of the Lead Management Module. The approach was highly iterative, with frequent testing and direct issue resolution as identified by testing agents.
 </analysis>
 
 <product_requirements>
-The user requested a full-stack ERP named Sawayatta ERP.
-**Core Features & Status**:
-*   **Authentication & RBAC**: JWT username/password login, Sawayatta ERP branding. Implemented with an admin user, secure login/logout. Robust Role-Based Access Control (RBAC) system (Users → Roles → Permissions) with granular , , , ,  permissions.
-*   **User Management Module**: All 9 masters (Users, Roles, Permissions, Modules, Menu, Role-Permission Mapping, Departments, Designations, Activity Logs) implemented with CRUD, , audit fields, soft delete (except Activity Logs). Frontend features: modal forms, Zod validation (red error messages), pagination, search, sorting, CSV export, action columns (View, Edit, Delete).
-*   **Dynamic RBAC Sidebar**: Dynamically built from backend  endpoint. Sidebar only shows modules and menus accessible to the user's role (requiring  permission), supports expand/collapse, and enforces 403 Forbidden for unauthorized routes.
-*   **Role-Permission UI**: Implemented as a matrix interface with role tabs, checkboxes for permissions (View, Add, Edit, Delete, Export) per menu, expand/collapse modules, Add Module flow for unassigned modules, and batch save.
-*   **Permission-driven UI/API**: Action buttons (Add, Edit, Delete, Export) on list pages and rows dynamically show/hide based on user's permissions, with backend API enforcing the same.
-*   **API (REST Endpoints)**: Auth endpoints (, ), User Management masters, , . All backend API routes prefixed with .
-*   **Security**: Passwords hashed with bcrypt. RBAC middleware checks permissions on every API call. Activity logging implemented.
-*   **Sales Module**: Defined but not yet implemented.
+The Sawayatta ERP is a full-stack system (React, FastAPI, MongoDB) with JWT authentication and Role-Based Access Control (RBAC). The initial problem involved a broken frontend: non-functional login, uninitialized sidebar, non-submitting CRUD forms, and missing permission-based UI buttons (Add/Edit/Delete/Export). The immediate fix involved correcting frontend authentication (JWT storage, Axios headers), enabling dynamic sidebar loading, and fixing CRUD forms for user management, followed by correctly integrating  for RBAC-driven UI buttons across master pages.
+
+Subsequently, the following modules were requested:
+1.  **Company Registration Module**: A multi-step form (General Info, Location, Financials, Documents, Checklist) with client/server-side validation (unique name, conditional fields for GST/PAN/VAT), lead scoring, auto-save, notifications, audit trail, and bulk import/export. A comprehensive listing page with full CRUD was also required.
+2.  **Contact Management Module**: A multi-stage form (General Info, Contact Details, Additional Info) with validations for email/SPOC uniqueness, AI-based duplicate detection (fuzzy match), RBAC, and a master listing page supporting full CRUD, search, filter, sort, pagination, and bulk actions.
+3.  **Lead Management Module**: A comprehensive module for Sales with Partner Master, Product & Services Master, Sub-Tender Master, and KPIs. It includes a multi-stage lead form (General Info, Lead Details, Proofs & Checklist) with tender logic, various validations (Lead ID format, conditional fields), nurture/conversion logic, notifications, audit trail, and a Lead Listing page with KPIs (total, pending, approved, escalated), filters, search, and full CRUD.
 </product_requirements>
 
 <key_technical_concepts>
-- **Frontend**: React JS, Shadcn UI, Tailwind CSS, Axios, React Router DOM, React Hook Form, Zod.
-- **Backend**: FastAPI, Uvicorn, Python-dotenv, PyMongo/Motor, Pydantic, Passlib (bcrypt), PyJWT.
-- **Database**: MongoDB.
-- **Architecture**: Full-stack (React + FastAPI), RESTful APIs, JWT Authentication, Role-Based Access Control (RBAC).
+-   **Full-Stack**: React.js (Frontend), FastAPI (Backend), MongoDB (Database).
+-   **Authentication/Authorization**: JWT, bcrypt hashing, Role-Based Access Control (RBAC).
+-   **UI/Forms**: Shadcn UI, Tailwind CSS, , .
+-   **API Communication**: .
+-   **Environment**: Kubernetes ingress rules, backend                          RUNNING   pid 27, uptime 0:00:04
+code-server                      RUNNING   pid 29, uptime 0:00:04
+frontend                         STOPPING  
+mongodb                          RUNNING   pid 35, uptime 0:00:04
+supervisor> .
+-   **Debugging**: , , testing agents.
 </key_technical_concepts>
 
 <code_architecture>
 
--   **/app/backend/server.py**: This file defines all database models (User, Role, Permission, Module, Menu, etc.) using Pydantic. It includes authentication endpoints, CRUD APIs for all 9 User Management modules, RBAC middleware for permission checks, dynamic sidebar API (), and export APIs. Key changes include: fixing MongoDB ObjectId serialization, integrating  and JWT, implementing comprehensive RBAC middleware with  helpers, refactoring CRUD update operations to exclude auto-generated fields (uid=0(root) gid=0(root) groups=0(root), ), adding a  field to the  model, and creating a startup function to seed initial RBAC data.
--   **/app/backend/.env**: Contains  and .  was added to enable JWT authentication.
--   **/app/frontend/src/App.js**: The central React component managing application routing. It orchestrates the integration of the login page, dashboard layout, , and . It defines routes for all main pages, including the 403 Forbidden page. It was updated to integrate all user management modules and dynamically render the sidebar based on RBAC.
--   **/app/frontend/src/components/Users.js, Roles.js, Departments.js, Designations.js, Permissions.js, Modules.js, Menus.js, ActivityLogs.js**: These components represent the UI for each User Management master. They feature modal forms with Zod validation, integrate with backend APIs for CRUD operations, and utilize the  and  for permission-aware interactions. The  component was updated to include the code field.
--   **/app/frontend/src/components/DynamicSidebar.js**: A new component that fetches the RBAC-filtered navigation structure from the  endpoint and renders an interactive, expandable/collapsible sidebar.
--   **/app/frontend/src/components/ForbiddenPage.js**: A newly created component to display a 403 Forbidden message for unauthorized route access.
--   **/app/frontend/src/contexts/PermissionContext.js**: A new React Context designed to manage and distribute user permissions across the application. It is responsible for fetching and holding the authenticated user's permissions, enabling child components to check access rights using functions like , , etc.
--   **/app/frontend/src/components/ProtectedButton.js**: A new reusable component that conditionally renders its children (typically a Shadcn ) based on the permissions provided, ensuring UI elements align with user access rights.
--   **/app/frontend/src/components/PermissionDataTable.js**: A generic DataTable component that was introduced to display master data. It enhances basic table functionality by dynamically showing/hiding action buttons (View, Edit, Delete, Export) based on the user's specific permissions, integrating with .
--   **/app/frontend/src/components/RolePermissionMatrix.js**: A newly developed, sophisticated UI component that replaces the simpler . It presents a matrix-style interface for managing role-permission mappings, featuring role tabs, checkboxes for individual permissions (View, Add, Edit, Delete, Export) per menu, module expand/collapse, an Add Module flow for unassigned modules, and a batch save mechanism.
+-   : This central FastAPI file defines all Pydantic models (User, Role, Company, Contact, Lead, Partner, ProductService, SubTenderType), CRUD API endpoints, RBAC logic, and database initialization. It underwent continuous modification to integrate new modules and fix routing/validation issues.
+-   : Configures backend-specific environment variables for MongoDB connection and JWT secret.
+-   : The main React component managing global routing (), context providers (Auth, Permission), and layout. It was updated to include routes for new modules like Company Registration, Company List, Contact Form, and Contact List.
+-   : Stores frontend environment variables, primarily , which was a recurring fix point to ensure proper API routing in the Kubernetes environment.
+-   : Handles user CRUD. Fixes involved  component integration with  and conditional password validation in edit mode.
+-   : A reusable component providing a data table with RBAC-controlled Add/Edit/Delete/Export buttons. Its correct usage was vital for consistent UI.
+-   , , : Modified to correctly utilize  and fix  component form integration.
+-   : Created for the multi-step company registration form, supporting create/edit and auto-save.
+-   : Created for displaying company data with CRUD, search, filter, pagination, and export capabilities.
+-   : Created for the multi-step contact registration form.
+-   : Created for displaying contact data, fixed for  empty string values.
 </code_architecture>
 
 <pending_tasks>
-- Implement forgot password functionality via email.
-- Implement file upload storage to the local filesystem for documents.
-- Develop the full Sales Module, including Company, Contact, Channel Partner, Lead, and Opportunity masters with multi-step forms and CSV export.
-- Implement rate-limiting for login attempts and account locking after N failures.
+-   Complete the Lead Management Module:
+    -   Implement the frontend multi-stage form for leads.
+    -   Create the Partner Master frontend CRUD.
+    -   Build the Lead Listing page with KPIs, filters, search, sort, and bulk actions.
+    -   Implement lead nurture/conversion, file uploads, notifications, and audit trails.
 </pending_tasks>
 
 <current_work>
-The AI engineer is currently debugging an issue where the frontend login process visually appears stuck on Signing in... and the dynamic sidebar menus are not visible after login. This persists despite the backend  endpoint successfully returning the correct, permission-filtered navigation data and the initial login API call () also succeeding. Backend logs indicate that some subsequent requests, particularly to , are returning 403 Forbidden errors. The suspicion is a timing issue in the frontend's authentication flow, specifically within , where it might be attempting to fetch permissions before the user's authentication token is fully set and recognized, leading to unauthorized access attempts and a UI hang.
+The AI engineer is currently in the initial backend implementation phase of the **Lead Management Module**. This involves:
+1.  **Defining Backend Models**: Pydantic models for , , , and  have been added to .
+2.  **Implementing CRUD APIs**: Initial CRUD operations and validation logic for Leads, Partners, Products & Services, and Sub-Tender Types are being integrated into .
+3.  **Preparing Master Data Initialization**: The next step is to add initial seed data for  and  masters, and Partners into the database via the  in .
 </current_work>
 
 <optional_next_step>
-Update  to ensure permissions are fetched only after successful user authentication.
+Initialize the master data for Product & Services and Sub-Tender Types in the backend .
 </optional_next_step>

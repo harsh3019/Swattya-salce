@@ -5,7 +5,7 @@ import json
 
 def test_basic_company_functionality():
     """Test basic company functionality"""
-    base_url = "https://swayatta-admin.preview.emergentagent.com/api"
+    base_url = "https://sawayatta-erp.preview.emergentagent.com/api"
     
     # Login
     login_response = requests.post(f'{base_url}/auth/login', 
