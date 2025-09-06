@@ -239,6 +239,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ PRODUCT SERVICES CRUD WORKING: Comprehensive testing completed successfully. CRUD OPERATIONS: ✅ POST /api/product-services creates services with validation (created 'Blockchain Development'), ✅ PUT /api/product-services/{id} updates successfully (updated to 'Blockchain & DeFi Development'), ✅ DELETE /api/product-services/{id} soft deletes correctly, ✅ Name uniqueness validation working (duplicates rejected with 400 status). VALIDATION: ✅ Name format validation, ✅ Required fields validation, ✅ Soft delete verification (deleted items not in active list). SECURITY: ✅ RBAC permissions working (admin has access). Minor Issue: No seed data found (expected 8 services like Software Development, Web Development, etc.), GET single endpoint not tested due to empty list, dependency check not tested due to no existing leads. Overall: 71.4% success rate (5/7 tests passed) - core functionality working perfectly."
+        - working: "NA"
+          agent: "main"
+          comment: "Fixed master data initialization - created separate initialize_lead_master_data() function and force-initialized 10 Product Services (Software Development, Web Development, Mobile App Development, Cloud Services, Digital Marketing, Data Analytics, Cybersecurity, AI/ML Solutions, IT Consulting, System Integration). APIs now returning proper data."
 
   - task: "Lead Management Sub-Tender Types CRUD APIs"
     implemented: true
@@ -254,6 +257,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ SUB-TENDER TYPES CRUD WORKING: Comprehensive testing completed successfully. CRUD OPERATIONS: ✅ POST /api/sub-tender-types creates types with validation (created 'Government - Defense'), ✅ PUT /api/sub-tender-types/{id} updates successfully (updated to 'Government - Defense & Security'), ✅ DELETE /api/sub-tender-types/{id} soft deletes correctly, ✅ Name uniqueness validation working (duplicates rejected with 400 status). VALIDATION: ✅ Name format validation, ✅ Required fields validation, ✅ Soft delete verification (deleted items not in active list). SECURITY: ✅ RBAC permissions working (admin has access). Minor Issue: No seed data found (expected 6 types like Government-Central, Government-State, etc.), GET single endpoint not tested due to empty list, dependency check not tested due to no existing leads. Overall: 71.4% success rate (5/7 tests passed) - core functionality working perfectly."
+        - working: "NA"
+          agent: "main"
+          comment: "Fixed master data initialization - force-initialized 8 Sub-Tender Types (Government - Central/State/Municipal/PSU, Private - Enterprise/SME/Startup/International). APIs now returning proper data."
 
   - task: "Partner Management CRUD APIs"
     implemented: true
