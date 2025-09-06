@@ -1540,8 +1540,10 @@ async def initialize_rbac_system():
         {"name": "Companies", "path": "/companies", "module_id": created_modules["Sales"], "order_index": 1},
         {"name": "Contacts", "path": "/contacts", "module_id": created_modules["Sales"], "order_index": 2},
         {"name": "Channel Partners", "path": "/channel-partners", "module_id": created_modules["Sales"], "order_index": 3},
-        {"name": "Leads", "path": "/leads", "module_id": created_modules["Sales"], "order_index": 4},
-        {"name": "Opportunities", "path": "/opportunities", "module_id": created_modules["Sales"], "order_index": 5},
+        {"name": "Product Services", "path": "/product-services", "module_id": created_modules["Sales"], "order_index": 4},
+        {"name": "Sub-Tender Types", "path": "/sub-tender-types", "module_id": created_modules["Sales"], "order_index": 5},
+        {"name": "Leads", "path": "/leads", "module_id": created_modules["Sales"], "order_index": 6},
+        {"name": "Opportunities", "path": "/opportunities", "module_id": created_modules["Sales"], "order_index": 7},
         
         # System menus
         {"name": "Activity Logs", "path": "/activity-logs", "module_id": created_modules["System"], "order_index": 1}
