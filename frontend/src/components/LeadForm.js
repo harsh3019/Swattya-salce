@@ -357,7 +357,7 @@ export const LeadForm = () => {
             name="sub_tender_type_id"
             control={control}
             render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={field.onChange} value={field.value || 'none'}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select sub-tender type (optional)" />
                 </SelectTrigger>
