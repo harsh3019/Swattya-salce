@@ -2655,6 +2655,26 @@ class SubTenderType(BaseAuditModel):
     description: Optional[str] = Field(None, max_length=500)
     is_active: bool = Field(default=True)
 
+class ProductServiceCreate(BaseModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    description: Optional[str] = Field(None, max_length=500)
+    is_active: bool = Field(default=True)
+
+class ProductServiceUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=2, max_length=100)
+    description: Optional[str] = Field(None, max_length=500)
+    is_active: Optional[bool] = None
+
+class SubTenderTypeCreate(BaseModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    description: Optional[str] = Field(None, max_length=500)
+    is_active: bool = Field(default=True)
+
+class SubTenderTypeUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=2, max_length=100)
+    description: Optional[str] = Field(None, max_length=500)
+    is_active: Optional[bool] = None
+
 class LeadDocument(BaseModel):
     document_type: str = Field(..., max_length=100)
     filename: str
