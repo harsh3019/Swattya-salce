@@ -523,11 +523,19 @@ function App() {
                   <ContactForm />
                 </ProtectedRoute>
               } />
-              <Route path="/contacts" element={
+              
+              {/* Lead Management Master Routes */}
+              <Route path="/product-services" element={
                 <ProtectedRoute>
-                  <ContactsPage />
+                  <ProductServicesList />
                 </ProtectedRoute>
               } />
+              <Route path="/sub-tender-types" element={
+                <ProtectedRoute>
+                  <SubTenderTypesList />
+                </ProtectedRoute>
+              } />
+              
               <Route path="/" element={<HomeRoute />} />
             </Routes>
           </BrowserRouter>
