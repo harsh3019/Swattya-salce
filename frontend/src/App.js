@@ -525,6 +525,11 @@ function App() {
               } />
               
               {/* Lead Management Routes */}
+              <Route path="/leads" element={
+                <ProtectedRoute>
+                  <LeadList />
+                </ProtectedRoute>
+              } />
               <Route path="/leads/add" element={
                 <ProtectedRoute>
                   <LeadForm />
