@@ -2825,6 +2825,27 @@ async def init_lead_data(current_user: User = Depends(get_current_user)):
         logger.error(f"Failed to initialize lead data: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Initialization failed: {str(e)}")
 
+# Debug endpoint to check actual data
+@api_router.get("/admin/debug-data")
+async def debug_data(current_user: User = Depends(get_current_user)):
+    """Debug endpoint to check actual data in collections"""
+    if current_user.username != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        # Get all data from collections
+        product_services = await db.product_services.find({}).to_list(None)
+        sub_tender_types = await db.sub_tender_types.find({}).to_list(None)
+        partners = await db.partners.find({}).to_list(None)
+        
+        return {
+            "product_services": [prepare_for_json(ps) for ps in product_services],
+            "sub_tender_types": [prepare_for_json(st) for st in sub_tender_types],
+            "partners": [prepare_for_json(p) for p in partners]
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
 # Debug endpoint to check database collections
 @api_router.get("/admin/debug-collections")
 async def debug_collections(current_user: User = Depends(get_current_user)):
