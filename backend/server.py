@@ -2601,6 +2601,403 @@ async def export_contacts(
     contacts = await db.contacts.find(query).to_list(None)
     return [prepare_for_json(c) for c in contacts]
 
+# ================ LEAD MANAGEMENT MODELS ================
+
+class Partner(BaseAuditModel):
+    first_name: str = Field(..., min_length=1, max_length=50)
+    last_name: str = Field(..., min_length=1, max_length=50)
+    email: str = Field(..., regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    phone_number: str = Field(..., min_length=10, max_length=15, regex=r'^\+?[\d\s\-\(\)]{10,15}$')
+    is_active: bool = Field(default=True)
+
+class PartnerCreate(BaseModel):
+    first_name: str = Field(..., min_length=1, max_length=50)
+    last_name: str = Field(..., min_length=1, max_length=50)
+    email: str = Field(..., regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    phone_number: str = Field(..., min_length=10, max_length=15, regex=r'^\+?[\d\s\-\(\)]{10,15}$')
+    is_active: bool = Field(default=True)
+
+class ProductService(BaseAuditModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    description: Optional[str] = Field(None, max_length=500)
+    is_active: bool = Field(default=True)
+
+class SubTenderType(BaseAuditModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    description: Optional[str] = Field(None, max_length=500)
+    is_active: bool = Field(default=True)
+
+class LeadDocument(BaseModel):
+    document_type: str = Field(..., max_length=100)
+    filename: str
+    original_filename: str
+    file_path: str
+    file_size: int
+    mime_type: str
+    description: Optional[str] = Field(None, max_length=200)
+    uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class LeadProof(BaseModel):
+    filename: str
+    original_filename: str
+    file_path: str
+    file_size: int
+    mime_type: str
+    uploaded_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Lead(BaseAuditModel):
+    # Auto-generated Lead ID
+    lead_id: str = Field(..., regex=r'^LEAD-[A-Z0-9]{7}$')
+    
+    # General Info
+    tender_type: str = Field(..., regex=r'^(Tender|Pre-Tender|Non-Tender)$')
+    sub_tender_type_id: Optional[str] = None
+    project_title: str = Field(..., min_length=2, max_length=200)
+    company_id: str = Field(..., description="Reference to company")
+    state: str = Field(..., max_length=100)
+    partner_id: Optional[str] = None
+    
+    # Lead Details
+    lead_subtype: str = Field(..., regex=r'^(Direct|Referral)$')
+    source: str = Field(..., max_length=100)
+    product_service_id: str = Field(..., description="Reference to product/service")
+    is_enquiry: Optional[bool] = Field(default=False)
+    billing_type: Optional[str] = Field(None, regex=r'^(Prepaid|Postpaid)$')
+    expected_orc: Optional[float] = Field(None, ge=0)
+    revenue: Optional[float] = Field(None, ge=0)
+    competitors: Optional[str] = Field(None, max_length=500)
+    status: str = Field(default="New", regex=r'^(New|Nurturing|Converted)$')
+    lead_owner: str = Field(..., description="User ID of lead owner")
+    approval_status: str = Field(default="Pending", regex=r'^(Pending|Approved|Rejected|Escalated)$')
+    
+    # Proofs & Documents
+    proofs: List[LeadProof] = []
+    documents: List[LeadDocument] = []
+    checklist_completed: bool = Field(default=False)
+    
+    # Conversion
+    opportunity_date: Optional[datetime] = None
+    converted_to_opportunity: bool = Field(default=False)
+    
+    # Status fields
+    is_active: bool = Field(default=True)
+    is_deleted: bool = Field(default=False)
+    deleted_at: Optional[datetime] = None
+
+class LeadCreate(BaseModel):
+    # General Info (lead_id will be auto-generated)
+    tender_type: str = Field(..., regex=r'^(Tender|Pre-Tender|Non-Tender)$')
+    sub_tender_type_id: Optional[str] = None
+    project_title: str = Field(..., min_length=2, max_length=200)
+    company_id: str = Field(..., description="Reference to company")
+    state: str = Field(..., max_length=100)
+    partner_id: Optional[str] = None
+    
+    # Lead Details
+    lead_subtype: str = Field(..., regex=r'^(Direct|Referral)$')
+    source: str = Field(..., max_length=100)
+    product_service_id: str = Field(..., description="Reference to product/service")
+    is_enquiry: Optional[bool] = Field(default=False)
+    billing_type: Optional[str] = Field(None, regex=r'^(Prepaid|Postpaid)$')
+    expected_orc: Optional[float] = Field(None, ge=0)
+    revenue: Optional[float] = Field(None, ge=0)
+    competitors: Optional[str] = Field(None, max_length=500)
+    status: str = Field(default="New", regex=r'^(New|Nurturing|Converted)$')
+    lead_owner: str = Field(..., description="User ID of lead owner")
+    approval_status: str = Field(default="Pending", regex=r'^(Pending|Approved|Rejected|Escalated)$')
+    
+    # Checklist
+    checklist_completed: bool = Field(default=False)
+
+class LeadUpdate(BaseModel):
+    # Allow partial updates
+    tender_type: Optional[str] = Field(None, regex=r'^(Tender|Pre-Tender|Non-Tender)$')
+    sub_tender_type_id: Optional[str] = None
+    project_title: Optional[str] = Field(None, min_length=2, max_length=200)
+    company_id: Optional[str] = None
+    state: Optional[str] = Field(None, max_length=100)
+    partner_id: Optional[str] = None
+    lead_subtype: Optional[str] = Field(None, regex=r'^(Direct|Referral)$')
+    source: Optional[str] = Field(None, max_length=100)
+    product_service_id: Optional[str] = None
+    is_enquiry: Optional[bool] = None
+    billing_type: Optional[str] = Field(None, regex=r'^(Prepaid|Postpaid)$')
+    expected_orc: Optional[float] = Field(None, ge=0)
+    revenue: Optional[float] = Field(None, ge=0)
+    competitors: Optional[str] = Field(None, max_length=500)
+    status: Optional[str] = Field(None, regex=r'^(New|Nurturing|Converted)$')
+    lead_owner: Optional[str] = None
+    approval_status: Optional[str] = Field(None, regex=r'^(Pending|Approved|Rejected|Escalated)$')
+    checklist_completed: Optional[bool] = None
+    opportunity_date: Optional[datetime] = None
+
+class LeadKPIs(BaseModel):
+    total_leads: int
+    pending_leads: int
+    approved_leads: int
+    escalated_leads: int
+
+# ================ LEAD MANAGEMENT ENDPOINTS ================
+
+# Helper function for lead access control
+async def check_lead_access(current_user: User):
+    """Check if user has access to lead operations"""
+    user_permissions = await get_user_permissions(current_user.id)
+    has_lead_access = any(
+        p.get("module") == "Sales" and p.get("menu") == "Leads" and p.get("permission") in ["View", "Add", "Edit"]
+        for p in user_permissions
+    )
+    if not has_lead_access:
+        raise HTTPException(status_code=403, detail="Access denied. Permission required.")
+    return True
+
+# Helper function to generate unique Lead ID
+async def generate_lead_id() -> str:
+    """Generate unique LEAD-XXXXXXX format ID"""
+    import random
+    import string
+    
+    while True:
+        # Generate 7 character alphanumeric string
+        suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
+        lead_id = f"LEAD-{suffix}"
+        
+        # Check if it already exists
+        existing = await db.leads.find_one({"lead_id": lead_id})
+        if not existing:
+            return lead_id
+
+# Partner CRUD endpoints
+@api_router.get("/partners")
+async def get_partners(current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    partners = await db.partners.find({"is_active": True}).to_list(None)
+    return [prepare_for_json(p) for p in partners]
+
+@api_router.get("/partners/{partner_id}")
+async def get_partner(partner_id: str, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    partner = await db.partners.find_one({"id": partner_id, "is_active": True})
+    if not partner:
+        raise HTTPException(status_code=404, detail="Partner not found")
+    return prepare_for_json(partner)
+
+@api_router.post("/partners")
+async def create_partner(partner_data: PartnerCreate, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    
+    # Check email uniqueness
+    existing_email = await db.partners.find_one({
+        "email": {"$regex": f"^{partner_data.email}$", "$options": "i"},
+        "is_active": True
+    })
+    if existing_email:
+        raise HTTPException(status_code=400, detail="Email already in use")
+    
+    try:
+        partner_dict = {
+            **partner_data.dict(),
+            "id": str(uuid.uuid4()),
+            "created_by": current_user.id,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        await db.partners.insert_one(partner_dict)
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="CREATE",
+            resource_type="Partner",
+            resource_id=partner_dict["id"],
+            details=f"Created partner: {partner_dict['first_name']} {partner_dict['last_name']}"
+        )
+        
+        return prepare_for_json(partner_dict)
+        
+    except Exception as e:
+        logger.error(f"Failed to create partner: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to create partner")
+
+@api_router.put("/partners/{partner_id}")
+async def update_partner(partner_id: str, partner_data: PartnerCreate, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    
+    # Check if partner exists
+    existing_partner = await db.partners.find_one({"id": partner_id, "is_active": True})
+    if not existing_partner:
+        raise HTTPException(status_code=404, detail="Partner not found")
+    
+    # Check email uniqueness (excluding current partner)
+    existing_email = await db.partners.find_one({
+        "email": {"$regex": f"^{partner_data.email}$", "$options": "i"},
+        "id": {"$ne": partner_id},
+        "is_active": True
+    })
+    if existing_email:
+        raise HTTPException(status_code=400, detail="Email already in use")
+    
+    try:
+        update_data = {
+            **partner_data.dict(),
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        await db.partners.update_one(
+            {"id": partner_id},
+            {"$set": update_data}
+        )
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="UPDATE",
+            resource_type="Partner",
+            resource_id=partner_id,
+            details=f"Updated partner: {partner_data.first_name} {partner_data.last_name}"
+        )
+        
+        updated_partner = await db.partners.find_one({"id": partner_id})
+        return prepare_for_json(updated_partner)
+        
+    except Exception as e:
+        logger.error(f"Failed to update partner: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to update partner")
+
+@api_router.delete("/partners/{partner_id}")
+async def delete_partner(partner_id: str, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    
+    # Check if partner exists
+    partner = await db.partners.find_one({"id": partner_id, "is_active": True})
+    if not partner:
+        raise HTTPException(status_code=404, detail="Partner not found")
+    
+    try:
+        # Soft delete
+        await db.partners.update_one(
+            {"id": partner_id},
+            {"$set": {"is_active": False, "updated_at": datetime.now(timezone.utc)}}
+        )
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id=current_user.id,
+            action="DELETE",
+            resource_type="Partner",
+            resource_id=partner_id,
+            details=f"Deleted partner: {partner['first_name']} {partner['last_name']}"
+        )
+        
+        return {"message": "Partner deleted successfully"}
+        
+    except Exception as e:
+        logger.error(f"Failed to delete partner: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to delete partner")
+
+# Product & Services endpoints (backend only)
+@api_router.get("/product-services")
+async def get_product_services(current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    products = await db.product_services.find({"is_active": True}).to_list(None)
+    return [prepare_for_json(p) for p in products]
+
+# Sub-Tender Types endpoints (backend only)
+@api_router.get("/sub-tender-types")
+async def get_sub_tender_types(current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    sub_tenders = await db.sub_tender_types.find({"is_active": True}).to_list(None)
+    return [prepare_for_json(st) for st in sub_tenders]
+
+# Lead CRUD endpoints
+@api_router.get("/leads")
+async def get_leads(
+    company_id: Optional[str] = None,
+    partner_id: Optional[str] = None,
+    status: Optional[str] = None,
+    tender_type: Optional[str] = None,
+    sub_tender_type_id: Optional[str] = None,
+    approval_status: Optional[str] = None,
+    search: Optional[str] = None,
+    page: int = 1,
+    limit: int = 50,
+    sort_by: str = "created_at",
+    sort_order: str = "desc",
+    current_user: User = Depends(get_current_user)
+):
+    await check_lead_access(current_user)
+    
+    # Build query
+    query = {"is_deleted": {"$ne": True}}
+    
+    if company_id:
+        query["company_id"] = company_id
+    if partner_id:
+        query["partner_id"] = partner_id
+    if status:
+        query["status"] = status
+    if tender_type:
+        query["tender_type"] = tender_type
+    if sub_tender_type_id:
+        query["sub_tender_type_id"] = sub_tender_type_id
+    if approval_status:
+        query["approval_status"] = approval_status
+    
+    # Search functionality
+    if search:
+        search_pattern = {"$regex": search, "$options": "i"}
+        query["$or"] = [
+            {"lead_id": search_pattern},
+            {"project_title": search_pattern},
+            {"competitors": search_pattern}
+        ]
+    
+    # Calculate pagination
+    skip = (page - 1) * limit
+    
+    # Get total count
+    total = await db.leads.count_documents(query)
+    
+    # Get leads with sorting
+    sort_direction = 1 if sort_order == "asc" else -1
+    leads = await db.leads.find(query).sort(sort_by, sort_direction).skip(skip).limit(limit).to_list(None)
+    
+    return {
+        "leads": [prepare_for_json(l) for l in leads],
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "total_pages": (total + limit - 1) // limit
+    }
+
+@api_router.get("/leads/kpis")
+async def get_lead_kpis(current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    
+    # Count leads by different statuses
+    total_leads = await db.leads.count_documents({"is_deleted": {"$ne": True}})
+    pending_leads = await db.leads.count_documents({"approval_status": "Pending", "is_deleted": {"$ne": True}})
+    approved_leads = await db.leads.count_documents({"approval_status": "Approved", "is_deleted": {"$ne": True}})
+    escalated_leads = await db.leads.count_documents({"approval_status": "Escalated", "is_deleted": {"$ne": True}})
+    
+    return {
+        "total_leads": total_leads,
+        "pending_leads": pending_leads,
+        "approved_leads": approved_leads,
+        "escalated_leads": escalated_leads
+    }
+
+@api_router.get("/leads/{lead_id}")
+async def get_lead(lead_id: str, current_user: User = Depends(get_current_user)):
+    await check_lead_access(current_user)
+    
+    lead = await db.leads.find_one({"id": lead_id, "is_deleted": {"$ne": True}})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    
+    return prepare_for_json(lead)
+
 @api_router.get("/contacts/{contact_id}")
 async def get_contact(contact_id: str, current_user: User = Depends(get_current_user)):
     await check_contact_access(current_user)
