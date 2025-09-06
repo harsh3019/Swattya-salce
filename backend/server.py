@@ -1480,6 +1480,11 @@ async def startup_event():
         if await db.company_types.count_documents({}) == 0:
             await initialize_company_master_data()
             logger.info("Company master data initialized")
+        
+        # Initialize Lead Management master data if not exists
+        if await db.product_services.count_documents({}) == 0:
+            await initialize_lead_master_data()
+            logger.info("Lead Management master data initialized")
             
     except Exception as e:
         logger.error(f"Startup error: {e}")
