@@ -613,6 +613,21 @@ frontend:
         - working: "NA"
           agent: "main"
           comment: "Implemented comprehensive Lead Form with 3-stage process: Stage 1 (General Info) - Tender type, project title, company, state, sub-tender type, partner selection with conditional validation; Stage 2 (Lead Details) - Lead subtype, source, product/service, expected ORC, revenue, competitors, lead owner with full validation; Stage 3 (Proofs & Checklist) - File upload functionality, 5-item checklist validation, submission blocking until all items checked. Features: React Hook Form with Zod validation, professional Shadcn UI, progress tracking, auto-save to localStorage, conditional field logic (Tender vs Non-Tender), LEAD-XXXXXXX ID generation, comprehensive error handling. Routes added to App.js (/leads/add, /leads/edit/:id). Ready for manual testing with full backend integration."
+        - working: "NA"
+          agent: "main"
+          comment: "Fixed SelectItem empty string error that was causing 'A <Select.Item /> must have a value prop that is not an empty string' error. Updated all SelectItem components with empty values to use 'none' instead of empty string for sub_tender_type_id, partner_id, and product_service_id fields. Added logic in handleFinalSubmit to convert 'none' values to null before API submission. Lead form is now error-free and ready for testing."
+
+  - task: "Lead Listing Page with KPIs Dashboard"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/LeadList.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented comprehensive Lead Listing page with KPIs dashboard and advanced features. KPI DASHBOARD: 4 cards showing Total Leads, Pending Approval, Approved, and Escalated leads with color-coded icons and descriptions. ADVANCED FILTERS: Status filter (New/Nurturing/Converted), Approval Status filter (Pending/Approved/Rejected/Escalated), Tender Type filter, and search functionality. DATA TABLE: Professional PermissionDataTable with Lead ID, Project Title, Company, Status badges, Approval status badges, Expected ORC (₹ formatted), Revenue (₹ formatted), Location, Created date. CUSTOM ACTIONS: Nurture button for New leads, Convert button for Approved leads, standard CRUD operations. VIEW DIALOG: Comprehensive lead details modal with Lead Information, Company & Location, Lead Details, Financial Information, Status Information, Additional Information, and System Information sections. Features: Proper badge coloring, Indian number formatting, master data lookups, CSV export, pagination, sorting. Routes added to App.js (/leads). Ready for manual testing."
 
   - task: "Lead Form Backend Integration"
     implemented: true
