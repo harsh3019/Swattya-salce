@@ -1824,6 +1824,54 @@ async def initialize_company_master_data():
     
     logger.info("Company registration master data initialized successfully")
 
+async def initialize_lead_master_data():
+    """Initialize master data for Lead Management"""
+    
+    # Check if data already exists
+    if await db.product_services.count_documents({}) > 0:
+        return
+    
+    logger.info("Initializing Lead Management master data...")
+    
+    # Lead Sources
+    lead_sources = [
+        {"id": str(uuid.uuid4()), "name": "Website", "description": "Leads from company website", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Social Media", "description": "Leads from social media platforms", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Email Campaign", "description": "Leads from email marketing campaigns", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Cold Calling", "description": "Leads from cold calling activities", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Referral", "description": "Leads from customer referrals", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Trade Show", "description": "Leads from trade shows and events", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Partner", "description": "Leads from business partners", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Advertisement", "description": "Leads from online/offline advertisements", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    ]
+    await db.lead_sources.insert_many(lead_sources)
+    
+    # Lead Statuses
+    lead_statuses = [
+        {"id": str(uuid.uuid4()), "name": "New", "description": "Newly created lead", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Contacted", "description": "Initial contact made", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Qualified", "description": "Lead has been qualified", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Proposal Sent", "description": "Proposal has been sent", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Negotiation", "description": "In negotiation phase", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Won", "description": "Lead converted to customer", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Lost", "description": "Lead lost to competitor or rejected", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "On Hold", "description": "Lead is on hold", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    ]
+    await db.lead_statuses.insert_many(lead_statuses)
+    
+    # Opportunity Stages
+    opportunity_stages = [
+        {"id": str(uuid.uuid4()), "name": "Qualification", "description": "Initial qualification stage", "probability": 10, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Needs Analysis", "description": "Understanding customer needs", "probability": 25, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Proposal", "description": "Proposal preparation and submission", "probability": 50, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Negotiation", "description": "Price and terms negotiation", "probability": 75, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Closed Won", "description": "Successfully closed deal", "probability": 100, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Closed Lost", "description": "Lost the opportunity", "probability": 0, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc)},
+    ]
+    await db.opportunity_stages.insert_many(opportunity_stages)
+    
+    logger.info("Lead Management master data initialized successfully")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
