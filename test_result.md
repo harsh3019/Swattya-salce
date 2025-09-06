@@ -225,6 +225,42 @@ backend:
           agent: "testing"
           comment: "✅ CONTACT MANAGEMENT BACKEND FULLY FUNCTIONAL: Comprehensive testing completed successfully. CRUD OPERATIONS: ✅ POST /api/contacts creates contacts with validation, ✅ GET /api/contacts returns paginated list (5 contacts found), ✅ PUT /api/contacts/{id} updates successfully, ✅ DELETE /api/contacts/{id} soft deletes correctly. ADVANCED FEATURES: ✅ Email uniqueness validation working (duplicates rejected), ✅ SPOC enforcement functional (one per company), ✅ Duplicate detection similarity matching implemented, ✅ Bulk activate/deactivate operations working. VALIDATION: ✅ Email format validation, ✅ Phone format validation, ✅ Salutation validation, ✅ Required fields validation. SECURITY: ✅ RBAC permissions working (admin has View/Add/Edit/Delete/Export for Sales/Contacts). MASTER DATA: ✅ 24 designations available (20+ required), ✅ 14 companies available. Minor Issue: Export endpoint has routing conflict with /contacts/{contact_id} causing 404 error - needs route reordering."
 
+  - task: "Lead Management Product Services CRUD APIs"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented full CRUD APIs for Product Services: GET /api/product-services (list), GET /api/product-services/{id} (detail), POST /api/product-services (create), PUT /api/product-services/{id} (update), DELETE /api/product-services/{id} (soft delete). Added ProductServiceCreate and ProductServiceUpdate models. Includes name uniqueness validation, lead dependency check before deletion, audit trail logging, and RBAC access control."
+
+  - task: "Lead Management Sub-Tender Types CRUD APIs"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented full CRUD APIs for Sub-Tender Types: GET /api/sub-tender-types (list), GET /api/sub-tender-types/{id} (detail), POST /api/sub-tender-types (create), PUT /api/sub-tender-types/{id} (update), DELETE /api/sub-tender-types/{id} (soft delete). Added SubTenderTypeCreate and SubTenderTypeUpdate models. Includes name uniqueness validation, lead dependency check before deletion, audit trail logging, and RBAC access control."
+
+  - task: "Partner Management CRUD APIs"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Partner CRUD APIs already implemented and need testing: GET /api/partners (list), GET /api/partners/{id} (detail), POST /api/partners (create), PUT /api/partners/{id} (update), DELETE /api/partners/{id} (soft delete). Includes email uniqueness validation, audit trail logging, and RBAC access control."
+
 frontend:
   - task: "Company List Page and CRUD Operations"
     implemented: true
