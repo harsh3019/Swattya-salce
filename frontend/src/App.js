@@ -523,6 +523,18 @@ function App() {
                 </ProtectedRoute>
               } />
               
+              {/* Lead Management Routes */}
+              <Route path="/leads/add" element={
+                <ProtectedRoute>
+                  <LeadForm />
+                </ProtectedRoute>
+              } />
+              <Route path="/leads/edit/:id" element={
+                <ProtectedRoute>
+                  <LeadForm />
+                </ProtectedRoute>
+              } />
+              
               <Route path="/" element={<HomeRoute />} />
             </Routes>
           </BrowserRouter>
