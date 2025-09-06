@@ -2809,8 +2809,41 @@ async def init_lead_data(current_user: User = Depends(get_current_user)):
     if current_user.username != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    await initialize_lead_master_data()
-    return {"message": "Lead Management master data initialized successfully"}
+    try:
+        # Check current count
+        current_count = await db.product_services.count_documents({})
+        logger.info(f"Current product services count: {current_count}")
+        
+        await initialize_lead_master_data()
+        
+        # Check after initialization
+        new_count = await db.product_services.count_documents({})
+        logger.info(f"New product services count: {new_count}")
+        
+        return {"message": "Lead Management master data initialized successfully", "before": current_count, "after": new_count}
+    except Exception as e:
+        logger.error(f"Failed to initialize lead data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Initialization failed: {str(e)}")
+
+# Debug endpoint to check database collections
+@api_router.get("/admin/debug-collections")
+async def debug_collections(current_user: User = Depends(get_current_user)):
+    """Debug endpoint to check collections"""
+    if current_user.username != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        collections = await db.list_collection_names()
+        counts = {}
+        for collection in ["product_services", "sub_tender_types", "partners"]:
+            if collection in collections:
+                counts[collection] = await db.get_collection(collection).count_documents({})
+            else:
+                counts[collection] = "Collection doesn't exist"
+        
+        return {"collections": collections, "counts": counts}
+    except Exception as e:
+        return {"error": str(e)}
 
 # ================ LEAD MANAGEMENT ENDPOINTS ================
 
