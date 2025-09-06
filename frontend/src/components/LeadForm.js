@@ -507,7 +507,7 @@ export const LeadForm = () => {
           name="product_service_id"
           control={control}
           render={({ field }) => (
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select onValueChange={field.onChange} value={field.value || 'none'}>
               <SelectTrigger>
                 <SelectValue placeholder="Select product/service (optional)" />
               </SelectTrigger>
