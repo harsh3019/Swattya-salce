@@ -363,6 +363,31 @@ export const LeadForm = () => {
           )}
         </div>
 
+        {/* Conditional Billing Type - only show for Tender or Pre-Tender */}
+        {(watchedValues.tender_type === 'Tender' || watchedValues.tender_type === 'Pre-Tender') && (
+          <div className="space-y-2">
+            <Label htmlFor="billing_type">Billing Type *</Label>
+            <Controller
+              name="billing_type"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value || ''}>
+                  <SelectTrigger className={errors.billing_type ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Select billing type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="prepaid">Prepaid</SelectItem>
+                    <SelectItem value="postpaid">Postpaid</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.billing_type && (
+              <p className="text-sm text-red-600">{errors.billing_type.message}</p>
+            )}
+          </div>
+        )}
+
         <div className="space-y-2">
           <Label htmlFor="sub_tender_type_id">Sub-Tender Type</Label>
           <Controller
