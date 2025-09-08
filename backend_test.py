@@ -1020,8 +1020,16 @@ class SawayattaERPTester:
         if not success:
             return self.log_test("Lead Change Status API", False, f"Could not get leads list: {status}")
         
+        # Check if leads_response is a dict with 'leads' key or a list
+        if isinstance(leads_response, dict) and 'leads' in leads_response:
+            leads_list = leads_response['leads']
+        elif isinstance(leads_response, list):
+            leads_list = leads_response
+        else:
+            leads_list = []
+        
         # If no leads exist, create one for testing
-        if not leads_response or len(leads_response) == 0:
+        if not leads_list or len(leads_list) == 0:
             # Get required data for lead creation
             companies_success, _, companies = self.make_request('GET', 'companies')
             users_success, _, users = self.make_request('GET', 'users')
@@ -1054,7 +1062,7 @@ class SawayattaERPTester:
             self.created_items['test_lead_id'] = lead_id
         else:
             # Use existing lead
-            lead_id = leads_response[0]['id']
+            lead_id = leads_list[0]['id']
         
         all_tests_passed = True
         
@@ -1119,19 +1127,25 @@ class SawayattaERPTester:
         
         # Create another lead for this test
         if 'test_lead_id' in self.created_items:
+            # Get required data again if not available
+            if 'companies' not in locals():
+                companies_success, _, companies = self.make_request('GET', 'companies')
+                users_success, _, users = self.make_request('GET', 'users')
+                services_success, _, services = self.make_request('GET', 'product-services')
+            
             # Create a new lead that's not approved
             test_lead_2 = {
                 "tender_type": "Non-Tender",
                 "project_title": f"Test Lead 2 for Validation {datetime.now().strftime('%H%M%S')}",
-                "company_id": companies[0]['id'] if 'companies' in locals() else lead_id,  # Fallback
+                "company_id": companies[0]['id'] if companies else lead_id,  # Fallback
                 "state": "Karnataka",
                 "lead_subtype": "Referral",
                 "source": "Partner",
-                "product_service_id": services[0]['id'] if 'services' in locals() else None,
+                "product_service_id": services[0]['id'] if services else None,
                 "expected_orc": 300000,
                 "revenue": 280000,
                 "competitors": "CompetitorX",
-                "lead_owner": users[0]['id'] if 'users' in locals() else None,
+                "lead_owner": users[0]['id'] if users else None,
                 "checklist_completed": True
             }
             
