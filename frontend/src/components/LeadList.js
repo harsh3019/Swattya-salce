@@ -528,6 +528,15 @@ export const LeadList = () => {
         entityName="leads"
         customActions={(lead) => (
           <div className="flex space-x-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleStatusChange(lead)}
+              className="text-purple-600 hover:text-purple-700"
+            >
+              <RefreshCw className="h-4 w-4 mr-1" />
+              Status
+            </Button>
             {lead.status === 'New' && (
               <Button
                 size="sm"
