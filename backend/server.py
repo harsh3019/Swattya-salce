@@ -2736,7 +2736,7 @@ class Lead(BaseAuditModel):
     source: str = Field(..., max_length=100)
     product_service_id: str = Field(..., description="Reference to product/service")
     is_enquiry: Optional[bool] = Field(default=False)
-    billing_type: Optional[str] = Field(None, pattern=r'^(Prepaid|Postpaid)$')
+    billing_type: Optional[str] = Field(None, pattern=r'^(prepaid|postpaid)$')
     expected_orc: Optional[float] = Field(None, ge=0)
     revenue: Optional[float] = Field(None, ge=0)
     competitors: Optional[str] = Field(None, max_length=500)
