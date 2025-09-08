@@ -3634,6 +3634,9 @@ async def change_lead_status(
                 resource_id=lead_id,
                 details=f"Changed lead approval status to: {approval_status}"
             )
+            
+            # For approval/rejection, converted should be False
+            converted = False
         else:
             raise HTTPException(status_code=400, detail="Invalid status")
         
