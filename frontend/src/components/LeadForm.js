@@ -81,6 +81,7 @@ export const LeadForm = () => {
   const [formData, setFormData] = useState({
     // Step 1 defaults
     tender_type: '',
+    billing_type: '',
     project_title: '',
     company_id: '',
     state: '',
