@@ -526,17 +526,19 @@ export const LeadList = () => {
         description="Manage lead pipeline and track conversions"
         modulePath="/leads"
         entityName="leads"
+        additionalActions={(lead) => (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleStatusChange(lead)}
+            className="h-8 w-8 p-0 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+            title="Change Status"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </Button>
+        )}
         customActions={(lead) => (
           <div className="flex space-x-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => handleStatusChange(lead)}
-              className="text-purple-600 hover:text-purple-700"
-            >
-              <RefreshCw className="h-4 w-4 mr-1" />
-              Status
-            </Button>
             {lead.status === 'New' && (
               <Button
                 size="sm"
