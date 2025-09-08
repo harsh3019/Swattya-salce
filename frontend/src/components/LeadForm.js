@@ -154,6 +154,7 @@ export const LeadForm = () => {
     // Use proper default values for the form
     const defaultValues = {
       ...formData,
+      billing_type: formData.billing_type || '',
       sub_tender_type_id: formData.sub_tender_type_id || 'none',
       partner_id: formData.partner_id || 'none',
       product_service_id: formData.product_service_id || 'none',
