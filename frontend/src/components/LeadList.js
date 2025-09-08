@@ -730,6 +730,15 @@ export const LeadList = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Lead Change Status Modal */}
+      <LeadChangeStatusModal
+        leadId={statusChangeModal.leadId}
+        initialLead={statusChangeModal.lead}
+        isOpen={statusChangeModal.isOpen}
+        onClose={handleStatusChangeClose}
+        onSuccess={handleStatusChangeSuccess}
+      />
     </div>
   );
 };
