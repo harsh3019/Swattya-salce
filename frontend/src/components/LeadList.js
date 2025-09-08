@@ -125,6 +125,34 @@ export const LeadList = () => {
     }
   };
 
+  const handleStatusChange = (lead) => {
+    setStatusChangeModal({
+      isOpen: true,
+      leadId: lead.id,
+      lead: lead
+    });
+  };
+
+  const handleStatusChangeSuccess = (updatedLead) => {
+    // Refresh the leads list and KPIs
+    loadData();
+    
+    // Close the modal
+    setStatusChangeModal({
+      isOpen: false,
+      leadId: null,
+      lead: null
+    });
+  };
+
+  const handleStatusChangeClose = () => {
+    setStatusChangeModal({
+      isOpen: false,
+      leadId: null,
+      lead: null
+    });
+  };
+
   const handleDelete = async (lead) => {
     if (window.confirm(`Are you sure you want to delete lead "${lead.project_title}"?`)) {
       try {
