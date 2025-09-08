@@ -1240,8 +1240,8 @@ class SawayattaERPTester:
 
 def main():
     tester = SawayattaERPTester()
-    # Run only company creation tests as requested in the review
-    success = tester.run_company_tests_only()
+    # Run Lead Change Status API tests as requested in the review
+    success = tester.run_lead_status_tests_only()
     return 0 if success else 1
 
 if __name__ == "__main__":
