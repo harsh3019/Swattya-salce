@@ -40,9 +40,13 @@ const PermissionDataTable = ({
   onEdit,
   onDelete,
   onAdd,
+  onExport,
   title,
+  description,
   modulePath = '',
-  entityName = ''
+  entityName = '',
+  customActions,
+  additionalActions // New prop for additional action buttons
 }) => {
   const { canAdd, canEdit, canDelete, canView, hasPermission } = usePermissions();
 
