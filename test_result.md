@@ -629,6 +629,18 @@ frontend:
           agent: "main"
           comment: "Implemented comprehensive Lead Listing page with KPIs dashboard and advanced features. KPI DASHBOARD: 4 cards showing Total Leads, Pending Approval, Approved, and Escalated leads with color-coded icons and descriptions. ADVANCED FILTERS: Status filter (New/Nurturing/Converted), Approval Status filter (Pending/Approved/Rejected/Escalated), Tender Type filter, and search functionality. DATA TABLE: Professional PermissionDataTable with Lead ID, Project Title, Company, Status badges, Approval status badges, Expected ORC (₹ formatted), Revenue (₹ formatted), Location, Created date. CUSTOM ACTIONS: Nurture button for New leads, Convert button for Approved leads, standard CRUD operations. VIEW DIALOG: Comprehensive lead details modal with Lead Information, Company & Location, Lead Details, Financial Information, Status Information, Additional Information, and System Information sections. Features: Proper badge coloring, Indian number formatting, master data lookups, CSV export, pagination, sorting. Routes added to App.js (/leads). Ready for manual testing."
 
+  - task: "Lead Change Status API"
+    implemented: true
+    working: false
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ LEAD CHANGE STATUS API TESTING COMPLETED: 90% success rate (9/10 tests passed). ✅ WORKING FEATURES: Lead approval (POST /api/leads/{id}/status with status='approved'), Lead conversion (POST /api/leads/{id}/status with status='convert_to_opp'), Lead rejection (POST /api/leads/{id}/status with status='Rejected'), Opportunity ID generation in POT-XXXXXXXX format working correctly, Business logic validation (prevents conversion of unapproved leads), Opportunity creation in database working. ❌ CRITICAL ISSUES: 1) Approval/Rejection responses incorrectly show 'converted: true' instead of 'converted: false', 2) Double conversion prevention not implemented - allows multiple conversions of same lead (should return 400 error). ✅ OPPORTUNITY ID FORMAT: Correctly generates POT-[A-Z0-9]{8} format as specified. ✅ BUSINESS LOGIC: Properly enforces approval requirement before conversion. ASSESSMENT: Core functionality working but needs fixes for response format consistency and double conversion prevention."
+
   - task: "Lead Form Backend Integration"
     implemented: true
     working: true
