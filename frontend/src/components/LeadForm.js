@@ -45,6 +45,15 @@ const step1Schema = z.object({
   state: z.string().min(1, 'State is required').max(100, 'State must be less than 100 characters'),
   sub_tender_type_id: z.string().optional(),
   partner_id: z.string().optional(),
+}).refine((data) => {
+  // If tender_type is Tender or Pre-Tender, billing_type is required
+  if (data.tender_type === 'Tender' || data.tender_type === 'Pre-Tender') {
+    return data.billing_type && data.billing_type.trim() !== '';
+  }
+  return true;
+}, {
+  message: 'Billing type is required for Tender and Pre-Tender types',
+  path: ['billing_type'],
 });
 
 const step2Schema = z.object({
