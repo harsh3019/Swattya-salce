@@ -2724,6 +2724,7 @@ class Lead(BaseAuditModel):
     
     # General Info
     tender_type: str = Field(..., pattern=r'^(Tender|Pre-Tender|Non-Tender)$')
+    billing_type: Optional[str] = Field(None, pattern=r'^(prepaid|postpaid)$')
     sub_tender_type_id: Optional[str] = None
     project_title: str = Field(..., min_length=2, max_length=200)
     company_id: str = Field(..., description="Reference to company")
