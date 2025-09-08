@@ -3301,16 +3301,16 @@ async def get_lead_kpis(current_user: User = Depends(get_current_user)):
     await check_lead_access(current_user)
     
     # Count leads by different statuses
-    total_leads = await db.leads.count_documents({"is_deleted": {"$ne": True}})
-    pending_leads = await db.leads.count_documents({"approval_status": "Pending", "is_deleted": {"$ne": True}})
-    approved_leads = await db.leads.count_documents({"approval_status": "Approved", "is_deleted": {"$ne": True}})
-    escalated_leads = await db.leads.count_documents({"approval_status": "Escalated", "is_deleted": {"$ne": True}})
+    total_leads = await db.leads.count_documents({"is_active": True})
+    pending_leads = await db.leads.count_documents({"approval_status": "Pending", "is_active": True})
+    approved_leads = await db.leads.count_documents({"approval_status": "Approved", "is_active": True})
+    escalated_leads = await db.leads.count_documents({"approval_status": "Escalated", "is_active": True})
     
     return {
-        "total_leads": total_leads,
-        "pending_leads": pending_leads,
-        "approved_leads": approved_leads,
-        "escalated_leads": escalated_leads
+        "total": total_leads,
+        "pending": pending_leads,
+        "approved": approved_leads,
+        "escalated": escalated_leads
     }
 
 @api_router.get("/leads/{lead_id}")
