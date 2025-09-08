@@ -192,6 +192,10 @@ const PermissionDataTable = ({
                     {(canView(modulePath) || canEdit(modulePath) || canDelete(modulePath)) && (
                       <TableCell>
                         <div className="flex items-center space-x-1">
+                          {/* Additional Actions First */}
+                          {additionalActions && additionalActions(item)}
+                          
+                          {/* Standard Actions */}
                           {canView(modulePath) && (
                             <Button
                               variant="ghost"
