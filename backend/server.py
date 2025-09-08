@@ -2761,6 +2761,7 @@ class Lead(BaseAuditModel):
 class LeadCreate(BaseModel):
     # General Info (lead_id will be auto-generated)
     tender_type: str = Field(..., pattern=r'^(Tender|Pre-Tender|Non-Tender)$')
+    billing_type: Optional[str] = Field(None, pattern=r'^(prepaid|postpaid)$')
     sub_tender_type_id: Optional[str] = None
     project_title: str = Field(..., min_length=2, max_length=200)
     company_id: str = Field(..., description="Reference to company")
@@ -2772,7 +2773,6 @@ class LeadCreate(BaseModel):
     source: str = Field(..., max_length=100)
     product_service_id: str = Field(..., description="Reference to product/service")
     is_enquiry: Optional[bool] = Field(default=False)
-    billing_type: Optional[str] = Field(None, pattern=r'^(Prepaid|Postpaid)$')
     expected_orc: Optional[float] = Field(None, ge=0)
     revenue: Optional[float] = Field(None, ge=0)
     competitors: Optional[str] = Field(None, max_length=500)
