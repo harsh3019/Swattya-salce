@@ -3534,44 +3534,132 @@ async def delete_lead(lead_id: str, current_user: User = Depends(get_current_use
         raise HTTPException(status_code=500, detail="Failed to delete lead")
 
 # Lead nurturing and conversion
-@api_router.post("/leads/{lead_id}/nurture")
-async def nurture_lead(lead_id: str, current_user: User = Depends(get_current_user)):
+# Lead Status Change endpoint
+@api_router.post("/leads/{lead_id}/status")
+async def change_lead_status(
+    lead_id: str, 
+    status_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Change lead status with opportunity conversion support"""
     await check_lead_access(current_user)
     
-    # Check if lead exists
-    lead = await db.leads.find_one({"id": lead_id, "is_deleted": {"$ne": True}})
-    if not lead:
-        raise HTTPException(status_code=404, detail="Lead not found")
-    
     try:
-        # Update status to Nurturing
-        await db.leads.update_one(
-            {"id": lead_id},
-            {
-                "$set": {
-                    "status": "Nurturing",
-                    "updated_at": datetime.now(timezone.utc)
-                }
+        # Get the lead
+        lead = await db.leads.find_one({"id": lead_id, "is_active": True})
+        if not lead:
+            raise HTTPException(status_code=404, detail="Lead not found")
+        
+        new_status = status_data.get("status")
+        if not new_status:
+            raise HTTPException(status_code=400, detail="Status is required")
+        
+        converted = False
+        opportunity_id = None
+        
+        # Handle convert to opportunity
+        if new_status == "convert_to_opp":
+            if lead.get("approval_status") != "Approved":
+                raise HTTPException(status_code=400, detail="Lead must be approved before conversion")
+            
+            # Generate opportunity ID in POT-XXXXXXXX format
+            opportunity_id = generate_opportunity_id()
+            
+            # Create opportunity
+            opportunity_data = {
+                "id": opportunity_id,
+                "name": lead.get("project_title", ""),
+                "lead_id": lead_id,
+                "company_id": lead.get("company_id"),
+                "contact_id": lead.get("contact_id"),
+                "source": lead.get("source", "Lead Conversion"),
+                "stage": "Qualification",
+                "expected_value": lead.get("expected_orc", 0),
+                "currency": "INR",
+                "probability": 25,
+                "expected_close_date": None,
+                "owner_user_id": lead.get("lead_owner"),
+                "created_by": current_user.id,
+                "created_at": datetime.now(timezone.utc),
+                "updated_at": datetime.now(timezone.utc),
+                "is_active": True
             }
-        )
+            
+            await db.opportunities.insert_one(opportunity_data)
+            
+            # Update lead status
+            await db.leads.update_one(
+                {"id": lead_id},
+                {
+                    "$set": {
+                        "status": "Converted",
+                        "approval_status": "Approved",
+                        "converted_to_opportunity": True,
+                        "opportunity_date": datetime.now(timezone.utc),
+                        "updated_at": datetime.now(timezone.utc)
+                    }
+                }
+            )
+            
+            converted = True
+            
+            # Log audit trail
+            await log_audit_trail(
+                user_id=current_user.id,
+                action="CONVERT",
+                resource_type="Lead",
+                resource_id=lead_id,
+                details=f"Converted lead to opportunity: {opportunity_id}"
+            )
+            
+        elif new_status in ["approved", "Rejected"]:
+            # Map to proper approval status
+            approval_status = "Approved" if new_status == "approved" else "Rejected"
+            
+            await db.leads.update_one(
+                {"id": lead_id},
+                {
+                    "$set": {
+                        "approval_status": approval_status,
+                        "updated_at": datetime.now(timezone.utc)
+                    }
+                }
+            )
+            
+            # Log audit trail
+            await log_audit_trail(
+                user_id=current_user.id,
+                action="UPDATE",
+                resource_type="Lead",
+                resource_id=lead_id,
+                details=f"Changed lead approval status to: {approval_status}"
+            )
+        else:
+            raise HTTPException(status_code=400, detail="Invalid status")
         
-        # Log audit trail
-        await log_audit_trail(
-            user_id=current_user.id,
-            action="NURTURE",
-            resource_type="Lead",
-            resource_id=lead_id,
-            details=f"Nurtured lead: {lead['lead_id']} - {lead['project_title']}"
-        )
+        # Get updated lead
+        updated_lead = await db.leads.find_one({"id": lead_id})
         
-        # Log email notification attempt
-        logger.info(f"Email notification attempt: Lead '{lead['lead_id']}' nurtured by {current_user.username}")
-        
-        return {"message": "Lead status updated to Nurturing"}
+        return {
+            "success": True,
+            "lead": prepare_for_json(updated_lead),
+            "converted": converted,
+            "opportunity_id": opportunity_id
+        }
         
     except Exception as e:
-        logger.error(f"Failed to nurture lead: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to nurture lead")
+        logger.error(f"Failed to change lead status: {str(e)}")
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=500, detail="Failed to change lead status")
+
+def generate_opportunity_id():
+    """Generate opportunity ID in POT-XXXXXXXX format"""
+    chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    suffix = ''.join(random.choices(chars, k=8))
+    return f'POT-{suffix}'
+
+@api_router.post("/leads/{lead_id}/nurture")
 
 @api_router.post("/leads/{lead_id}/convert")
 async def convert_lead_to_opportunity(
