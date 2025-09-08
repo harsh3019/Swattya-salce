@@ -44,6 +44,11 @@ export const LeadList = () => {
   
   // Dialog states
   const [viewingLead, setViewingLead] = useState(null);
+  const [statusChangeModal, setStatusChangeModal] = useState({
+    isOpen: false,
+    leadId: null,
+    lead: null
+  });
   
   // Master data
   const [companies, setCompanies] = useState([]);
