@@ -37,6 +37,7 @@ const step1Schema = z.object({
   tender_type: z.enum(['Tender', 'Pre-Tender', 'Non-Tender'], {
     required_error: 'Tender type is required'
   }),
+  billing_type: z.string().optional(),
   project_title: z.string()
     .min(2, 'Project title must be at least 2 characters')
     .max(200, 'Project title must be less than 200 characters'),
