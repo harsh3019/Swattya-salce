@@ -1028,47 +1028,66 @@ class SawayattaERPTester:
         else:
             leads_list = []
         
-        # If no leads exist, create one for testing
-        if not leads_list or len(leads_list) == 0:
-            # Get required data for lead creation
-            companies_success, _, companies = self.make_request('GET', 'companies')
-            users_success, _, users = self.make_request('GET', 'users')
-            services_success, _, services = self.make_request('GET', 'product-services')
-            
-            if not all([companies_success, users_success, services_success]) or not all([companies, users, services]):
-                return self.log_test("Lead Change Status API", False, "Missing required data for lead creation")
-            
-            # Create a test lead
-            test_lead = {
-                "tender_type": "Non-Tender",
-                "project_title": f"Test Lead for Status Change {datetime.now().strftime('%H%M%S')}",
-                "company_id": companies[0]['id'],
-                "state": "Maharashtra",
-                "lead_subtype": "Direct",
-                "source": "Website",
-                "product_service_id": services[0]['id'],
-                "expected_orc": 500000,
-                "revenue": 450000,
-                "competitors": "TechCorp, InnoSoft",
-                "lead_owner": users[0]['id'],
-                "checklist_completed": True
-            }
-            
-            success, status, lead_response = self.make_request('POST', 'leads', test_lead, 200)
-            if not success:
-                return self.log_test("Lead Change Status API", False, f"Could not create test lead: {status}")
-            
-            lead_id = lead_response.get('id')
-            self.created_items['test_lead_id'] = lead_id
-        else:
-            # Use existing lead
-            lead_id = leads_list[0]['id']
+        # Get required data for lead creation
+        companies_success, _, companies = self.make_request('GET', 'companies')
+        users_success, _, users = self.make_request('GET', 'users')
+        services_success, _, services = self.make_request('GET', 'product-services')
+        
+        if not all([companies_success, users_success, services_success]) or not all([companies, users, services]):
+            return self.log_test("Lead Change Status API", False, "Missing required data for lead creation")
+        
+        # Always create fresh leads for testing to ensure clean state
+        # Create first test lead
+        test_lead_1 = {
+            "tender_type": "Non-Tender",
+            "project_title": f"Test Lead 1 for Approval {datetime.now().strftime('%H%M%S')}",
+            "company_id": companies[0]['id'],
+            "state": "Maharashtra",
+            "lead_subtype": "Direct",
+            "source": "Website",
+            "product_service_id": services[0]['id'],
+            "expected_orc": 500000,
+            "revenue": 450000,
+            "competitors": "TechCorp, InnoSoft",
+            "lead_owner": users[0]['id'],
+            "checklist_completed": True
+        }
+        
+        success, status, lead1_response = self.make_request('POST', 'leads', test_lead_1, 200)
+        if not success:
+            return self.log_test("Lead Change Status API", False, f"Could not create test lead 1: {status}")
+        
+        lead1_id = lead1_response.get('id')
+        self.created_items['test_lead1_id'] = lead1_id
+        
+        # Create second test lead for validation testing
+        test_lead_2 = {
+            "tender_type": "Non-Tender",
+            "project_title": f"Test Lead 2 for Validation {datetime.now().strftime('%H%M%S')}",
+            "company_id": companies[0]['id'],
+            "state": "Karnataka",
+            "lead_subtype": "Referral",
+            "source": "Partner",
+            "product_service_id": services[0]['id'],
+            "expected_orc": 300000,
+            "revenue": 280000,
+            "competitors": "CompetitorX",
+            "lead_owner": users[0]['id'],
+            "checklist_completed": True
+        }
+        
+        success, status, lead2_response = self.make_request('POST', 'leads', test_lead_2, 200)
+        if not success:
+            return self.log_test("Lead Change Status API", False, f"Could not create test lead 2: {status}")
+        
+        lead2_id = lead2_response.get('id')
+        self.created_items['test_lead2_id'] = lead2_id
         
         all_tests_passed = True
         
         # Test 1: Approve lead
         print("   Testing lead approval...")
-        success, status, response = self.make_request('POST', f'leads/{lead_id}/status', {"status": "approved"}, 200)
+        success, status, response = self.make_request('POST', f'leads/{lead1_id}/status', {"status": "approved"}, 200)
         if success:
             approval_success = self.log_test("Lead Approval", True, f"Lead approved successfully")
             
@@ -1088,7 +1107,7 @@ class SawayattaERPTester:
         
         # Test 2: Convert approved lead to opportunity
         print("   Testing lead conversion...")
-        success, status, response = self.make_request('POST', f'leads/{lead_id}/status', {"status": "convert_to_opp"}, 200)
+        success, status, response = self.make_request('POST', f'leads/{lead1_id}/status', {"status": "convert_to_opp"}, 200)
         if success:
             conversion_success = self.log_test("Lead Conversion", True, f"Lead converted successfully")
             
@@ -1128,69 +1147,38 @@ class SawayattaERPTester:
         
         # Test 3: Try to convert unapproved lead (should fail)
         print("   Testing business logic validation...")
-        
-        # Create another lead for this test
-        if 'test_lead_id' in self.created_items:
-            # Get required data again if not available
-            if 'companies' not in locals():
-                companies_success, _, companies = self.make_request('GET', 'companies')
-                users_success, _, users = self.make_request('GET', 'users')
-                services_success, _, services = self.make_request('GET', 'product-services')
-            
-            # Create a new lead that's not approved
-            test_lead_2 = {
-                "tender_type": "Non-Tender",
-                "project_title": f"Test Lead 2 for Validation {datetime.now().strftime('%H%M%S')}",
-                "company_id": companies[0]['id'] if companies else lead_id,  # Fallback
-                "state": "Karnataka",
-                "lead_subtype": "Referral",
-                "source": "Partner",
-                "product_service_id": services[0]['id'] if services else None,
-                "expected_orc": 300000,
-                "revenue": 280000,
-                "competitors": "CompetitorX",
-                "lead_owner": users[0]['id'] if users else None,
-                "checklist_completed": True
-            }
-            
-            success, status, lead2_response = self.make_request('POST', 'leads', test_lead_2, 200)
-            if success:
-                lead2_id = lead2_response.get('id')
-                self.created_items['test_lead2_id'] = lead2_id
-                
-                # Try to convert without approval (should fail)
-                success, status, response = self.make_request('POST', f'leads/{lead2_id}/status', {"status": "convert_to_opp"}, 400)
-                validation_success = self.log_test("Conversion Validation", success, 
-                                                 f"Correctly rejected conversion of unapproved lead: {status}")
-            else:
-                validation_success = self.log_test("Conversion Validation", False, "Could not create second test lead")
-        else:
-            validation_success = True  # Skip if we couldn't create test data
+        success, status, response = self.make_request('POST', f'leads/{lead2_id}/status', {"status": "convert_to_opp"}, 400)
+        validation_success = self.log_test("Conversion Validation", success, 
+                                         f"Correctly rejected conversion of unapproved lead: {status}")
         
         all_tests_passed = all_tests_passed and validation_success
         
         # Test 4: Reject lead
         print("   Testing lead rejection...")
-        if 'test_lead2_id' in self.created_items:
-            success, status, response = self.make_request('POST', f'leads/{self.created_items["test_lead2_id"]}/status', {"status": "Rejected"}, 200)
-            if success:
-                rejection_success = self.log_test("Lead Rejection", True, f"Lead rejected successfully")
-                
-                # Verify response format
-                has_success = response.get('success') == True
-                has_converted = response.get('converted') == False
-                
-                rejection_format_success = self.log_test("Rejection Response Format", 
-                                                       has_success and has_converted,
-                                                       f"Success: {has_success}, Converted: {has_converted}")
-            else:
-                rejection_success = self.log_test("Lead Rejection", False, f"Status: {status}, Response: {response}")
-                rejection_format_success = False
+        success, status, response = self.make_request('POST', f'leads/{lead2_id}/status', {"status": "Rejected"}, 200)
+        if success:
+            rejection_success = self.log_test("Lead Rejection", True, f"Lead rejected successfully")
+            
+            # Verify response format
+            has_success = response.get('success') == True
+            has_converted = response.get('converted') == False
+            
+            rejection_format_success = self.log_test("Rejection Response Format", 
+                                                   has_success and has_converted,
+                                                   f"Success: {has_success}, Converted: {has_converted}")
         else:
-            rejection_success = True
-            rejection_format_success = True
+            rejection_success = self.log_test("Lead Rejection", False, f"Status: {status}, Response: {response}")
+            rejection_format_success = False
         
         all_tests_passed = all_tests_passed and rejection_success and rejection_format_success
+        
+        # Test 5: Try to convert already converted lead (should fail)
+        print("   Testing double conversion prevention...")
+        success, status, response = self.make_request('POST', f'leads/{lead1_id}/status', {"status": "convert_to_opp"}, 400)
+        double_conversion_success = self.log_test("Double Conversion Prevention", success, 
+                                                f"Correctly rejected double conversion: {status}")
+        
+        all_tests_passed = all_tests_passed and double_conversion_success
         
         return all_tests_passed
 
