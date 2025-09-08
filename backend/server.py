@@ -11,6 +11,7 @@ import bcrypt
 import uuid
 import json
 import logging
+import random
 from pathlib import Path
 from dotenv import load_dotenv
 
