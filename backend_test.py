@@ -12,7 +12,7 @@ from datetime import datetime
 # Configuration
 BASE_URL = "https://lead-opp-crm.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {
-    "email": "admin@sawayatta.com", 
+    "username": "admin@sawayatta.com", 
     "password": "password"
 }
 
