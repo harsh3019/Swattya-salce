@@ -140,16 +140,21 @@ class ComprehensiveFixTester:
         # Test 2: Lead creation with Pre-Tender type and billing_type field
         try:
             lead_data_pre_tender = {
-                "title": "Test Lead - Pre-Tender Type with Billing",
-                "company_id": "test-company-id",
-                "contact_id": "test-contact-id",
-                "source": "Email",
-                "status": "New", 
-                "owner_user_id": "test-user-id",
-                "expected_value": 75000,
-                "currency": "USD",
                 "tender_type": "Pre-Tender",
-                "billing_type": "postpaid"  # This field should be included when tender_type is Pre-Tender
+                "billing_type": "postpaid",  # This field should be included when tender_type is Pre-Tender
+                "project_title": "Test Lead - Pre-Tender Type with Billing",
+                "company_id": "test-company-id",
+                "state": "Karnataka",
+                "lead_subtype": "Referral",
+                "source": "Email",
+                "product_service_id": "test-product-service-id",
+                "is_enquiry": True,
+                "expected_orc": 75000,
+                "revenue": 75000,
+                "status": "New",
+                "lead_owner": "test-user-id",
+                "approval_status": "Pending",
+                "checklist_completed": False
             }
             
             response = requests.post(
