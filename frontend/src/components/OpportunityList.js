@@ -34,6 +34,7 @@ const OpportunityList = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [stageDialogOpen, setStageDialogOpen] = useState(false);
   
   // Master data
   const [stages, setStages] = useState([]);
