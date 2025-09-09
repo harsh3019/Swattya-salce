@@ -137,7 +137,7 @@ class LeadOpportunityConversionTester:
         print("\n📝 TESTING LEAD CREATION")
         print("=" * 50)
         
-        if not self.company_id or not self.service_id:
+        if not self.company_id or not self.service_id or not self.sub_tender_id:
             self.log_test("Create Lead", False, "Missing required master data")
             return False
         
@@ -145,6 +145,7 @@ class LeadOpportunityConversionTester:
             lead_data = {
                 "tender_type": "Tender",
                 "billing_type": "prepaid",
+                "sub_tender_type_id": self.sub_tender_id,
                 "project_title": "Test Lead for Conversion",
                 "company_id": self.company_id,
                 "state": "Maharashtra",
