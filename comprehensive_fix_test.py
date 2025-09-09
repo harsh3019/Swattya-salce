@@ -145,7 +145,7 @@ class ComprehensiveFixTester:
                 "billing_type": "postpaid",  # This field should be included when tender_type is Pre-Tender
                 "sub_tender_type_id": "4304d03c-ccbd-4dac-af97-0e60f88eb8c9",  # Private - Enterprise
                 "project_title": "Test Lead - Pre-Tender Type with Billing",
-                "company_id": "test-company-id",
+                "company_id": "df3d438f-d614-4e72-a666-44c2cf600f44",  # Valid company ID
                 "state": "Karnataka",
                 "lead_subtype": "Referral",
                 "source": "Email",
@@ -154,7 +154,7 @@ class ComprehensiveFixTester:
                 "expected_orc": 75000,
                 "revenue": 75000,
                 "status": "New",
-                "lead_owner": "test-user-id",
+                "lead_owner": "078ed9d6-a65e-401f-a83f-a18432c9016f",  # Valid user ID
                 "approval_status": "Pending",
                 "checklist_completed": False
             }
