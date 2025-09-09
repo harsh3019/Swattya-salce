@@ -207,7 +207,7 @@ class LeadOpportunityConversionTester:
         
         try:
             approval_data = {
-                "status": "Approved"
+                "status": "approved"
             }
             
             response = requests.post(
