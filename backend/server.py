@@ -4227,5 +4227,310 @@ class QuotationCreate(BaseModel):
 
 # ================ OPPORTUNITY MANAGEMENT ENDPOINTS ================
 
+# Helper functions
+def generate_opportunity_id():
+    """Generate opportunity ID in OPP-XXXXXXX format"""
+    chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    suffix = ''.join(random.choices(chars, k=7))
+    return f'OPP-{suffix}'
+
+def generate_quotation_id():
+    """Generate quotation ID in QUO-XXXXXXX format"""
+    chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    suffix = ''.join(random.choices(chars, k=7))
+    return f'QUO-{suffix}'
+
+async def calculate_quotation_totals(quotation_data):
+    """Calculate quotation totals and profitability"""
+    total_recurring = 0
+    total_one_time = 0
+    total_cost = 0
+    
+    for item in quotation_data.get('items', []):
+        # Calculate item totals
+        item_recurring = item['recurring_sale_price'] * item['qty'] * item.get('tenure_months', 1)
+        item_one_time = item['one_time_sale_price'] * item['qty']
+        item_cost = item['purchase_cost_snapshot'] * item['qty']
+        
+        # Update item totals
+        item['total_recurring'] = item_recurring
+        item['total_one_time'] = item_one_time
+        item['total_cost'] = item_cost
+        
+        # Add to grand totals
+        total_recurring += item_recurring
+        total_one_time += item_one_time
+        total_cost += item_cost
+    
+    grand_total = total_recurring + total_one_time
+    profitability_percent = ((grand_total - total_cost) / grand_total * 100) if grand_total > 0 else 0
+    
+    return {
+        'total_recurring': total_recurring,
+        'total_one_time': total_one_time,
+        'grand_total': grand_total,
+        'total_cost': total_cost,
+        'profitability_percent': round(profitability_percent, 2)
+    }
+
+async def get_min_purchase_cost(product_id: str, purchase_date: datetime = None):
+    """Get minimum purchase cost for a product by purchase date"""
+    query = {"product_id": product_id, "is_active": True}
+    if purchase_date:
+        query["purchase_date"] = {"$lte": purchase_date}
+    
+    costs = await db.mst_purchase_costs.find(query).sort("purchase_date", -1).to_list(length=None)
+    
+    if not costs:
+        return 0
+    
+    # Return minimum cost from available data
+    min_cost = min(cost['purchase_cost'] for cost in costs)
+    return min_cost
+
+# Master Data APIs
+@api_router.get("/mst/primary-categories")
+async def get_primary_categories(current_user: User = Depends(get_current_user)):
+    """Get all primary categories"""
+    categories = await db.mst_primary_categories.find({"is_active": True}).to_list(None)
+    return [prepare_for_json(cat) for cat in categories]
+
+@api_router.post("/mst/primary-categories")
+async def create_primary_category(category_data: MstPrimaryCategoryCreate, current_user: User = Depends(get_current_user)):
+    """Create new primary category"""
+    category_dict = {
+        **category_data.dict(),
+        "id": str(uuid.uuid4()),
+        "created_by": current_user.id,
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    await db.mst_primary_categories.insert_one(category_dict)
+    return prepare_for_json(category_dict)
+
+@api_router.get("/mst/products")
+async def get_products(current_user: User = Depends(get_current_user)):
+    """Get all products"""
+    products = await db.mst_products.find({"is_active": True}).to_list(None)
+    return [prepare_for_json(product) for product in products]
+
+@api_router.post("/mst/products")
+async def create_product(product_data: MstProductCreate, current_user: User = Depends(get_current_user)):
+    """Create new product"""
+    product_dict = {
+        **product_data.dict(),
+        "id": str(uuid.uuid4()),
+        "created_by": current_user.id,
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    await db.mst_products.insert_one(product_dict)
+    return prepare_for_json(product_dict)
+
+@api_router.get("/mst/currencies")
+async def get_currencies(current_user: User = Depends(get_current_user)):
+    """Get all currencies"""
+    currencies = await db.mst_currencies.find({"is_active": True}).to_list(None)
+    return [prepare_for_json(currency) for currency in currencies]
+
+@api_router.get("/mst/stages")
+async def get_stages(current_user: User = Depends(get_current_user)):
+    """Get all opportunity stages (L1-L8)"""
+    stages = await db.mst_stages.find({"is_active": True}).sort("stage_order", 1).to_list(None)
+    return [prepare_for_json(stage) for stage in stages]
+
+@api_router.get("/mst/rate-cards")
+async def get_rate_cards(current_user: User = Depends(get_current_user)):
+    """Get all active rate cards"""
+    current_date = datetime.now(timezone.utc)
+    query = {
+        "is_active": True,
+        "effective_from": {"$lte": current_date},
+        "$or": [
+            {"effective_to": None},
+            {"effective_to": {"$gte": current_date}}
+        ]
+    }
+    rate_cards = await db.mst_rate_cards.find(query).to_list(None)
+    return [prepare_for_json(card) for card in rate_cards]
+
+@api_router.get("/mst/sales-prices/{rate_card_id}")
+async def get_sales_prices_by_rate_card(rate_card_id: str, current_user: User = Depends(get_current_user)):
+    """Get sales prices for a specific rate card"""
+    prices = await db.mst_sales_prices.find({
+        "rate_card_id": rate_card_id,
+        "is_active": True
+    }).to_list(None)
+    return [prepare_for_json(price) for price in prices]
+
+# Opportunity APIs
+@api_router.get("/opportunities")
+async def get_opportunities(
+    page: int = 1,
+    limit: int = 20,
+    stage: Optional[str] = None,
+    status: Optional[str] = None,
+    search: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Get opportunities with pagination and filters"""
+    query = {"is_active": True}
+    
+    if stage:
+        query["stage_id"] = stage
+    if status:
+        query["status"] = status
+    if search:
+        query["$or"] = [
+            {"opportunity_id": {"$regex": search, "$options": "i"}},
+            {"project_title": {"$regex": search, "$options": "i"}}
+        ]
+    
+    skip = (page - 1) * limit
+    opportunities = await db.opportunities.find(query).skip(skip).limit(limit).to_list(None)
+    total = await db.opportunities.count_documents(query)
+    
+    return {
+        "opportunities": [prepare_for_json(opp) for opp in opportunities],
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "total_pages": (total + limit - 1) // limit
+    }
+
+@api_router.get("/opportunities/kpis")
+async def get_opportunity_kpis(current_user: User = Depends(get_current_user)):
+    """Get opportunity KPIs"""
+    total = await db.opportunities.count_documents({"is_active": True})
+    open_opps = await db.opportunities.count_documents({"status": {"$in": ["Open", "On Hold"]}, "is_active": True})
+    won = await db.opportunities.count_documents({"status": "Won", "is_active": True})
+    lost = await db.opportunities.count_documents({"status": "Lost", "is_active": True})
+    
+    # Calculate weighted pipeline
+    pipeline = await db.opportunities.aggregate([
+        {"$match": {"status": {"$in": ["Open", "On Hold"]}, "is_active": True}},
+        {"$group": {"_id": None, "weighted_pipeline": {"$sum": "$weighted_revenue"}}}
+    ]).to_list(None)
+    
+    weighted_pipeline = pipeline[0]["weighted_pipeline"] if pipeline else 0
+    
+    return {
+        "total": total,
+        "open": open_opps,
+        "won": won,
+        "lost": lost,
+        "weighted_pipeline": weighted_pipeline
+    }
+
+@api_router.post("/opportunities")
+async def create_opportunity(opp_data: OpportunityCreate, current_user: User = Depends(get_current_user)):
+    """Create new opportunity"""
+    
+    # Get default stage (L1)
+    default_stage = await db.mst_stages.find_one({"stage_code": "L1", "is_active": True})
+    if not default_stage:
+        raise HTTPException(status_code=400, detail="Default stage L1 not found")
+    
+    # Calculate weighted revenue
+    weighted_revenue = opp_data.expected_revenue * (opp_data.win_probability / 100)
+    
+    opportunity_dict = {
+        **opp_data.dict(),
+        "id": str(uuid.uuid4()),
+        "opportunity_id": generate_opportunity_id(),
+        "stage_id": default_stage["id"],
+        "weighted_revenue": weighted_revenue,
+        "convert_date": datetime.now(timezone.utc) if opp_data.lead_id else None,
+        "created_by": current_user.id,
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
+        "is_active": True
+    }
+    
+    await db.opportunities.insert_one(opportunity_dict)
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="CREATE",
+        resource_type="Opportunity",
+        resource_id=opportunity_dict["id"],
+        details=f"Created opportunity: {opportunity_dict['opportunity_id']}"
+    )
+    
+    return prepare_for_json(opportunity_dict)
+
+@api_router.get("/opportunities/{opportunity_id}")
+async def get_opportunity(opportunity_id: str, current_user: User = Depends(get_current_user)):
+    """Get opportunity by ID"""
+    opportunity = await db.opportunities.find_one({"id": opportunity_id, "is_active": True})
+    if not opportunity:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    
+    return prepare_for_json(opportunity)
+
+# Quotation APIs
+@api_router.get("/opportunities/{opportunity_id}/quotations")
+async def get_opportunity_quotations(opportunity_id: str, current_user: User = Depends(get_current_user)):
+    """Get all quotations for an opportunity"""
+    quotations = await db.quotations.find({
+        "opportunity_id": opportunity_id,
+        "is_active": True
+    }).to_list(None)
+    
+    return [prepare_for_json(quot) for quot in quotations]
+
+@api_router.post("/opportunities/{opportunity_id}/quotations")
+async def create_quotation(
+    opportunity_id: str,
+    quotation_data: QuotationCreate,
+    current_user: User = Depends(get_current_user)
+):
+    """Create new quotation for opportunity"""
+    
+    # Verify opportunity exists
+    opportunity = await db.opportunities.find_one({"id": opportunity_id, "is_active": True})
+    if not opportunity:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    
+    quotation_dict = quotation_data.dict()
+    quotation_dict.update({
+        "id": str(uuid.uuid4()),
+        "quotation_id": generate_quotation_id(),
+        "opportunity_id": opportunity_id,
+        "created_by": current_user.id,
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
+        "is_active": True
+    })
+    
+    # Calculate totals and profitability
+    totals = await calculate_quotation_totals(quotation_dict)
+    quotation_dict.update(totals)
+    
+    await db.quotations.insert_one(quotation_dict)
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="CREATE",
+        resource_type="Quotation",
+        resource_id=quotation_dict["id"],
+        details=f"Created quotation: {quotation_dict['quotation_id']}"
+    )
+    
+    return prepare_for_json(quotation_dict)
+
+@api_router.get("/quotations/{quotation_id}")
+async def get_quotation(quotation_id: str, current_user: User = Depends(get_current_user)):
+    """Get quotation by ID"""
+    quotation = await db.quotations.find_one({"id": quotation_id, "is_active": True})
+    if not quotation:
+        raise HTTPException(status_code=404, detail="Quotation not found")
+    
+    return prepare_for_json(quotation)
+
 # Include router after all endpoints are defined
 app.include_router(api_router)
