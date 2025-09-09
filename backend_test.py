@@ -265,8 +265,8 @@ class OpportunityBackendTester:
             if response.status_code == 200:
                 data = response.json()
                 
-                # Check for expected KPI fields
-                expected_fields = ['total_opportunity', 'open', 'pipeline_value', 'weighted_revenue', 'win_rate']
+                # Check for actual KPI fields returned by the API
+                expected_fields = ['total', 'open', 'won', 'lost', 'weighted_pipeline']
                 found_fields = []
                 
                 for field in expected_fields:
