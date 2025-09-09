@@ -114,6 +114,16 @@ export const LeadForm = () => {
   // File uploads
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [uploadingFile, setUploadingFile] = useState(false);
+  
+  // Checklist state
+  const [checklistItems, setChecklistItems] = useState([
+    { id: 'company_verified', label: 'Company information has been verified', checked: false },
+    { id: 'project_details', label: 'Project details are complete and accurate', checked: false },
+    { id: 'financial_info', label: 'Financial information (ORC/Revenue) is realistic', checked: false },
+    { id: 'documents_uploaded', label: 'All required documents have been uploaded', checked: false },
+    { id: 'lead_owner_assigned', label: 'Lead owner has been properly assigned', checked: false },
+    { id: 'compliance_check', label: 'Lead complies with company policies', checked: false }
+  ]);
 
   // Form setup for current step
   const getCurrentSchema = () => {
