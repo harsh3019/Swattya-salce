@@ -170,7 +170,7 @@ class LeadCreationTester:
         # Complete lead data structure
         lead_data = {
             "tender_type": "Tender",
-            "billing_type": "Prepaid", 
+            "billing_type": "prepaid",  # lowercase as required by API
             "sub_tender_type_id": subtender_id,
             "project_title": "Test Project Implementation",
             "company_id": company_id,
