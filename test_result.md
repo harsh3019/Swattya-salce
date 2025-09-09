@@ -871,7 +871,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Fixed Lead Creation functionality after removing checklist requirement"
+    - "Complete Lead-to-Opportunity Conversion Workflow"
   stuck_tasks:
     - "Stepper-Based Opportunity Management System"
   test_all: false
