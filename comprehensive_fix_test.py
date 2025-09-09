@@ -196,7 +196,16 @@ class ComprehensiveFixTester:
             # Test without authentication headers (should fail)
             response_no_auth = requests.post(
                 f"{self.base_url}/leads",
-                json={"title": "Test Lead - No Auth"},
+                json={
+                    "tender_type": "Non-Tender",
+                    "project_title": "Test Lead - No Auth",
+                    "company_id": "test-company-id",
+                    "state": "Delhi",
+                    "lead_subtype": "Direct",
+                    "source": "Phone",
+                    "product_service_id": "test-product-service-id",
+                    "lead_owner": "test-user-id"
+                },
                 timeout=10
             )
             
