@@ -88,7 +88,7 @@ class ComprehensiveFixTester:
                 "billing_type": "prepaid",  # This field should be included when tender_type is Tender
                 "sub_tender_type_id": "cdb2e33b-8971-41c2-9582-af66fdda2af4",  # Government - Municipal
                 "project_title": "Test Lead - Tender Type with Billing",
-                "company_id": "test-company-id",
+                "company_id": "df3d438f-d614-4e72-a666-44c2cf600f44",  # Valid company ID
                 "state": "Maharashtra",
                 "lead_subtype": "Direct",
                 "source": "Website",
@@ -97,7 +97,7 @@ class ComprehensiveFixTester:
                 "expected_orc": 50000,
                 "revenue": 50000,
                 "status": "New",
-                "lead_owner": "test-user-id",
+                "lead_owner": "078ed9d6-a65e-401f-a83f-a18432c9016f",  # Valid user ID
                 "approval_status": "Pending",
                 "checklist_completed": False
             }
