@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the comprehensive Company Registration multi-step form that was just built. Test coverage includes: 1) Access Control & Navigation to /company/add route, 2) Multi-Step Form Testing (5 Steps): General Info, Location, Financials, Documents & Profile, Review & Submit, 3) Key Features: Progress bar updates, Step labels, Form validation, Auto-save to localStorage, Error messages, Success page, 4) UI/UX Testing: Responsive design, Accessibility features, Professional styling with Shadcn UI components, Loading states during API calls."
+user_problem_statement: "Test the **Complete Lead-to-Opportunity Conversion workflow** after implementing the full conversion functionality: AUTHENTICATION FIRST: Test admin login with credentials {\"username\": \"admin\", \"password\": \"admin123\"}, COMPLETE WORKFLOW TESTING: 1. Create a New Lead with complete data, 2. Approve the Lead (if needed), 3. Convert Lead to Opportunity, 4. Verify Opportunity Creation, 5. Verify Lead Update, 6. Test Duplicate Conversion Prevention. SUCCESS CRITERIA: Lead creation works without issues, Lead approval process functional, Lead-to-opportunity conversion creates proper opportunity with OPP-XXXXXX ID, Opportunity starts at L1 stage with 25% win probability, All financial data (revenue, currency) properly transferred, Lead shows \"Converted\" status with opportunity reference, Opportunity appears in opportunities listing, Duplicate conversion prevented, Proper stage_history tracking with conversion audit trail."
 
 backend:
   - task: "Admin Authentication"
