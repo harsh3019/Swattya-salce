@@ -142,7 +142,7 @@ const PermissionDataTable = ({
           <Table>
             <TableHeader>
               <TableRow>
-                {(columns || []).map((column) => (
+                {Array.isArray(columns) && columns.map((column) => (
                   <TableHead
                     key={column.key}
                     className={column.sortable ? "cursor-pointer hover:bg-slate-50" : ""}
