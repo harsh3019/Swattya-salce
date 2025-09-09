@@ -35,6 +35,7 @@ const OpportunityDetail = () => {
   const [quotations, setQuotations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [stageDialogOpen, setStageDialogOpen] = useState(false);
   
   // Master data
   const [stages, setStages] = useState([]);
