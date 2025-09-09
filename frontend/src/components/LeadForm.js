@@ -838,19 +838,12 @@ export const LeadForm = () => {
               
               <Button
                 type="submit"
-                disabled={submitting || (currentStep === 3 && !checklistItems.every(item => item.checked))}
-                className={
-                  currentStep === 3 && !checklistItems.every(item => item.checked) 
-                    ? 'opacity-50 cursor-not-allowed' 
-                    : ''
-                }
+                disabled={submitting}
               >
                 {submitting ? (
                   'Processing...'
                 ) : currentStep === 3 ? (
-                  !checklistItems.every(item => item.checked) 
-                    ? 'Complete Checklist to Submit'
-                    : `${isEdit ? 'Update' : 'Create'} Lead`
+                  `${isEdit ? 'Update' : 'Create'} Lead`
                 ) : (
                   <>
                     Next
