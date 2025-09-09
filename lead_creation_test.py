@@ -172,13 +172,13 @@ class LeadCreationTester:
             "tender_type": "Tender",
             "billing_type": "prepaid",  # lowercase as required by API
             "sub_tender_type_id": subtender_id,
-            "project_title": "Test Project Implementation",
+            "project_title": f"Test Project Implementation - {datetime.now().strftime('%Y%m%d%H%M%S')}",  # Unique title
             "company_id": company_id,
             "state": "Maharashtra",
             "lead_subtype": "Direct",
             "source": "Website",
             "product_service_id": service_id,
-            "expected_orc": 500000.0,
+            "expected_orc": 500000.0,  # Required for Tender leads
             "revenue": 750000.0,
             "competitors": "CompetitorA, CompetitorB",
             "status": "New",
