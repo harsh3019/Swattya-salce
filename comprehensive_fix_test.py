@@ -110,7 +110,7 @@ class ComprehensiveFixTester:
                 
                 # Check if billing_type was properly saved
                 billing_type = data.get('billing_type')
-                if billing_type == "Fixed Price":
+                if billing_type == "prepaid":
                     self.log_test(
                         "POST /api/leads with Tender type and billing_type", 
                         True, 
