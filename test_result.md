@@ -354,13 +354,13 @@ backend:
           agent: "testing"
           comment: "✅ VERIFICATION COMPLETED: Quick verification test confirms Partners API is working perfectly. GET /api/partners returns empty list with proper structure (acceptable for partners). No 500 Internal Server Errors. Admin has proper RBAC permissions for Partners/Channel Partners menu. API is production-ready and functioning as expected."
 
-  - task: "Opportunity Management Frontend Implementation"
-    implemented: true
-    working: true
+  - task: "Stepper-Based Opportunity Management System"
+    implemented: false
+    working: false
     file: "frontend/src/components/OpportunityList.js"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: false
           agent: "testing"
@@ -374,6 +374,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "🎉 OPPORTUNITY DATA DISPLAY FIX VERIFICATION COMPLETED - 100% SUCCESS: Comprehensive testing confirms the backend response structure fix is working perfectly. AUTHENTICATION & ACCESS: ✅ Admin login successful with admin/admin123, ✅ Navigation to /opportunities route working flawlessly. CRITICAL DATA DISPLAY FIX VERIFIED: ✅ KPIs show correct count: Total Opportunities = 7, ✅ Data table displays exactly 7 opportunity rows (no more 'No data found'), ✅ Perfect data consistency between KPIs and table, ✅ Backend response structure fix working correctly (response.data.opportunities accessed properly). OPPORTUNITY DATA FIELDS VERIFICATION: ✅ All 10 column headers display correctly (Opportunity ID, Project Title, Company, Stage, Status, Expected Revenue, Weighted Revenue, Win Probability, Owner, Created), ✅ Professional data formatting with currency symbols (₹), ✅ Stage badges with proper L1-L8 colors (2 badges found), ✅ Status badges displaying correctly (12 status badges), ✅ Win Probability progress bars working (7 progress bars), ✅ Company names resolving properly (TechCorp Solutions Pvt Ltd), ✅ Currency formatting with ₹ symbol (14 currency values found). DATA TABLE FUNCTIONALITY: ✅ All 7 opportunities display as table rows with proper formatting, ✅ Action buttons (View, Edit, Delete) available for each opportunity, ✅ Professional Shadcn UI design throughout, ✅ No JavaScript console errors affecting functionality. MINOR ISSUES NOTED: ⚠️ Some Opportunity IDs showing empty (display formatting issue), ⚠️ Owner names showing 'Unknown User' (master data lookup issue), ⚠️ Permission errors in console (403 Forbidden) but not affecting core functionality. SUCCESS CRITERIA ACHIEVED: ✅ Table shows 7 opportunity rows (not 'No data found'), ✅ KPIs and table data counts match perfectly, ✅ All data fields display with proper formatting, ✅ Professional data presentation with badges and currency formatting, ✅ No critical JavaScript errors blocking functionality. OVERALL ASSESSMENT: The opportunity data display issue has been COMPLETELY FIXED. The backend response structure fix is working perfectly, and all 7 opportunities now display consistently between KPIs and data table with professional formatting."
+        - working: false
+          agent: "testing"
+          comment: "❌ STEPPER-BASED OPPORTUNITY MANAGEMENT SYSTEM NOT IMPLEMENTED: Comprehensive testing reveals that the new stepper-based system has NOT been implemented as required. CRITICAL ISSUES IDENTIFIED: 1) ❌ MANUAL OPPORTUNITY CREATION STILL PRESENT: 'Add Opportunitie' button is visible in top-right corner - this should be completely removed as opportunities should only be created through lead conversion. 2) ❌ REACT RUNTIME ERRORS: Critical JavaScript error 'Dialog is not defined' causing red screen overlay, preventing proper UI functionality. 3) ❌ MANAGE STAGES BUTTON MISSING: The new 'Manage Stages' button is not present on opportunity detail pages - still using old dropdown-based system instead of stepper interface. 4) ❌ STEPPER INTERFACE NOT ACCESSIBLE: Cannot access the L1-L8 stepper form interface as the entry point ('Manage Stages' button) is missing. TESTING RESULTS: ✅ Authentication working with admin/admin123, ✅ Navigation to /opportunities successful, ✅ Lead conversion message present: 'Opportunities are created only by converting leads', ✅ Opportunity data displaying correctly (15 opportunities found), ✅ KPI dashboard functional with proper metrics, ✅ Action buttons (View, Edit, Delete) working in table, ✅ Successfully navigated to opportunity detail page. MISSING IMPLEMENTATION: ❌ No stepper-based stage management system, ❌ No L1-L8 progressive forms, ❌ No stage locking logic after L4, ❌ No master data integration for new regions/users, ❌ No 'Manage Stages' button replacing 'Change Stage', ❌ Manual opportunity creation not disabled. ASSESSMENT: The stepper-based opportunity management system is NOT implemented. The current system still uses the old dropdown-based approach and allows manual opportunity creation, which contradicts the requirements. Major development work is needed to implement the L1-L8 stepper interface, remove manual creation, and add proper stage management controls."
 
   - task: "Opportunity Detail Page (Phase 3) Implementation"
     implemented: true
