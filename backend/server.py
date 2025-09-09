@@ -4350,18 +4350,53 @@ class MstProductCreate(BaseModel):
     description: Optional[str] = Field(None, max_length=500)
     is_active: bool = Field(default=True)
 
-class OpportunityCreate(BaseModel):
-    lead_id: Optional[str] = None
-    stage_id: str = Field(..., description="Reference to stage (default L1)")
-    project_title: str = Field(..., min_length=2, max_length=200)
-    company_id: str = Field(..., description="Reference to company")
-    contact_id: Optional[str] = None
-    product_interest: Optional[str] = Field(None, max_length=1000)
-    expected_revenue: float = Field(..., ge=0)
-    currency_id: str = Field(..., description="Reference to currency")
-    assigned_to_user_ids: List[str] = Field(default_factory=list)
-    lead_owner_id: str = Field(..., description="Primary owner user ID")
-    win_probability: int = Field(default=25, ge=0, le=100)
+class OpportunityCreate(OpportunityBase):
+    pass
+
+class OpportunityUpdate(BaseModel):
+    project_title: Optional[str] = None
+    current_stage: Optional[int] = None
+    status: Optional[str] = None
+    expected_revenue: Optional[float] = None
+    win_probability: Optional[float] = None
+    
+    # Stage-specific fields (all optional for updates)
+    region_id: Optional[str] = None
+    product_interest: Optional[str] = None
+    assigned_representatives: Optional[List[str]] = None
+    lead_owner_id: Optional[str] = None
+    scorecard: Optional[str] = None
+    budget: Optional[str] = None
+    authority: Optional[str] = None
+    need: Optional[str] = None
+    timeline: Optional[str] = None
+    qualification_status: Optional[str] = None
+    proposal_documents: Optional[List[str]] = None
+    submission_date: Optional[date] = None
+    internal_stakeholder_id: Optional[str] = None
+    client_response: Optional[str] = None
+    selected_quotation_id: Optional[str] = None
+    updated_price: Optional[float] = None
+    margin: Optional[float] = None
+    cpc_overhead: Optional[float] = None
+    po_number: Optional[str] = None
+    po_date: Optional[date] = None
+    po_file: Optional[str] = None
+    final_value: Optional[float] = None
+    client_poc: Optional[str] = None
+    delivery_team: Optional[List[str]] = None
+    kickoff_task: Optional[str] = None
+    lost_reason: Optional[str] = None
+    competitor_id: Optional[str] = None
+    followup_reminder: Optional[date] = None
+    internal_learning: Optional[str] = None
+    drop_reason: Optional[str] = None
+    reminder_date: Optional[date] = None
+
+class StageTransition(BaseModel):
+    target_stage: int = Field(..., ge=1, le=8)
+    stage_data: dict = Field(default_factory=dict)
+    notes: Optional[str] = None
 
 class QuotationCreate(BaseModel):
     quotation_name: str = Field(..., min_length=2, max_length=100)
