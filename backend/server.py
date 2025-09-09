@@ -4238,24 +4238,75 @@ class MstPurchaseCost(BaseAuditModel):
     remark: Optional[str] = Field(None, max_length=500)
     is_active: bool = Field(default=True)
 
-# Opportunity Models
-class Opportunity(BaseAuditModel):
-    opportunity_id: str = Field(..., pattern=r'^OPP-[A-Z0-9]{7}$')
-    lead_id: Optional[str] = Field(None, description="Reference to lead if converted")
-    stage_id: str = Field(..., description="Reference to stage")
-    status: str = Field(default="Open", pattern=r'^(Open|Won|Lost|On Hold)$')
-    project_title: str = Field(..., min_length=2, max_length=200)
-    company_id: str = Field(..., description="Reference to company")
-    contact_id: Optional[str] = Field(None, description="Reference to contact")
-    product_interest: Optional[str] = Field(None, max_length=1000)
-    expected_revenue: float = Field(..., ge=0)
-    currency_id: str = Field(..., description="Reference to currency")
-    weighted_revenue: float = Field(..., ge=0)
-    convert_date: Optional[datetime] = None
-    assigned_to_user_ids: List[str] = Field(default_factory=list)
-    lead_owner_id: str = Field(..., description="Primary owner user ID")
-    close_date: Optional[datetime] = None
-    win_probability: int = Field(default=25, ge=0, le=100)
+# Opportunity Models with Stage-Specific Fields
+class OpportunityBase(BaseModel):
+    project_title: str = Field(..., min_length=1, max_length=200)
+    company_id: str = Field(..., min_length=1)
+    lead_id: Optional[str] = None
+    current_stage: int = Field(default=1, ge=1, le=8)  # L1 to L8
+    status: str = Field(default="Active")  # Active, Won, Lost, Dropped
+    expected_revenue: float = Field(default=0, ge=0)
+    currency_id: str = Field(..., min_length=1)
+    win_probability: float = Field(default=0, ge=0, le=100)
+    weighted_revenue: float = Field(default=0, ge=0)
+    
+    # Stage L1 - Prospect Fields
+    region_id: Optional[str] = None
+    product_interest: Optional[str] = None
+    assigned_representatives: List[str] = Field(default_factory=list)
+    lead_owner_id: Optional[str] = None
+    
+    # Stage L2 - Qualification Fields
+    scorecard: Optional[str] = None  # BANT, CHAMP
+    budget: Optional[str] = None
+    authority: Optional[str] = None
+    need: Optional[str] = None
+    timeline: Optional[str] = None
+    qualification_status: Optional[str] = None  # Qualified, Not Now, Disqualified
+    
+    # Stage L3 - Proposal/Bid Fields
+    proposal_documents: List[str] = Field(default_factory=list)  # File paths
+    submission_date: Optional[date] = None
+    internal_stakeholder_id: Optional[str] = None
+    client_response: Optional[str] = None
+    
+    # Stage L4 - Technical Qualification Fields
+    selected_quotation_id: Optional[str] = None
+    
+    # Stage L5 - Commercial Negotiation Fields
+    updated_price: Optional[float] = None
+    margin: Optional[float] = None
+    cpc_overhead: Optional[float] = None
+    po_number: Optional[str] = None
+    po_date: Optional[date] = None
+    po_file: Optional[str] = None
+    
+    # Stage L6 - Won Fields
+    final_value: Optional[float] = None
+    client_poc: Optional[str] = None
+    delivery_team: List[str] = Field(default_factory=list)
+    kickoff_task: Optional[str] = None
+    
+    # Stage L7 - Lost Fields
+    lost_reason: Optional[str] = None
+    competitor_id: Optional[str] = None
+    followup_reminder: Optional[date] = None
+    internal_learning: Optional[str] = None
+    
+    # Stage L8 - Dropped Fields
+    drop_reason: Optional[str] = None
+    reminder_date: Optional[date] = None
+    
+    # Locking mechanism
+    is_locked: bool = Field(default=False)
+    locked_stages: List[int] = Field(default_factory=list)
+    
+    # Audit fields
+    stage_history: List[dict] = Field(default_factory=list)
+
+class Opportunity(OpportunityBase, BaseAuditModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    opportunity_id: str = Field(..., min_length=1)
 
 # Quotation Models
 class QuotationItem(BaseModel):
