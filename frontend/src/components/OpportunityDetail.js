@@ -258,6 +258,14 @@ const OpportunityDetail = () => {
           </div>
         </div>
         <div className="flex items-center space-x-2">
+          <Button 
+            variant="outline"
+            onClick={() => setStageDialogOpen(true)}
+            className="bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
+          >
+            <Target className="w-4 h-4 mr-2" />
+            Change Stage
+          </Button>
           {permissions.some(p => p.permission === 'Edit' && p.menu === 'Opportunities') && (
             <Button onClick={handleEdit} className="bg-blue-600 hover:bg-blue-700">
               <Edit className="w-4 h-4 mr-2" />
