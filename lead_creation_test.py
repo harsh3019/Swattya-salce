@@ -245,6 +245,13 @@ class LeadCreationTester:
             if isinstance(services, list) and len(services) > 0:
                 service_id = services[0].get("id")
         
+        subtender_response = self.session.get(f"{BACKEND_URL}/sub-tender-types")
+        subtender_id = None
+        if subtender_response.status_code == 200:
+            subtenders = subtender_response.json()
+            if isinstance(subtenders, list) and len(subtenders) > 0:
+                subtender_id = subtenders[0].get("id")
+        
         for test_case in test_cases:
             lead_data = {
                 "tender_type": test_case["tender_type"],
@@ -260,6 +267,10 @@ class LeadCreationTester:
             
             if test_case["billing_type"]:
                 lead_data["billing_type"] = test_case["billing_type"]
+            
+            # Add sub-tender type for Tender and Pre-Tender
+            if test_case["tender_type"] in ["Tender", "Pre-Tender"] and subtender_id:
+                lead_data["sub_tender_type_id"] = subtender_id
             
             try:
                 response = self.session.post(f"{BACKEND_URL}/leads", json=lead_data)
