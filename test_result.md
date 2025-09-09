@@ -709,7 +709,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Lead Change Status API"
+    - "Opportunity Management Backend APIs Testing Completed"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
