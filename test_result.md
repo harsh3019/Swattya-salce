@@ -668,6 +668,54 @@ frontend:
           agent: "main"
           comment: "Implemented Sub-Tender Types Master frontend page with full CRUD operations. Features: PermissionDataTable with 8 seed types, professional UI with FileText icons, View modal with detailed information, Add/Edit forms with validation (name uniqueness, required fields, description length limits), Delete confirmation with dependency checking, CSV export functionality, search and filter capabilities, RBAC integration, responsive Shadcn UI design. Routes added to App.js (/sub-tender-types). Ready for manual testing."
 
+  - task: "Lead Creation Fix Testing"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/LeadForm.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Starting comprehensive testing of Lead Creation fixes. Need to verify: 1) Navigation to /leads/add route works, 2) billing_type field appears when tender_type is 'Tender' or 'Pre-Tender', 3) Form submission works without hanging, 4) Successful lead creation and redirect to /leads."
+
+  - task: "Opportunity Form Fix Testing"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/OpportunityForm.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Starting comprehensive testing of Opportunity Form fixes. Need to verify: 1) Navigation to /opportunities/add route does NOT show 'Opportunity Not Found' error, 2) Opportunity creation form loads properly, 3) All form fields are present (project title, company, stage, status, revenue, etc.), 4) Form submission works correctly."
+
+  - task: "L1-L8 Stage Management Testing"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/OpportunityDetail.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Starting comprehensive testing of L1-L8 Stage Management fixes. Need to verify: 1) Navigate to opportunity detail page, 2) 'Change Stage' button is present in header, 3) Clicking 'Change Stage' opens stage management dialog, 4) L1-L8 stages are displayed with proper colors, 5) Stage progression functionality works."
+
+  - task: "Opportunity Edit Fix Testing"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/components/OpportunityForm.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Starting comprehensive testing of Opportunity Edit fixes. Need to verify: 1) Navigate to opportunity detail page, 2) Click 'Edit Opportunity' button, 3) Verify edit form loads (should NOT show blank page), 4) Test opportunity editing functionality works."
+
   - task: "Lead Management Menu Integration"
     implemented: true
     working: true
