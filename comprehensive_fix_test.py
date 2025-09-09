@@ -99,7 +99,7 @@ class ComprehensiveFixTester:
                 "status": "New",
                 "lead_owner": "078ed9d6-a65e-401f-a83f-a18432c9016f",  # Valid user ID
                 "approval_status": "Pending",
-                "checklist_completed": False
+                "checklist_completed": True
             }
             
             response = requests.post(
@@ -156,7 +156,7 @@ class ComprehensiveFixTester:
                 "status": "New",
                 "lead_owner": "078ed9d6-a65e-401f-a83f-a18432c9016f",  # Valid user ID
                 "approval_status": "Pending",
-                "checklist_completed": False
+                "checklist_completed": True
             }
             
             response = requests.post(
