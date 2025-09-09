@@ -20,7 +20,6 @@ import {
   Upload, 
   FileText, 
   CheckCircle2, 
-  AlertTriangle,
   User,
   Building,
   Target,
