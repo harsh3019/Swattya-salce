@@ -86,12 +86,13 @@ class ComprehensiveFixTester:
             lead_data_tender = {
                 "tender_type": "Tender",
                 "billing_type": "prepaid",  # This field should be included when tender_type is Tender
+                "sub_tender_type_id": "cdb2e33b-8971-41c2-9582-af66fdda2af4",  # Government - Municipal
                 "project_title": "Test Lead - Tender Type with Billing",
                 "company_id": "test-company-id",
                 "state": "Maharashtra",
                 "lead_subtype": "Direct",
                 "source": "Website",
-                "product_service_id": "test-product-service-id",
+                "product_service_id": "f9faac48-fc91-421a-bc43-19550c04036b",  # Mobile App Development
                 "is_enquiry": False,
                 "expected_orc": 50000,
                 "revenue": 50000,
