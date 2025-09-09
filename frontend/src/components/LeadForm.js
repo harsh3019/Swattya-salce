@@ -714,60 +714,6 @@ export const LeadForm = () => {
           </div>
         )}
       </div>
-
-      <Separator />
-
-      {/* Checklist Section */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <CheckCircle2 className="h-5 w-5" />
-          <Label className="text-lg font-medium">Lead Checklist</Label>
-        </div>
-        
-        <Alert>
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            All checklist items must be completed before submitting the lead.
-          </AlertDescription>
-        </Alert>
-
-        <div className="space-y-3">
-          {checklistItems.map((item) => (
-            <div key={item.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-              <Checkbox
-                id={item.id}
-                checked={item.checked}
-                onCheckedChange={(checked) => handleChecklistChange(item.id, checked)}
-              />
-              <Label 
-                htmlFor={item.id} 
-                className={`flex-1 cursor-pointer ${item.checked ? 'line-through text-gray-500' : ''}`}
-              >
-                {item.label}
-              </Label>
-              {item.checked && <CheckCircle2 className="h-4 w-4 text-green-600" />}
-            </div>
-          ))}
-        </div>
-
-        {!checklistItems.every(item => item.checked) && (
-          <Alert className="border-amber-200 bg-amber-50">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertDescription className="text-amber-800">
-              <strong>Action Required:</strong> Please check all {checklistItems.filter(item => !item.checked).length} remaining checklist items to enable form submission.
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {checklistItems.every(item => item.checked) && (
-          <Alert className="border-green-200 bg-green-50">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
-              <strong>Ready to Submit:</strong> All checklist items completed. You can now submit the lead.
-            </AlertDescription>
-          </Alert>
-        )}
-      </div>
     </div>
   );
 
