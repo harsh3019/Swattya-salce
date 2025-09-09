@@ -341,7 +341,17 @@ export const LeadForm = () => {
     }
   };
 
+  const removeFile = (index) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
 
+  const handleChecklistChange = (itemId, checked) => {
+    setChecklistItems(prev => 
+      prev.map(item => 
+        item.id === itemId ? { ...item, checked } : item
+      )
+    );
+  };
 
   const renderStep1 = () => (
     <div className="space-y-6">
