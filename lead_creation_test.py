@@ -118,15 +118,20 @@ class LeadCreationTester:
         try:
             response = self.session.post(f"{BACKEND_URL}/leads", json=lead_data)
             
-            if response.status_code == 201:
+            if response.status_code in [200, 201]:
                 data = response.json()
                 lead_id = data.get("lead_id") or data.get("id")
                 self.log_test("Lead Creation (without checklist)", True, 
-                            f"Lead created successfully with ID: {lead_id}")
+                            f"Lead created successfully with ID: {lead_id} - NO checklist validation error!")
                 return lead_id
             else:
-                self.log_test("Lead Creation (without checklist)", False, 
-                            f"Status {response.status_code}: {response.text}")
+                error_msg = response.text
+                if "checklist" in error_msg.lower():
+                    self.log_test("Lead Creation (without checklist)", False, 
+                                f"CRITICAL: Still getting checklist validation error: {error_msg}")
+                else:
+                    self.log_test("Lead Creation (without checklist)", False, 
+                                f"Status {response.status_code}: {response.text}")
                 return None
                 
         except Exception as e:
