@@ -3529,10 +3529,6 @@ async def create_lead(lead_data: LeadCreate, current_user: User = Depends(get_cu
     if existing_lead:
         raise HTTPException(status_code=409, detail="Lead conflict detected. Escalated for review.")
     
-    # Validate checklist completion
-    if not lead_data.checklist_completed:
-        raise HTTPException(status_code=400, detail="Complete all checklist items to proceed")
-    
     try:
         lead_dict = {
             **lead_data.dict(),
