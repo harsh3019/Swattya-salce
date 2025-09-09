@@ -114,6 +114,15 @@ export const LeadForm = () => {
   // File uploads
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [uploadingFile, setUploadingFile] = useState(false);
+  
+  // Checklist items
+  const [checklistItems, setChecklistItems] = useState([
+    { id: 'project_feasibility', label: 'Project feasibility assessed', checked: false },
+    { id: 'budget_approval', label: 'Budget approval obtained', checked: false },
+    { id: 'stakeholder_alignment', label: 'Stakeholder alignment confirmed', checked: false },
+    { id: 'technical_requirements', label: 'Technical requirements documented', checked: false },
+    { id: 'legal_compliance', label: 'Legal compliance verified', checked: false },
+  ]);
 
   // Form setup for current step
   const getCurrentSchema = () => {
