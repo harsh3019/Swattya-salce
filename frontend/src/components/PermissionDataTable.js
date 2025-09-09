@@ -167,7 +167,7 @@ const PermissionDataTable = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(data || []).length === 0 ? (
+              {!Array.isArray(data) || data.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={(columns || []).length + 1} className="text-center py-8">
                     <div className="text-gray-500">
@@ -182,9 +182,9 @@ const PermissionDataTable = ({
                   </TableCell>
                 </TableRow>
               ) : (
-                (data || []).map((item) => (
+                Array.isArray(data) && data.map((item) => (
                   <TableRow key={item.id}>
-                    {(columns || []).map((column) => (
+                    {Array.isArray(columns) && columns.map((column) => (
                       <TableCell key={column.key}>
                         {column.render ? column.render(item) : item[column.key]}
                       </TableCell>
