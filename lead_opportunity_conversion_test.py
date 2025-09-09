@@ -146,7 +146,7 @@ class LeadOpportunityConversionTester:
                 "tender_type": "Tender",
                 "billing_type": "prepaid",
                 "sub_tender_type_id": self.sub_tender_id,
-                "project_title": "Test Lead for Conversion",
+                "project_title": f"Test Lead for Conversion - {datetime.now().strftime('%Y%m%d_%H%M%S')}",
                 "company_id": self.company_id,
                 "state": "Maharashtra",
                 "lead_subtype": "Direct",
