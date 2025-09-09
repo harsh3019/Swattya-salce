@@ -549,6 +549,11 @@ function App() {
                   <OpportunityList />
                 </ProtectedRoute>
               } />
+              <Route path="/opportunities/:id" element={
+                <ProtectedRoute>
+                  <OpportunityDetail />
+                </ProtectedRoute>
+              } />
               
               <Route path="/" element={<HomeRoute />} />
             </Routes>
