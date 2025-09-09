@@ -19,6 +19,7 @@ import ContactForm from './components/ContactForm';
 import { ContactList } from './components/ContactList';
 import LeadForm from './components/LeadForm';
 import LeadList from './components/LeadList';
+import OpportunityList from './components/OpportunityList';
 
 // Import new RBAC components
 import DynamicSidebar from './components/DynamicSidebar';
