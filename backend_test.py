@@ -429,12 +429,23 @@ class OpportunityBackendTester:
     def test_create_quotation(self, opportunity_id):
         """Test quotation creation"""
         try:
+            # First get rate cards for quotation
+            rate_cards_response = requests.get(f"{self.base_url}/mst/rate-cards", headers=self.headers, timeout=10)
+            
+            if rate_cards_response.status_code != 200:
+                self.log_test(f"POST /opportunities/{opportunity_id}/quotations", False, "Could not get rate cards")
+                return
+            
+            rate_cards = rate_cards_response.json()
+            if not rate_cards:
+                self.log_test(f"POST /opportunities/{opportunity_id}/quotations", False, "No rate cards available")
+                return
+            
             quotation_data = {
-                "name": "Test Quotation - Backend Testing",
-                "amount": 50000,
-                "currency": "INR",
-                "valid_until": "2025-04-30T00:00:00Z",
-                "status": "Draft"
+                "quotation_name": "Test Quotation - Backend Testing",
+                "rate_card_id": rate_cards[0]['id'],
+                "validity_date": "2025-04-30T00:00:00Z",
+                "items": []  # Empty items list for basic test
             }
             
             response = requests.post(
@@ -446,7 +457,7 @@ class OpportunityBackendTester:
             
             if response.status_code in [200, 201]:
                 data = response.json()
-                quotation_id = data.get('id')
+                quotation_id = data.get('quotation_id')  # Note: using quotation_id not id
                 
                 # Check if quotation ID follows QUO-XXXXXXX format
                 if quotation_id and quotation_id.startswith('QUO-') and len(quotation_id) == 11:
