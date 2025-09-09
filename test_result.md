@@ -772,11 +772,11 @@ frontend:
 
   - task: "Lead Form Multi-Stage Implementation"
     implemented: true
-    working: "NA"
+    working: false
     file: "frontend/src/components/LeadForm.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
@@ -784,6 +784,9 @@ frontend:
         - working: "NA"
           agent: "main"
           comment: "Fixed SelectItem empty string error that was causing 'A <Select.Item /> must have a value prop that is not an empty string' error. Updated all SelectItem components with empty values to use 'none' instead of empty string for sub_tender_type_id, partner_id, and product_service_id fields. Added logic in handleFinalSubmit to convert 'none' values to null before API submission. Lead form is now error-free and ready for testing."
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL ISSUE: CHECKLIST REQUIREMENT NOT REMOVED FROM BACKEND: Comprehensive testing reveals that the checklist requirement has NOT been removed from the backend API as requested. ROOT CAUSE: Backend server.py line 3533-3534 still enforces checklist completion with validation 'if not lead_data.checklist_completed: raise HTTPException(status_code=400, detail=\"Complete all checklist items to proceed\")'. TESTING RESULTS: ❌ All lead creation attempts fail with 400 error 'Complete all checklist items to proceed', ❌ Lead creation without checklist_completed field fails, ❌ Lead creation with checklist_completed=false fails, ❌ All billing type logic tests fail due to checklist validation, ❌ Lead ID generation test fails due to checklist validation. BACKEND VALIDATION ISSUES: The LeadCreate model has checklist_completed: bool = Field(default=False) but the API endpoint still requires it to be True. SUCCESS RATE: 52.9% (9/17 tests passed) - Master data APIs working perfectly, authentication working, lead retrieval working, but ALL lead creation functionality blocked by checklist requirement. CRITICAL FIX NEEDED: Remove checklist validation from backend/server.py line 3533-3534 to allow lead creation without checklist completion."
 
   - task: "Lead Listing Page with KPIs Dashboard"
     implemented: true
