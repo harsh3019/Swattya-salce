@@ -733,8 +733,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Purchase Costs API Testing Completed Successfully"
-  stuck_tasks: []
+    - "Opportunity Management Frontend Implementation"
+  stuck_tasks:
+    - "Opportunity Management Frontend Implementation"
   test_all: false
   test_priority: "high_first"
 
