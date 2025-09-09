@@ -246,14 +246,12 @@ class LeadOpportunityConversionTester:
             return False
         
         try:
-            conversion_data = {
-                "opportunity_date": "2024-01-15T10:00:00Z"
-            }
+            opportunity_date = "2024-01-15T10:00:00Z"
             
             response = requests.post(
                 f"{self.base_url}/leads/{self.created_lead_id}/convert",
                 headers=self.headers,
-                json=conversion_data,
+                params={"opportunity_date": opportunity_date},
                 timeout=10
             )
             
