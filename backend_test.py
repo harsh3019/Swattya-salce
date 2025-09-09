@@ -252,6 +252,9 @@ class OpportunityBackendTester:
         # Test single opportunity (if we have an ID)
         if hasattr(self, 'opportunity_id') and self.opportunity_id:
             self.test_single_opportunity()
+        elif hasattr(self, 'created_opportunity_id') and self.created_opportunity_id:
+            self.opportunity_id = self.created_opportunity_id
+            self.test_single_opportunity()
     
     def test_opportunity_kpis(self):
         """Test opportunity KPIs dashboard"""
