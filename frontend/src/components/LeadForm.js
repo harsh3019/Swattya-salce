@@ -239,8 +239,6 @@ export const LeadForm = () => {
       setCurrentStep(currentStep + 1);
     } else {
       console.log('Attempting final submission with data:', updatedData);
-      console.log('Checklist completed:', checklistItems.every(item => item.checked));
-      console.log('Checklist items:', checklistItems);
       await handleFinalSubmit(updatedData);
     }
   };
