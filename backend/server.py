@@ -4093,5 +4093,139 @@ async def bulk_update_contacts(bulk_data: ContactBulkUpdate, current_user: User 
         logger.error(f"Failed to bulk update contacts: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to update contacts. Try again.")
 
+# ================ OPPORTUNITY MANAGEMENT MODELS ================
+
+# Master Data Models
+class MstPrimaryCategory(BaseAuditModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    abbreviation: str = Field(..., min_length=1, max_length=10)
+    is_active: bool = Field(default=True)
+
+class MstProduct(BaseAuditModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    primary_category_id: str = Field(..., description="Reference to primary category")
+    unit: str = Field(..., max_length=20)
+    description: Optional[str] = Field(None, max_length=500)
+    is_active: bool = Field(default=True)
+
+class MstCurrency(BaseAuditModel):
+    code: str = Field(..., min_length=3, max_length=3, pattern=r'^[A-Z]{3}$')
+    name: str = Field(..., min_length=2, max_length=50)
+    symbol: str = Field(..., max_length=5)
+    is_active: bool = Field(default=True)
+
+class MstStage(BaseAuditModel):
+    stage_code: str = Field(..., pattern=r'^L[1-8]$')
+    stage_name: str = Field(..., min_length=2, max_length=100)
+    stage_order: int = Field(..., ge=1, le=8)
+    description: Optional[str] = Field(None, max_length=500)
+    is_active: bool = Field(default=True)
+
+class MstRateCard(BaseAuditModel):
+    code: str = Field(..., min_length=2, max_length=20)
+    name: str = Field(..., min_length=2, max_length=100)
+    effective_from: datetime = Field(...)
+    effective_to: Optional[datetime] = None
+    is_active: bool = Field(default=True)
+
+class MstSalesPrice(BaseAuditModel):
+    rate_card_id: str = Field(..., description="Reference to rate card")
+    product_id: str = Field(..., description="Reference to product")
+    price_type: str = Field(..., pattern=r'^(recurring|one_time)$')
+    price: float = Field(..., ge=0)
+    currency_id: str = Field(..., description="Reference to currency")
+    is_active: bool = Field(default=True)
+
+class MstPurchaseCost(BaseAuditModel):
+    product_id: str = Field(..., description="Reference to product")
+    purchase_cost: float = Field(..., ge=0)
+    purchase_date: datetime = Field(...)
+    currency_id: str = Field(..., description="Reference to currency")
+    cost_type: str = Field(..., max_length=50)
+    remark: Optional[str] = Field(None, max_length=500)
+    is_active: bool = Field(default=True)
+
+# Opportunity Models
+class Opportunity(BaseAuditModel):
+    opportunity_id: str = Field(..., pattern=r'^OPP-[A-Z0-9]{7}$')
+    lead_id: Optional[str] = Field(None, description="Reference to lead if converted")
+    stage_id: str = Field(..., description="Reference to stage")
+    status: str = Field(default="Open", pattern=r'^(Open|Won|Lost|On Hold)$')
+    project_title: str = Field(..., min_length=2, max_length=200)
+    company_id: str = Field(..., description="Reference to company")
+    contact_id: Optional[str] = Field(None, description="Reference to contact")
+    product_interest: Optional[str] = Field(None, max_length=1000)
+    expected_revenue: float = Field(..., ge=0)
+    currency_id: str = Field(..., description="Reference to currency")
+    weighted_revenue: float = Field(..., ge=0)
+    convert_date: Optional[datetime] = None
+    assigned_to_user_ids: List[str] = Field(default_factory=list)
+    lead_owner_id: str = Field(..., description="Primary owner user ID")
+    close_date: Optional[datetime] = None
+    win_probability: int = Field(default=25, ge=0, le=100)
+
+# Quotation Models
+class QuotationItem(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    product_id: str = Field(..., description="Reference to product")
+    qty: int = Field(..., ge=1)
+    unit: str = Field(..., max_length=20)
+    recurring_sale_price: float = Field(default=0, ge=0)
+    one_time_sale_price: float = Field(default=0, ge=0)
+    purchase_cost_snapshot: float = Field(default=0, ge=0)
+    tenure_months: int = Field(default=1, ge=1, le=120)
+    total_recurring: float = Field(default=0, ge=0)
+    total_one_time: float = Field(default=0, ge=0)
+    total_cost: float = Field(default=0, ge=0)
+
+class Quotation(BaseAuditModel):
+    quotation_id: str = Field(..., pattern=r'^QUO-[A-Z0-9]{7}$')
+    opportunity_id: str = Field(..., description="Reference to opportunity")
+    quotation_name: str = Field(..., min_length=2, max_length=100)
+    rate_card_id: str = Field(..., description="Reference to rate card")
+    validity_date: datetime = Field(...)
+    version_no: int = Field(default=1, ge=1)
+    status: str = Field(default="Draft", pattern=r'^(Draft|Approved|Rejected|Expired)$')
+    items: List[QuotationItem] = Field(default_factory=list)
+    total_recurring: float = Field(default=0, ge=0)
+    total_one_time: float = Field(default=0, ge=0)
+    grand_total: float = Field(default=0, ge=0)
+    total_cost: float = Field(default=0, ge=0)
+    profitability_percent: float = Field(default=0)
+
+# Create/Update Models
+class MstPrimaryCategoryCreate(BaseModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    abbreviation: str = Field(..., min_length=1, max_length=10)
+    is_active: bool = Field(default=True)
+
+class MstProductCreate(BaseModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    primary_category_id: str = Field(..., description="Reference to primary category")
+    unit: str = Field(..., max_length=20)
+    description: Optional[str] = Field(None, max_length=500)
+    is_active: bool = Field(default=True)
+
+class OpportunityCreate(BaseModel):
+    lead_id: Optional[str] = None
+    stage_id: str = Field(..., description="Reference to stage (default L1)")
+    project_title: str = Field(..., min_length=2, max_length=200)
+    company_id: str = Field(..., description="Reference to company")
+    contact_id: Optional[str] = None
+    product_interest: Optional[str] = Field(None, max_length=1000)
+    expected_revenue: float = Field(..., ge=0)
+    currency_id: str = Field(..., description="Reference to currency")
+    assigned_to_user_ids: List[str] = Field(default_factory=list)
+    lead_owner_id: str = Field(..., description="Primary owner user ID")
+    win_probability: int = Field(default=25, ge=0, le=100)
+
+class QuotationCreate(BaseModel):
+    quotation_name: str = Field(..., min_length=2, max_length=100)
+    rate_card_id: str = Field(..., description="Reference to rate card")
+    validity_date: datetime = Field(...)
+    items: List[QuotationItem] = Field(default_factory=list)
+
+# ================ OPPORTUNITY MANAGEMENT ENDPOINTS ================
+
 # Include router after all endpoints are defined
 app.include_router(api_router)
