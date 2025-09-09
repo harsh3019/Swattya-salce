@@ -4569,111 +4569,187 @@ async def get_purchase_costs(current_user: User = Depends(get_current_user)):
     costs = await db.mst_purchase_costs.find({"is_active": True}).sort("purchase_date", -1).to_list(None)
     return [prepare_for_json(cost) for cost in costs]
 
-# Opportunity APIs
+# Remove manual opportunity creation - opportunities only come from lead conversion
+# @api_router.post("/opportunities") - REMOVED
+
 @api_router.get("/opportunities")
-async def get_opportunities(
-    page: int = 1,
-    limit: int = 20,
-    stage: Optional[str] = None,
-    status: Optional[str] = None,
-    search: Optional[str] = None,
-    current_user: User = Depends(get_current_user)
-):
-    """Get opportunities with pagination and filters"""
-    query = {"is_active": True}
-    
-    if stage:
-        query["stage_id"] = stage
-    if status:
-        query["status"] = status
-    if search:
-        query["$or"] = [
-            {"opportunity_id": {"$regex": search, "$options": "i"}},
-            {"project_title": {"$regex": search, "$options": "i"}}
-        ]
-    
-    skip = (page - 1) * limit
-    opportunities = await db.opportunities.find(query).skip(skip).limit(limit).to_list(None)
-    total = await db.opportunities.count_documents(query)
-    
-    return {
-        "opportunities": [prepare_for_json(opp) for opp in opportunities],
-        "total": total,
-        "page": page,
-        "limit": limit,
-        "total_pages": (total + limit - 1) // limit
-    }
-
-@api_router.get("/opportunities/kpis")
-async def get_opportunity_kpis(current_user: User = Depends(get_current_user)):
-    """Get opportunity KPIs"""
-    total = await db.opportunities.count_documents({"is_active": True})
-    open_opps = await db.opportunities.count_documents({"status": {"$in": ["Open", "On Hold"]}, "is_active": True})
-    won = await db.opportunities.count_documents({"status": "Won", "is_active": True})
-    lost = await db.opportunities.count_documents({"status": "Lost", "is_active": True})
-    
-    # Calculate weighted pipeline
-    pipeline = await db.opportunities.aggregate([
-        {"$match": {"status": {"$in": ["Open", "On Hold"]}, "is_active": True}},
-        {"$group": {"_id": None, "weighted_pipeline": {"$sum": "$weighted_revenue"}}}
-    ]).to_list(None)
-    
-    weighted_pipeline = pipeline[0]["weighted_pipeline"] if pipeline else 0
-    
-    return {
-        "total": total,
-        "open": open_opps,
-        "won": won,
-        "lost": lost,
-        "weighted_pipeline": weighted_pipeline
-    }
-
-@api_router.post("/opportunities")
-async def create_opportunity(opp_data: OpportunityCreate, current_user: User = Depends(get_current_user)):
-    """Create new opportunity"""
-    
-    # Get default stage (L1)
-    default_stage = await db.mst_stages.find_one({"stage_code": "L1", "is_active": True})
-    if not default_stage:
-        raise HTTPException(status_code=400, detail="Default stage L1 not found")
-    
-    # Calculate weighted revenue
-    weighted_revenue = opp_data.expected_revenue * (opp_data.win_probability / 100)
-    
-    opportunity_dict = {
-        **opp_data.dict(),
-        "id": str(uuid.uuid4()),
-        "opportunity_id": generate_opportunity_id(),
-        "stage_id": default_stage["id"],
-        "weighted_revenue": weighted_revenue,
-        "convert_date": datetime.now(timezone.utc) if opp_data.lead_id else None,
-        "created_by": current_user.id,
-        "created_at": datetime.now(timezone.utc),
-        "updated_at": datetime.now(timezone.utc),
-        "is_active": True
-    }
-    
-    await db.opportunities.insert_one(opportunity_dict)
-    
-    # Log audit trail
-    await log_audit_trail(
-        user_id=current_user.id,
-        action="CREATE",
-        resource_type="Opportunity",
-        resource_id=opportunity_dict["id"],
-        details=f"Created opportunity: {opportunity_dict['opportunity_id']}"
-    )
-    
-    return prepare_for_json(opportunity_dict)
+async def get_opportunities(current_user: User = Depends(get_current_user)):
+    """Get all opportunities (from lead conversion only)"""
+    try:
+        opportunities = await db.opportunities.find({"status": {"$ne": "Dropped"}}).to_list(None)
+        return {
+            "opportunities": [prepare_for_json(opp) for opp in opportunities],
+            "total": len(opportunities)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching opportunities: {str(e)}")
 
 @api_router.get("/opportunities/{opportunity_id}")
-async def get_opportunity(opportunity_id: str, current_user: User = Depends(get_current_user)):
-    """Get opportunity by ID"""
-    opportunity = await db.opportunities.find_one({"id": opportunity_id, "is_active": True})
+async def get_opportunity_by_id(opportunity_id: str, current_user: User = Depends(get_current_user)):
+    """Get a specific opportunity by ID"""
+    opportunity = await db.opportunities.find_one({"id": opportunity_id})
     if not opportunity:
         raise HTTPException(status_code=404, detail="Opportunity not found")
     
     return prepare_for_json(opportunity)
+
+@api_router.post("/opportunities/{opportunity_id}/change-stage")
+async def change_opportunity_stage(
+    opportunity_id: str, 
+    stage_transition: StageTransition, 
+    current_user: User = Depends(get_current_user)
+):
+    """Change opportunity stage with validation and locking rules"""
+    
+    # Get existing opportunity
+    opportunity = await db.opportunities.find_one({"id": opportunity_id})
+    if not opportunity:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    
+    current_stage = opportunity.get("current_stage", 1)
+    target_stage = stage_transition.target_stage
+    stage_data = stage_transition.stage_data
+    
+    # Check if opportunity is locked
+    if opportunity.get("is_locked", False):
+        raise HTTPException(status_code=400, detail="Opportunity is locked and cannot be modified")
+    
+    # Check if trying to modify locked stages (after L4)
+    if current_stage >= 4 and target_stage < current_stage:
+        raise HTTPException(status_code=400, detail="Cannot move backward from L4 and beyond")
+    
+    # Stage-specific validation
+    validation_errors = await validate_stage_data(target_stage, stage_data, opportunity_id)
+    if validation_errors:
+        raise HTTPException(status_code=400, detail={"validation_errors": validation_errors})
+    
+    # Prepare update data
+    update_data = {
+        "current_stage": target_stage,
+        "updated_at": datetime.now(timezone.utc),
+        "updated_by": current_user.id
+    }
+    
+    # Add stage-specific data
+    update_data.update(stage_data)
+    
+    # Handle special stage transitions
+    if target_stage == 6:  # Won
+        update_data["status"] = "Won"
+        update_data["is_locked"] = True
+        update_data["close_date"] = datetime.now(timezone.utc)
+    elif target_stage == 7:  # Lost
+        update_data["status"] = "Lost"
+        update_data["is_locked"] = True
+        update_data["close_date"] = datetime.now(timezone.utc)
+    elif target_stage == 8:  # Dropped
+        update_data["status"] = "Dropped"
+        update_data["is_locked"] = True
+        update_data["close_date"] = datetime.now(timezone.utc)
+    
+    # Lock stages L1-L3 after reaching L4
+    if target_stage >= 4:
+        update_data["locked_stages"] = [1, 2, 3]
+    
+    # Add to stage history
+    stage_history_entry = {
+        "from_stage": current_stage,
+        "to_stage": target_stage,
+        "changed_by": current_user.id,
+        "changed_at": datetime.now(timezone.utc),
+        "notes": stage_transition.notes,
+        "stage_data": stage_data
+    }
+    
+    # Update stage history
+    if "stage_history" not in opportunity:
+        opportunity["stage_history"] = []
+    
+    opportunity["stage_history"].append(stage_history_entry)
+    update_data["stage_history"] = opportunity["stage_history"]
+    
+    # Update opportunity
+    await db.opportunities.update_one(
+        {"id": opportunity_id},
+        {"$set": prepare_for_mongo(update_data)}
+    )
+    
+    return {"message": f"Opportunity stage changed from L{current_stage} to L{target_stage}"}
+
+async def validate_stage_data(stage: int, data: dict, opportunity_id: str) -> List[str]:
+    """Validate stage-specific required fields"""
+    errors = []
+    
+    if stage == 1:  # L1 - Prospect
+        if not data.get("region_id"):
+            errors.append("Region is required for L1 - Prospect")
+        if not data.get("product_interest"):
+            errors.append("Product Interest is required for L1 - Prospect")
+        if not data.get("assigned_representatives") or len(data["assigned_representatives"]) == 0:
+            errors.append("At least one Assigned Representative is required for L1 - Prospect")
+        if not data.get("lead_owner_id"):
+            errors.append("Lead Owner is required for L1 - Prospect")
+    
+    elif stage == 2:  # L2 - Qualification
+        if not data.get("scorecard"):
+            errors.append("Scorecard is required for L2 - Qualification")
+        if not data.get("budget"):
+            errors.append("Budget is required for L2 - Qualification")
+        if not data.get("authority"):
+            errors.append("Authority is required for L2 - Qualification")
+        if not data.get("need"):
+            errors.append("Need is required for L2 - Qualification")
+        if not data.get("timeline"):
+            errors.append("Timeline is required for L2 - Qualification")
+        if not data.get("qualification_status"):
+            errors.append("Status is required for L2 - Qualification")
+    
+    elif stage == 3:  # L3 - Proposal/Bid
+        if not data.get("proposal_documents") or len(data["proposal_documents"]) == 0:
+            errors.append("Proposal Documents are required for L3 - Proposal/Bid")
+        if not data.get("submission_date"):
+            errors.append("Submission Date is required for L3 - Proposal/Bid")
+        if not data.get("internal_stakeholder_id"):
+            errors.append("Internal Stakeholder is required for L3 - Proposal/Bid")
+    
+    elif stage == 4:  # L4 - Technical Qualification
+        if not data.get("selected_quotation_id"):
+            errors.append("Selected Quotation is required for L4 - Technical Qualification")
+        
+        # Verify quotation exists
+        if data.get("selected_quotation_id"):
+            quotation = await db.quotations.find_one({
+                "id": data["selected_quotation_id"],
+                "opportunity_id": opportunity_id
+            })
+            if not quotation:
+                errors.append("Selected quotation not found or not associated with this opportunity")
+    
+    elif stage == 5:  # L5 - Commercial Negotiation
+        if not data.get("updated_price"):
+            errors.append("Updated Price is required for L5 - Commercial Negotiation")
+        if not data.get("po_number"):
+            errors.append("PO Number is required for L5 - Commercial Negotiation")
+        if not data.get("po_date"):
+            errors.append("PO Date is required for L5 - Commercial Negotiation")
+    
+    elif stage == 6:  # L6 - Won
+        if not data.get("final_value"):
+            errors.append("Final Value is required for L6 - Won")
+        if not data.get("client_poc"):
+            errors.append("Client POC is required for L6 - Won")
+        if not data.get("delivery_team") or len(data["delivery_team"]) == 0:
+            errors.append("Delivery Team is required for L6 - Won")
+    
+    elif stage == 7:  # L7 - Lost
+        if not data.get("lost_reason"):
+            errors.append("Lost Reason is required for L7 - Lost")
+    
+    elif stage == 8:  # L8 - Dropped
+        if not data.get("drop_reason"):
+            errors.append("Drop Reason is required for L8 - Dropped")
+    
+    return errors
 
 # Quotation APIs
 @api_router.get("/opportunities/{opportunity_id}/quotations")
