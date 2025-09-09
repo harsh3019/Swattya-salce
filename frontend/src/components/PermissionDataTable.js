@@ -169,7 +169,7 @@ const PermissionDataTable = ({
             <TableBody>
               {!Array.isArray(data) || data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={(columns || []).length + 1} className="text-center py-8">
+                  <TableCell colSpan={(Array.isArray(columns) ? columns.length : 0) + 1} className="text-center py-8">
                     <div className="text-gray-500">
                       <p className="text-lg font-medium">No data found</p>
                       <p className="text-sm">
