@@ -182,6 +182,19 @@ const OpportunityDetail = () => {
     navigate(`/opportunities/edit/${id}`);
   };
 
+  const handleSelectQuotation = async (quotationId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.patch(`${baseURL}/api/opportunities/${id}/quotations/${quotationId}/select`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchQuotations(); // Refresh quotations list
+    } catch (error) {
+      console.error('Error selecting quotation:', error);
+      alert('Error selecting quotation. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto p-6">
