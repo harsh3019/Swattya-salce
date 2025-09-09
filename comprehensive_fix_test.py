@@ -206,7 +206,7 @@ class ComprehensiveFixTester:
                     "lead_subtype": "Direct",
                     "source": "Phone",
                     "product_service_id": "test-product-service-id",
-                    "lead_owner": "test-user-id"
+                    "lead_owner": "078ed9d6-a65e-401f-a83f-a18432c9016f"  # Valid user ID
                 },
                 timeout=10
             )
