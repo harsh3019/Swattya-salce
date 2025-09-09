@@ -129,6 +129,18 @@ backend:
           agent: "testing"
           comment: "✅ OPPORTUNITY MASTER DATA APIs WORKING EXCELLENTLY: Comprehensive testing completed with 85.7% success rate (6/7 tests passed). MASTER DATA ENDPOINTS: ✅ GET /api/mst/primary-categories returns 4 categories (Software, Hardware, Services, Consulting), ✅ GET /api/mst/products returns 5 products (CRM Software, ERP System, Server Hardware, Implementation Service, Support Service), ✅ GET /api/mst/stages returns 8 stages (L1-L8), ✅ GET /api/mst/currencies returns 3 currencies (INR, USD, EUR), ✅ GET /api/mst/rate-cards returns 1 Standard Rate Card 2025, ✅ GET /api/mst/sales-prices/{rate_card_id} returns 5 pricing entries for rate card. ❌ MISSING ENDPOINT: GET /api/mst/purchase-costs returns 404 Not Found - endpoint not implemented yet. All implemented master data APIs return proper JSON structure with expected counts and data integrity."
 
+  - task: "Purchase Costs API"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PURCHASE COSTS API WORKING PERFECTLY: Comprehensive testing completed successfully. AUTHENTICATION: ✅ Admin login working with credentials admin/admin123, ✅ JWT token generation and validation functional. PURCHASE COSTS ENDPOINT: ✅ GET /api/mst/purchase-costs returns exactly 3 purchase costs as expected, ✅ Response structure contains all required fields (id, product_id, purchase_cost, purchase_date, currency_id, cost_type, remark), ✅ Expected products verified: CRM Software (₹3,000 License), ERP System (₹6,000 License), Implementation Service (₹1,200 Service), ✅ No 500 Internal Server Errors encountered, ✅ Proper JSON response format confirmed, ✅ All purchase costs have proper data integrity with valid UUIDs, timestamps, and currency references. API is production-ready and functioning as specified in requirements."
+
   - task: "Opportunity CRUD APIs"
     implemented: true
     working: true
