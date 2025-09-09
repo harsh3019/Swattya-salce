@@ -98,7 +98,7 @@ const PermissionDataTable = ({
             {canAdd(modulePath) && (
               <Button onClick={onAdd} className="bg-blue-600 hover:bg-blue-700">
                 <Plus className="w-4 h-4 mr-2" />
-                Add {title.slice(0, -1)}
+                Add {title ? title.slice(0, -1) : 'Item'}
               </Button>
             )}
           </div>
