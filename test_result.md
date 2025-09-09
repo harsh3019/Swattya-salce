@@ -859,11 +859,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Stepper-Based Opportunity Management System"
+    - "Fixed Lead Creation functionality after removing checklist requirement"
   stuck_tasks:
     - "Stepper-Based Opportunity Management System"
   test_all: false
-  test_priority: "stuck_first"
+  test_priority: "high_first"
 
 agent_communication:
     - agent: "testing"
