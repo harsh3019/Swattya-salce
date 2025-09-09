@@ -93,7 +93,7 @@ class ComprehensiveFixTester:
                 "expected_value": 50000,
                 "currency": "INR",
                 "tender_type": "Tender",
-                "billing_type": "Fixed Price"  # This field should be included when tender_type is Tender
+                "billing_type": "prepaid"  # This field should be included when tender_type is Tender
             }
             
             response = requests.post(
