@@ -3848,7 +3848,90 @@ async def convert_lead_to_opportunity(
         raise HTTPException(status_code=400, detail="Opportunity date required to convert lead")
     
     try:
-        # Update lead status
+        # Generate opportunity ID
+        opportunity_id = f"OPP-{generate_id()}"
+        
+        # Get default currency (INR)
+        default_currency = await db.mst_currencies.find_one({"code": "INR"})
+        currency_id = default_currency["id"] if default_currency else None
+        
+        # Create opportunity data from lead
+        opportunity_data = {
+            "id": str(uuid.uuid4()),
+            "opportunity_id": opportunity_id,
+            "project_title": lead.get("project_title", f"Opportunity from Lead {lead.get('lead_id', '')}"),
+            "company_id": lead.get("company_id"),
+            "lead_id": lead_id,
+            "current_stage": 1,  # L1 - Prospect
+            "status": "Active",
+            "expected_revenue": float(lead.get("expected_orc", 0) or lead.get("revenue", 0) or 0),
+            "currency_id": currency_id,
+            "win_probability": 25.0,  # Default for L1 stage
+            "weighted_revenue": 0.0,
+            
+            # L1 - Prospect fields from lead data
+            "region_id": None,  # Will be set in stage management
+            "product_interest": f"Converted from lead. Original service: {lead.get('product_service_id', 'Not specified')}",
+            "assigned_representatives": [current_user.id],
+            "lead_owner_id": current_user.id,
+            
+            # Initialize empty stage data for future stages
+            "scorecard": None,
+            "budget": None,
+            "authority": None,
+            "need": None,
+            "timeline": None,
+            "qualification_status": None,
+            "proposal_documents": [],
+            "submission_date": None,
+            "internal_stakeholder_id": None,
+            "client_response": None,
+            "selected_quotation_id": None,
+            "updated_price": None,
+            "margin": None,
+            "cpc_overhead": None,
+            "po_number": None,
+            "po_date": None,
+            "po_file": None,
+            "final_value": None,
+            "client_poc": None,
+            "delivery_team": [],
+            "kickoff_task": None,
+            "lost_reason": None,
+            "competitor_id": None,
+            "followup_reminder": None,
+            "internal_learning": None,
+            "drop_reason": None,
+            "reminder_date": None,
+            
+            # Locking and stage management
+            "is_locked": False,
+            "locked_stages": [],
+            "stage_history": [{
+                "from_stage": 0,
+                "to_stage": 1,
+                "changed_by": current_user.id,
+                "changed_at": datetime.now(timezone.utc),
+                "notes": f"Opportunity created from lead conversion. Original Lead ID: {lead.get('lead_id')}",
+                "stage_data": {}
+            }],
+            
+            # Audit fields
+            "created_by": current_user.id,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        # Calculate weighted revenue
+        opportunity_data["weighted_revenue"] = (opportunity_data["expected_revenue"] * opportunity_data["win_probability"]) / 100
+        
+        # Convert for MongoDB storage
+        opportunity_data = prepare_for_mongo(opportunity_data)
+        
+        # Insert opportunity into database
+        await db.opportunities.insert_one(opportunity_data)
+        
+        # Update lead status with opportunity reference
         await db.leads.update_one(
             {"id": lead_id},
             {
@@ -3856,13 +3939,11 @@ async def convert_lead_to_opportunity(
                     "status": "Converted",
                     "converted_to_opportunity": True,
                     "opportunity_date": opportunity_date,
+                    "opportunity_id": opportunity_id,  # Store reference to created opportunity
                     "updated_at": datetime.now(timezone.utc)
                 }
             }
         )
-        
-        # Here you would insert into opportunities table (not implemented in this scope)
-        # await db.opportunities.insert_one(opportunity_data)
         
         # Log audit trail
         await log_audit_trail(
@@ -3870,13 +3951,17 @@ async def convert_lead_to_opportunity(
             action="CONVERT",
             resource_type="Lead",
             resource_id=lead_id,
-            details=f"Converted lead to opportunity: {lead['lead_id']} - {lead['project_title']}"
+            details=f"Converted lead to opportunity: {lead['lead_id']} -> {opportunity_id} - {lead.get('project_title', '')}"
         )
         
         # Log email notification attempt
-        logger.info(f"Email notification attempt: Lead '{lead['lead_id']}' converted to opportunity by {current_user.username}")
+        logger.info(f"Email notification attempt: Lead '{lead['lead_id']}' converted to opportunity {opportunity_id} by {current_user.username}")
         
-        return {"message": "Lead converted to opportunity successfully"}
+        return {
+            "message": "Lead converted to opportunity successfully",
+            "opportunity_id": opportunity_id,
+            "opportunity_uuid": opportunity_data["id"]
+        }
         
     except Exception as e:
         logger.error(f"Failed to convert lead: {str(e)}")
