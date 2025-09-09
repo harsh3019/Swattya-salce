@@ -255,7 +255,7 @@ class LeadCreationTester:
         for test_case in test_cases:
             lead_data = {
                 "tender_type": test_case["tender_type"],
-                "project_title": f"Test {test_case['name']} Project",
+                "project_title": f"Test {test_case['name']} Project - {datetime.now().strftime('%Y%m%d%H%M%S')}",  # Unique title
                 "company_id": company_id,
                 "state": "Maharashtra",
                 "lead_subtype": "Direct",
@@ -271,6 +271,7 @@ class LeadCreationTester:
             # Add sub-tender type for Tender and Pre-Tender
             if test_case["tender_type"] in ["Tender", "Pre-Tender"] and subtender_id:
                 lead_data["sub_tender_type_id"] = subtender_id
+                lead_data["expected_orc"] = 100000.0  # Required for Tender/Pre-Tender
             
             try:
                 response = self.session.post(f"{BACKEND_URL}/leads", json=lead_data)
