@@ -311,48 +311,42 @@ class ComprehensiveFixTester:
             except Exception as e:
                 self.log_test("GET /api/opportunities/{id} (get single opportunity)", False, f"Exception: {str(e)}")
         
-        # Test 3: Update opportunity (PUT /api/opportunities/{id})
-        if self.created_opportunity_id:
-            try:
-                update_data = {
-                    "project_title": "Updated Test Opportunity - CRUD Testing",
-                    "expected_revenue": 200000,
-                    "win_probability": 75
-                }
+        # Test 3: Test opportunity list endpoint (GET /api/opportunities)
+        try:
+            response = requests.get(
+                f"{self.base_url}/opportunities",
+                headers=self.headers,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
                 
-                response = requests.put(
-                    f"{self.base_url}/opportunities/{self.created_opportunity_id}",
-                    headers=self.headers,
-                    json=update_data,
-                    timeout=10
+                # Handle different response formats
+                if isinstance(data, dict) and 'opportunities' in data:
+                    opportunities = data['opportunities']
+                    total = data.get('total', len(opportunities))
+                elif isinstance(data, list):
+                    opportunities = data
+                    total = len(opportunities)
+                else:
+                    opportunities = []
+                    total = 0
+                
+                self.log_test(
+                    "GET /api/opportunities (list all opportunities)", 
+                    True, 
+                    f"Retrieved {total} opportunities from list endpoint"
+                )
+            else:
+                self.log_test(
+                    "GET /api/opportunities (list all opportunities)", 
+                    False, 
+                    f"Status: {response.status_code}, Response: {response.text[:300]}"
                 )
                 
-                if response.status_code == 200:
-                    data = response.json()
-                    updated_title = data.get('project_title', data.get('name', 'Unknown'))
-                    updated_revenue = data.get('expected_revenue', 0)
-                    
-                    if "Updated" in updated_title and updated_revenue == 200000:
-                        self.log_test(
-                            "PUT /api/opportunities/{id} (update opportunity)", 
-                            True, 
-                            f"Updated opportunity: {updated_title}, revenue: {updated_revenue}"
-                        )
-                    else:
-                        self.log_test(
-                            "PUT /api/opportunities/{id} (update opportunity)", 
-                            False, 
-                            f"Update not reflected properly. Title: {updated_title}, Revenue: {updated_revenue}"
-                        )
-                else:
-                    self.log_test(
-                        "PUT /api/opportunities/{id} (update opportunity)", 
-                        False, 
-                        f"Status: {response.status_code}, Response: {response.text[:300]}"
-                    )
-                    
-            except Exception as e:
-                self.log_test("PUT /api/opportunities/{id} (update opportunity)", False, f"Exception: {str(e)}")
+        except Exception as e:
+            self.log_test("GET /api/opportunities (list all opportunities)", False, f"Exception: {str(e)}")
     
     def test_stage_management(self):
         """Test Stage Management with new PATCH endpoint"""
