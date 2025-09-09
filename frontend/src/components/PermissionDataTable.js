@@ -91,8 +91,8 @@ const PermissionDataTable = ({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-2xl font-bold">{title}</CardTitle>
-            <CardDescription>Manage {title.toLowerCase()}</CardDescription>
+            <CardTitle className="text-2xl font-bold">{title || 'Data'}</CardTitle>
+            <CardDescription>Manage {title ? title.toLowerCase() : 'data'}</CardDescription>
           </div>
           <div className="flex items-center space-x-2">
             {canAdd(modulePath) && (
