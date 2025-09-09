@@ -4569,6 +4569,18 @@ async def get_purchase_costs(current_user: User = Depends(get_current_user)):
     costs = await db.mst_purchase_costs.find({"is_active": True}).sort("purchase_date", -1).to_list(None)
     return [prepare_for_json(cost) for cost in costs]
 
+@api_router.get("/mst/regions")
+async def get_regions(current_user: User = Depends(get_current_user)):
+    """Get all regions"""
+    regions = await db.mst_regions.find({"is_active": True}).sort("region_name", 1).to_list(None)
+    return [prepare_for_json(region) for region in regions]
+
+@api_router.get("/mst/competitors")
+async def get_competitors(current_user: User = Depends(get_current_user)):
+    """Get all competitors"""
+    competitors = await db.mst_competitors.find({"is_active": True}).sort("competitor_name", 1).to_list(None)
+    return [prepare_for_json(competitor) for competitor in competitors]
+
 # Remove manual opportunity creation - opportunities only come from lead conversion
 # @api_router.post("/opportunities") - REMOVED
 
