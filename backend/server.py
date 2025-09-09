@@ -2905,7 +2905,7 @@ class Lead(BaseAuditModel):
     # Proofs & Documents
     proofs: List[LeadProof] = []
     documents: List[LeadDocument] = []
-    checklist_completed: bool = Field(default=False)
+    checklist_completed: Optional[bool] = Field(default=False)
     
     # Conversion
     opportunity_date: Optional[datetime] = None
