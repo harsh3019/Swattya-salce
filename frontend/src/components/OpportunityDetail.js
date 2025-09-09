@@ -727,6 +727,30 @@ const OpportunityDetail = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Stage Management Dialog */}
+      <Dialog open={stageDialogOpen} onOpenChange={setStageDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-900">
+              Stage Management
+            </DialogTitle>
+            <DialogDescription>
+              Move this opportunity through the L1-L8 sales pipeline
+            </DialogDescription>
+          </DialogHeader>
+          
+          {opportunity && (
+            <StageManagement
+              opportunity={opportunity}
+              stages={stages}
+              currentStage={getStageInfo(opportunity.stage_id)}
+              onStageUpdate={handleStageUpdate}
+              onClose={() => setStageDialogOpen(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
