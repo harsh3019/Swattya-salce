@@ -189,6 +189,7 @@ const OpportunityList = () => {
   };
 
   const getStatusBadgeColor = (status) => {
+    if (!status) return 'bg-gray-100 text-gray-800 border-gray-200';
     switch (status.toLowerCase()) {
       case 'open': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'won': return 'bg-green-100 text-green-800 border-green-200';
