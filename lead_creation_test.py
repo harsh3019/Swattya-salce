@@ -341,6 +341,13 @@ class LeadCreationTester:
             elif isinstance(companies, dict) and companies.get("data"):
                 company_id = companies["data"][0].get("id")
         
+        services_response = self.session.get(f"{BACKEND_URL}/product-services")
+        service_id = None
+        if services_response.status_code == 200:
+            services = services_response.json()
+            if isinstance(services, list) and len(services) > 0:
+                service_id = services[0].get("id")
+        
         lead_data = {
             "tender_type": "Non-Tender",
             "project_title": "Lead ID Generation Test",
@@ -348,6 +355,7 @@ class LeadCreationTester:
             "state": "Karnataka",
             "lead_subtype": "Direct",
             "source": "Email",
+            "product_service_id": service_id,  # Required field
             "status": "New",
             "lead_owner": "admin"
         }
