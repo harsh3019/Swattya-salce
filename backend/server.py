@@ -1849,6 +1849,94 @@ async def initialize_lead_master_data():
     
     logger.info("Lead Management master data initialized successfully")
 
+async def initialize_opportunity_master_data():
+    """Initialize master data for Opportunity Management"""
+    
+    # Check if data already exists
+    if await db.mst_stages.count_documents({}) > 0:
+        return
+    
+    logger.info("Initializing Opportunity Management master data...")
+    
+    # Opportunity Stages (L1-L8)
+    stages = [
+        {"id": str(uuid.uuid4()), "stage_code": "L1", "stage_name": "Lead", "stage_order": 1, "description": "Initial lead stage", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "stage_code": "L2", "stage_name": "Qualification", "stage_order": 2, "description": "Lead qualification stage", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "stage_code": "L3", "stage_name": "Needs Analysis", "stage_order": 3, "description": "Understanding customer needs", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "stage_code": "L4", "stage_name": "Proposal", "stage_order": 4, "description": "Proposal and quotation stage", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "stage_code": "L5", "stage_name": "Negotiation", "stage_order": 5, "description": "Price and terms negotiation", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "stage_code": "L6", "stage_name": "Decision", "stage_order": 6, "description": "Customer decision stage", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "stage_code": "L7", "stage_name": "Contracting", "stage_order": 7, "description": "Contract finalization", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "stage_code": "L8", "stage_name": "Closure", "stage_order": 8, "description": "Deal closure stage", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+    ]
+    await db.mst_stages.insert_many(stages)
+    
+    # Currencies
+    currencies = [
+        {"id": str(uuid.uuid4()), "code": "INR", "name": "Indian Rupee", "symbol": "₹", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "code": "USD", "name": "US Dollar", "symbol": "$", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "code": "EUR", "name": "Euro", "symbol": "€", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+    ]
+    await db.mst_currencies.insert_many(currencies)
+    
+    # Primary Categories
+    categories = [
+        {"id": str(uuid.uuid4()), "name": "Software", "abbreviation": "SW", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Hardware", "abbreviation": "HW", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Services", "abbreviation": "SVC", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Consulting", "abbreviation": "CONS", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+    ]
+    await db.mst_primary_categories.insert_many(categories)
+    
+    # Sample Products
+    software_cat_id = categories[0]["id"]
+    hardware_cat_id = categories[1]["id"]
+    services_cat_id = categories[2]["id"]
+    
+    products = [
+        {"id": str(uuid.uuid4()), "name": "CRM Software", "primary_category_id": software_cat_id, "unit": "License", "description": "Customer Relationship Management Software", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "ERP System", "primary_category_id": software_cat_id, "unit": "License", "description": "Enterprise Resource Planning System", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Server Hardware", "primary_category_id": hardware_cat_id, "unit": "Unit", "description": "Physical Server Hardware", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Implementation Service", "primary_category_id": services_cat_id, "unit": "Hour", "description": "Software Implementation Service", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Support Service", "primary_category_id": services_cat_id, "unit": "Month", "description": "Technical Support Service", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+    ]
+    await db.mst_products.insert_many(products)
+    
+    # Sample Rate Card
+    inr_currency_id = currencies[0]["id"]
+    rate_card = {
+        "id": str(uuid.uuid4()),
+        "code": "RC2025",
+        "name": "Standard Rate Card 2025",
+        "effective_from": datetime.now(timezone.utc),
+        "effective_to": None,
+        "is_active": True,
+        "created_by": "system",
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc)
+    }
+    await db.mst_rate_cards.insert_one(rate_card)
+    
+    # Sample Sales Prices
+    sales_prices = [
+        {"id": str(uuid.uuid4()), "rate_card_id": rate_card["id"], "product_id": products[0]["id"], "price_type": "recurring", "price": 5000, "currency_id": inr_currency_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "rate_card_id": rate_card["id"], "product_id": products[0]["id"], "price_type": "one_time", "price": 50000, "currency_id": inr_currency_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "rate_card_id": rate_card["id"], "product_id": products[1]["id"], "price_type": "recurring", "price": 10000, "currency_id": inr_currency_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "rate_card_id": rate_card["id"], "product_id": products[1]["id"], "price_type": "one_time", "price": 100000, "currency_id": inr_currency_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "rate_card_id": rate_card["id"], "product_id": products[3]["id"], "price_type": "one_time", "price": 2000, "currency_id": inr_currency_id, "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+    ]
+    await db.mst_sales_prices.insert_many(sales_prices)
+    
+    # Sample Purchase Costs
+    purchase_costs = [
+        {"id": str(uuid.uuid4()), "product_id": products[0]["id"], "purchase_cost": 3000, "purchase_date": datetime.now(timezone.utc), "currency_id": inr_currency_id, "cost_type": "License", "remark": "Vendor cost", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "product_id": products[1]["id"], "purchase_cost": 6000, "purchase_date": datetime.now(timezone.utc), "currency_id": inr_currency_id, "cost_type": "License", "remark": "Vendor cost", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "product_id": products[3]["id"], "purchase_cost": 1200, "purchase_date": datetime.now(timezone.utc), "currency_id": inr_currency_id, "cost_type": "Service", "remark": "Resource cost", "is_active": True, "created_by": "system", "created_at": datetime.now(timezone.utc), "updated_at": datetime.now(timezone.utc)},
+    ]
+    await db.mst_purchase_costs.insert_many(purchase_costs)
+    
+    logger.info("Opportunity Management master data initialized successfully")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
