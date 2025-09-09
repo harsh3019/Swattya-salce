@@ -143,12 +143,13 @@ class ComprehensiveFixTester:
             lead_data_pre_tender = {
                 "tender_type": "Pre-Tender",
                 "billing_type": "postpaid",  # This field should be included when tender_type is Pre-Tender
+                "sub_tender_type_id": "4304d03c-ccbd-4dac-af97-0e60f88eb8c9",  # Private - Enterprise
                 "project_title": "Test Lead - Pre-Tender Type with Billing",
                 "company_id": "test-company-id",
                 "state": "Karnataka",
                 "lead_subtype": "Referral",
                 "source": "Email",
-                "product_service_id": "test-product-service-id",
+                "product_service_id": "f5b77540-b4d7-45f8-b6dd-95630486b299",  # Cloud Services
                 "is_enquiry": True,
                 "expected_orc": 75000,
                 "revenue": 75000,
