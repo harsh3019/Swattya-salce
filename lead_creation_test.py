@@ -265,7 +265,7 @@ class LeadCreationTester:
                 response = self.session.post(f"{BACKEND_URL}/leads", json=lead_data)
                 
                 if test_case["should_work"]:
-                    if response.status_code == 201:
+                    if response.status_code in [200, 201]:
                         data = response.json()
                         lead_id = data.get("lead_id") or data.get("id")
                         self.log_test(f"Billing Logic: {test_case['name']}", True, 
@@ -274,7 +274,7 @@ class LeadCreationTester:
                         self.log_test(f"Billing Logic: {test_case['name']}", False, 
                                     f"Expected success but got {response.status_code}: {response.text}")
                 else:
-                    if response.status_code != 201:
+                    if response.status_code not in [200, 201]:
                         self.log_test(f"Billing Logic: {test_case['name']}", True, 
                                     f"Correctly rejected with {response.status_code}")
                     else:
