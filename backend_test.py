@@ -298,15 +298,34 @@ class OpportunityBackendTester:
     def test_create_opportunity(self):
         """Test opportunity creation"""
         try:
-            # Sample opportunity data
+            # First get required master data
+            stages_response = requests.get(f"{self.base_url}/mst/stages", headers=self.headers, timeout=10)
+            currencies_response = requests.get(f"{self.base_url}/mst/currencies", headers=self.headers, timeout=10)
+            
+            if stages_response.status_code != 200 or currencies_response.status_code != 200:
+                self.log_test("POST /opportunities", False, "Could not get required master data")
+                return
+            
+            stages = stages_response.json()
+            currencies = currencies_response.json()
+            
+            # Find L1 stage and INR currency
+            l1_stage = next((s for s in stages if s.get('stage_code') == 'L1'), None)
+            inr_currency = next((c for c in currencies if c.get('code') == 'INR'), None)
+            
+            if not l1_stage or not inr_currency:
+                self.log_test("POST /opportunities", False, "L1 stage or INR currency not found in master data")
+                return
+            
+            # Sample opportunity data with correct field names
             opportunity_data = {
-                "name": "Test Opportunity - Backend Testing",
+                "project_title": "Test Opportunity - Backend Testing",
                 "company_id": "test-company-id",
-                "stage": "L1",
-                "amount": 100000,
-                "currency": "INR",
-                "close_date": "2025-03-31T00:00:00Z",
-                "owner_user_id": "test-user-id"
+                "stage_id": l1_stage['id'],
+                "expected_revenue": 100000,
+                "currency_id": inr_currency['id'],
+                "lead_owner_id": "test-user-id",
+                "win_probability": 50
             }
             
             response = requests.post(
@@ -318,7 +337,7 @@ class OpportunityBackendTester:
             
             if response.status_code in [200, 201]:
                 data = response.json()
-                opportunity_id = data.get('id')
+                opportunity_id = data.get('opportunity_id')  # Note: using opportunity_id not id
                 
                 # Check if opportunity ID follows OPP-XXXXXXX format
                 if opportunity_id and opportunity_id.startswith('OPP-') and len(opportunity_id) == 11:
@@ -327,7 +346,7 @@ class OpportunityBackendTester:
                         True, 
                         f"Opportunity created with ID: {opportunity_id}"
                     )
-                    self.created_opportunity_id = opportunity_id
+                    self.created_opportunity_id = data.get('id')  # Store the actual database ID
                 else:
                     self.log_test(
                         "POST /opportunities", 
