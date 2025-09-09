@@ -2913,6 +2913,7 @@ class Lead(BaseAuditModel):
     
     # Conversion
     opportunity_date: Optional[datetime] = None
+    opportunity_id: Optional[str] = None  # Reference to created opportunity
     converted_to_opportunity: bool = Field(default=False)
     
     # Status fields
