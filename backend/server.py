@@ -4458,6 +4458,12 @@ async def get_sales_prices_by_rate_card(rate_card_id: str, current_user: User = 
     }).to_list(None)
     return [prepare_for_json(price) for price in prices]
 
+@api_router.get("/mst/purchase-costs")
+async def get_purchase_costs(current_user: User = Depends(get_current_user)):
+    """Get all purchase costs"""
+    costs = await db.mst_purchase_costs.find({"is_active": True}).sort("purchase_date", -1).to_list(None)
+    return [prepare_for_json(cost) for cost in costs]
+
 # Opportunity APIs
 @api_router.get("/opportunities")
 async def get_opportunities(
