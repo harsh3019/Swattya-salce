@@ -68,11 +68,7 @@ const step2Schema = z.object({
   lead_owner: z.string().min(1, 'Lead owner is required'),
 });
 
-const step3Schema = z.object({
-  checklist_completed: z.boolean().refine((val) => val === true, {
-    message: 'All checklist items must be completed'
-  }),
-});
+const step3Schema = z.object({});
 
 const STEPS = [
   { id: 1, title: 'General Info', description: 'Basic lead information', icon: Building },
