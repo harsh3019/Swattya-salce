@@ -335,14 +335,6 @@ export const LeadForm = () => {
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleChecklistChange = (itemId, checked) => {
-    setChecklistItems(prev => 
-      prev.map(item => 
-        item.id === itemId ? { ...item, checked } : item
-      )
-    );
-  };
-
   const renderStep1 = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
