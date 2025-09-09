@@ -172,7 +172,7 @@ class OpportunityBackendTester:
             self.log_test("GET /mst/sales-prices/{rate_card_id}", False, f"Exception: {str(e)}")
     
     def test_purchase_costs(self):
-        """Test purchase costs API"""
+        """Test purchase costs API - Note: This endpoint may not be implemented yet"""
         try:
             response = requests.get(
                 f"{self.base_url}/mst/purchase-costs",
@@ -187,6 +187,12 @@ class OpportunityBackendTester:
                     "GET /mst/purchase-costs", 
                     True, 
                     f"Retrieved {count} purchase costs"
+                )
+            elif response.status_code == 404:
+                self.log_test(
+                    "GET /mst/purchase-costs", 
+                    False, 
+                    "Endpoint not implemented yet (404 Not Found)"
                 )
             else:
                 self.log_test(
