@@ -4230,12 +4230,31 @@ class MstSalesPrice(BaseAuditModel):
     is_active: bool = Field(default=True)
 
 class MstPurchaseCost(BaseAuditModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     product_id: str = Field(..., description="Reference to product")
     purchase_cost: float = Field(..., ge=0)
-    purchase_date: datetime = Field(...)
+    purchase_date: date = Field(...)
     currency_id: str = Field(..., description="Reference to currency")
-    cost_type: str = Field(..., max_length=50)
+    cost_type: str = Field(default="Direct", pattern=r'^(Direct|Indirect|Overhead)$')
     remark: Optional[str] = Field(None, max_length=500)
+    is_active: bool = Field(default=True)
+
+# Master Region Model
+class MstRegion(BaseAuditModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    region_name: str = Field(..., min_length=2, max_length=100)
+    region_code: str = Field(..., min_length=2, max_length=10)
+    description: Optional[str] = Field(None, max_length=500)
+    is_active: bool = Field(default=True)
+
+# Master Competitor Model
+class MstCompetitor(BaseAuditModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    competitor_name: str = Field(..., min_length=2, max_length=100)
+    competitor_type: str = Field(default="Direct", pattern=r'^(Direct|Indirect|Substitute)$')
+    description: Optional[str] = Field(None, max_length=500)
+    strengths: Optional[str] = Field(None, max_length=1000)
+    weaknesses: Optional[str] = Field(None, max_length=1000)
     is_active: bool = Field(default=True)
 
 # Opportunity Models with Stage-Specific Fields
