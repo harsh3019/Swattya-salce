@@ -186,12 +186,15 @@ export const LeadForm = () => {
   const loadMasterData = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('token');
+      const headers = { Authorization: `Bearer ${token}` };
+      
       const [companiesRes, subTenderRes, partnersRes, productServicesRes, usersRes] = await Promise.all([
-        axios.get(`${API}/companies`),
-        axios.get(`${API}/sub-tender-types`),
-        axios.get(`${API}/partners`),
-        axios.get(`${API}/product-services`),
-        axios.get(`${API}/users`),
+        axios.get(`${API}/companies`, { headers }),
+        axios.get(`${API}/sub-tender-types`, { headers }),
+        axios.get(`${API}/partners`, { headers }),
+        axios.get(`${API}/product-services`, { headers }),
+        axios.get(`${API}/users`, { headers }),
       ]);
       
       setCompanies(companiesRes.data || []);
