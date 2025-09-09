@@ -105,8 +105,7 @@ const OpportunityList = () => {
   };
 
   const handleViewOpportunity = (opportunity) => {
-    setSelectedOpportunity(opportunity);
-    setViewDialogOpen(true);
+    navigate(`/opportunities/${opportunity.id}`);
   };
 
   const handleAddOpportunity = () => {
