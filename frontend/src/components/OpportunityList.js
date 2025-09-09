@@ -57,7 +57,7 @@ const OpportunityList = () => {
       const response = await axios.get(`${baseURL}/api/opportunities`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setOpportunities(response.data || []);
+      setOpportunities(response.data.opportunities || []);
     } catch (error) {
       console.error('Error fetching opportunities:', error);
       setError('Failed to fetch opportunities');
