@@ -829,13 +829,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Lead Creation Fix Testing"
-    - "Opportunity Form Fix Testing" 
-    - "L1-L8 Stage Management Testing"
-    - "Opportunity Edit Fix Testing"
-  stuck_tasks: []
+    - "Stepper-Based Opportunity Management System"
+  stuck_tasks:
+    - "Stepper-Based Opportunity Management System"
   test_all: false
-  test_priority: "high_first"
+  test_priority: "stuck_first"
 
 agent_communication:
     - agent: "testing"
