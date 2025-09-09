@@ -120,7 +120,7 @@ class ComprehensiveFixTester:
                     self.log_test(
                         "POST /api/leads with Tender type and billing_type", 
                         False, 
-                        f"billing_type not properly saved. Expected: Fixed Price, Got: {billing_type}"
+                        f"billing_type not properly saved. Expected: prepaid, Got: {billing_type}"
                     )
             else:
                 self.log_test(
