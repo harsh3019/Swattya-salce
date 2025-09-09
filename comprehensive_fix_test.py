@@ -144,7 +144,7 @@ class ComprehensiveFixTester:
                 "expected_value": 75000,
                 "currency": "USD",
                 "tender_type": "Pre-Tender",
-                "billing_type": "Time & Material"  # This field should be included when tender_type is Pre-Tender
+                "billing_type": "postpaid"  # This field should be included when tender_type is Pre-Tender
             }
             
             response = requests.post(
