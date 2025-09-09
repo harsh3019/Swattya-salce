@@ -428,6 +428,7 @@ const OpportunityList = () => {
             onDelete={handleDeleteOpportunity}
             module="Sales"
             menu="Opportunities"
+            title="Opportunities"
             emptyStateTitle="No opportunities found"
             emptyStateDescription="Get started by creating your first opportunity"
           />
