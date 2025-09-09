@@ -167,7 +167,7 @@ const PermissionDataTable = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.length === 0 ? (
+              {(data || []).length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={columns.length + 1} className="text-center py-8">
                     <div className="text-gray-500">
