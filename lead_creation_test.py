@@ -211,18 +211,18 @@ class LeadCreationTester:
             {
                 "name": "Tender + Prepaid",
                 "tender_type": "Tender",
-                "billing_type": "Prepaid",
+                "billing_type": "prepaid",  # lowercase
                 "should_work": True
             },
             {
                 "name": "Pre-Tender + Postpaid", 
                 "tender_type": "Pre-Tender",
-                "billing_type": "Postpaid",
+                "billing_type": "postpaid",  # lowercase
                 "should_work": True
             },
             {
-                "name": "RFP (no billing type)",
-                "tender_type": "RFP", 
+                "name": "Non-Tender (no billing type)",
+                "tender_type": "Non-Tender",  # Use valid tender type
                 "billing_type": None,
                 "should_work": True
             }
