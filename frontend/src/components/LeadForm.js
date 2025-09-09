@@ -212,7 +212,10 @@ export const LeadForm = () => {
 
   const loadLeadData = async () => {
     try {
-      const response = await axios.get(`${API}/leads/${id}`);
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/leads/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       const leadData = response.data;
       setFormData(leadData);
       reset(leadData);
