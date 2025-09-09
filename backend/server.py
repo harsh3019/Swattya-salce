@@ -4696,5 +4696,38 @@ async def update_quotation(opportunity_id: str, quotation_id: str, quotation: Qu
     updated_quotation = await db.quotations.find_one({"id": quotation_id})
     return parse_from_mongo(updated_quotation)
 
+@api_router.patch("/opportunities/{opportunity_id}/stage")
+async def update_opportunity_stage(opportunity_id: str, stage_data: dict, current_user: User = Depends(get_current_user)):
+    """Update opportunity stage"""
+    existing_opportunity = await db.opportunities.find_one({"id": opportunity_id})
+    if not existing_opportunity:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    
+    # Validate stage exists
+    stage_id = stage_data.get("stage_id")
+    if not stage_id:
+        raise HTTPException(status_code=400, detail="Stage ID is required")
+    
+    existing_stage = await db.mst_stages.find_one({"id": stage_id})
+    if not existing_stage:
+        raise HTTPException(status_code=404, detail="Stage not found")
+    
+    # Update opportunity stage
+    update_data = {
+        "stage_id": stage_id,
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    # Add stage change notes if provided
+    if stage_data.get("stage_change_notes"):
+        update_data["stage_change_notes"] = stage_data["stage_change_notes"]
+    
+    await db.opportunities.update_one(
+        {"id": opportunity_id},
+        {"$set": update_data}
+    )
+    
+    return {"message": "Stage updated successfully"}
+
 # Include router after all endpoints are defined
 app.include_router(api_router)
