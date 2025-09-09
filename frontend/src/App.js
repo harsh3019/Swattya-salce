@@ -20,6 +20,7 @@ import { ContactList } from './components/ContactList';
 import LeadForm from './components/LeadForm';
 import LeadList from './components/LeadList';
 import OpportunityList from './components/OpportunityList';
+import OpportunityDetail from './components/OpportunityDetail';
 
 // Import new RBAC components
 import DynamicSidebar from './components/DynamicSidebar';
