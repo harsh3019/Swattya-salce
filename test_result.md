@@ -737,8 +737,7 @@ metadata:
 test_plan:
   current_focus:
     - "Opportunity Management Frontend Implementation"
-  stuck_tasks:
-    - "Opportunity Management Frontend Implementation"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
