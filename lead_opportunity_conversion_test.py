@@ -28,6 +28,7 @@ class LeadOpportunityConversionTester:
         self.created_opportunity_id = None
         self.company_id = None
         self.service_id = None
+        self.sub_tender_id = None
         
     def log_test(self, test_name, success, details=""):
         """Log test result"""
