@@ -184,7 +184,7 @@ const PermissionDataTable = ({
               ) : (
                 (data || []).map((item) => (
                   <TableRow key={item.id}>
-                    {columns.map((column) => (
+                    {(columns || []).map((column) => (
                       <TableCell key={column.key}>
                         {column.render ? column.render(item[column.key], item) : item[column.key]}
                       </TableCell>
