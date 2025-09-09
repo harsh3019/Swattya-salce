@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Target, TrendingUp, DollarSign, Award, Search, Filter } from 'lucide-react';
+import { Plus, Target, TrendingUp, DollarSign, Award, Search, Filter, RefreshCw } from 'lucide-react';
 import PermissionDataTable from './PermissionDataTable';
 import { usePermissions } from '../contexts/PermissionContext';
 import axios from 'axios';
@@ -24,7 +24,12 @@ const OpportunityList = () => {
     weighted_pipeline: 0
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState('created_at');
+  const [sortDirection, setSortDirection] = useState('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [stageFilter, setStageFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
@@ -46,6 +51,8 @@ const OpportunityList = () => {
 
   const fetchOpportunities = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const token = localStorage.getItem('token');
       const response = await axios.get(`${baseURL}/api/opportunities`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -53,7 +60,10 @@ const OpportunityList = () => {
       setOpportunities(response.data || []);
     } catch (error) {
       console.error('Error fetching opportunities:', error);
+      setError('Failed to fetch opportunities');
       setOpportunities([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,8 +101,6 @@ const OpportunityList = () => {
       setUsers(usersRes.data || []);
     } catch (error) {
       console.error('Error fetching master data:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -122,6 +130,36 @@ const OpportunityList = () => {
         console.error('Error deleting opportunity:', error);
         alert('Error deleting opportunity. Please try again.');
       }
+    }
+  };
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const exportToCSV = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${baseURL}/api/opportunities/export`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'opportunities.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Error exporting opportunities:', error);
+      alert('Error exporting opportunities. Please try again.');
     }
   };
 
@@ -184,30 +222,30 @@ const OpportunityList = () => {
       key: 'opportunity_id',
       label: 'Opportunity ID',
       sortable: true,
-      render: (value) => (
-        <span className="font-mono text-sm font-medium text-blue-600">{value}</span>
+      render: (opportunity) => (
+        <span className="font-mono text-sm font-medium text-blue-600">{opportunity.opportunity_id}</span>
       )
     },
     {
       key: 'project_title',
       label: 'Project Title',
       sortable: true,
-      render: (value) => (
-        <span className="font-medium text-gray-900">{value}</span>
+      render: (opportunity) => (
+        <span className="font-medium text-gray-900">{opportunity.project_title}</span>
       )
     },
     {
       key: 'company_id',
       label: 'Company',
-      render: (value) => (
-        <span className="text-gray-700">{getCompanyName(value)}</span>
+      render: (opportunity) => (
+        <span className="text-gray-700">{getCompanyName(opportunity.company_id)}</span>
       )
     },
     {
       key: 'stage_id',
       label: 'Stage',
-      render: (value) => {
-        const stage = getStageInfo(value);
+      render: (opportunity) => {
+        const stage = getStageInfo(opportunity.stage_id);
         return (
           <Badge variant="outline" className={getStageBadgeColor(stage.code)}>
             {stage.code} - {stage.name}
@@ -218,9 +256,9 @@ const OpportunityList = () => {
     {
       key: 'status',
       label: 'Status',
-      render: (value) => (
-        <Badge variant="outline" className={getStatusBadgeColor(value)}>
-          {value}
+      render: (opportunity) => (
+        <Badge variant="outline" className={getStatusBadgeColor(opportunity.status)}>
+          {opportunity.status}
         </Badge>
       )
     },
@@ -228,9 +266,9 @@ const OpportunityList = () => {
       key: 'expected_revenue',
       label: 'Expected Revenue',
       sortable: true,
-      render: (value, row) => (
+      render: (opportunity) => (
         <span className="font-medium text-green-600">
-          {formatCurrency(value, row.currency_id)}
+          {formatCurrency(opportunity.expected_revenue, opportunity.currency_id)}
         </span>
       )
     },
@@ -238,9 +276,9 @@ const OpportunityList = () => {
       key: 'weighted_revenue',
       label: 'Weighted Revenue',
       sortable: true,
-      render: (value, row) => (
+      render: (opportunity) => (
         <span className="font-medium text-purple-600">
-          {formatCurrency(value, row.currency_id)}
+          {formatCurrency(opportunity.weighted_revenue, opportunity.currency_id)}
         </span>
       )
     },
@@ -248,46 +286,36 @@ const OpportunityList = () => {
       key: 'win_probability',
       label: 'Win Probability',
       sortable: true,
-      render: (value) => (
+      render: (opportunity) => (
         <div className="flex items-center gap-2">
           <div className="w-16 bg-gray-200 rounded-full h-2">
             <div 
               className="bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${value}%` }}
+              style={{ width: `${opportunity.win_probability}%` }}
             ></div>
           </div>
-          <span className="text-sm font-medium">{value}%</span>
+          <span className="text-sm font-medium">{opportunity.win_probability}%</span>
         </div>
       )
     },
     {
       key: 'lead_owner_id',
       label: 'Owner',
-      render: (value) => (
-        <span className="text-gray-700">{getUserName(value)}</span>
+      render: (opportunity) => (
+        <span className="text-gray-700">{getUserName(opportunity.lead_owner_id)}</span>
       )
     },
     {
       key: 'created_at',
       label: 'Created',
       sortable: true,
-      render: (value) => (
+      render: (opportunity) => (
         <span className="text-gray-500 text-sm">
-          {new Date(value).toLocaleDateString('en-IN')}
+          {new Date(opportunity.created_at).toLocaleDateString('en-IN')}
         </span>
       )
     }
   ];
-
-  if (loading) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -297,12 +325,6 @@ const OpportunityList = () => {
           <h1 className="text-3xl font-bold text-gray-900">Opportunities</h1>
           <p className="text-gray-600 mt-1">Manage sales opportunities and pipeline</p>
         </div>
-        {permissions.some(p => p.permission === 'Add' && p.menu === 'Opportunities') && (
-          <Button onClick={handleAddOpportunity} className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Opportunity
-          </Button>
-        )}
       </div>
 
       {/* KPI Dashboard */}
@@ -373,17 +395,6 @@ const OpportunityList = () => {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search opportunities by project title, company, or opportunity ID..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
             <div className="flex gap-2">
               <Select value={stageFilter} onValueChange={setStageFilter}>
                 <SelectTrigger className="w-48">
@@ -417,23 +428,29 @@ const OpportunityList = () => {
       </Card>
 
       {/* Data Table */}
-      <Card>
-        <CardContent className="p-0">
-          <PermissionDataTable
-            data={opportunities}
-            columns={columns}
-            searchTerm={searchTerm}
-            onView={handleViewOpportunity}
-            onEdit={handleEditOpportunity}
-            onDelete={handleDeleteOpportunity}
-            module="Sales"
-            menu="Opportunities"
-            title="Opportunities"
-            emptyStateTitle="No opportunities found"
-            emptyStateDescription="Get started by creating your first opportunity"
-          />
-        </CardContent>
-      </Card>
+      <PermissionDataTable
+        data={opportunities}
+        columns={columns}
+        loading={loading}
+        error={error}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        sortField={sortField}
+        sortDirection={sortDirection}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
+        onSort={handleSort}
+        onExport={exportToCSV}
+        onView={handleViewOpportunity}
+        onEdit={handleEditOpportunity}
+        onDelete={handleDeleteOpportunity}
+        onAdd={handleAddOpportunity}
+        title="Opportunities"
+        description="Manage sales opportunities and pipeline"
+        modulePath="/opportunities"
+        entityName="opportunities"
+      />
 
       {/* View Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
