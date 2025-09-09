@@ -201,7 +201,7 @@ class ComprehensiveFixTester:
                 json={
                     "tender_type": "Non-Tender",
                     "project_title": "Test Lead - No Auth",
-                    "company_id": "test-company-id",
+                    "company_id": "df3d438f-d614-4e72-a666-44c2cf600f44",  # Valid company ID
                     "state": "Delhi",
                     "lead_subtype": "Direct",
                     "source": "Phone",
