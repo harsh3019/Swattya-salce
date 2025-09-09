@@ -111,6 +111,20 @@ class LeadOpportunityConversionTester:
                 self.log_test("Get Product Service ID", False, f"Status: {services_response.status_code}")
                 return False
             
+            # Get sub-tender types
+            sub_tender_response = requests.get(f"{self.base_url}/sub-tender-types", headers=self.headers, timeout=10)
+            if sub_tender_response.status_code == 200:
+                sub_tenders = sub_tender_response.json()
+                if sub_tenders and len(sub_tenders) > 0:
+                    self.sub_tender_id = sub_tenders[0].get('id')
+                    self.log_test("Get Sub-Tender Type ID", True, f"Using sub-tender ID: {self.sub_tender_id}")
+                else:
+                    self.log_test("Get Sub-Tender Type ID", False, "No sub-tender types found")
+                    return False
+            else:
+                self.log_test("Get Sub-Tender Type ID", False, f"Status: {sub_tender_response.status_code}")
+                return False
+            
             return True
             
         except Exception as e:
