@@ -12,8 +12,8 @@ from datetime import datetime
 # Configuration
 BASE_URL = "https://lead-opp-crm.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {
-    "username": "admin@sawayatta.com", 
-    "password": "password"
+    "username": "admin", 
+    "password": "admin123"
 }
 
 class OpportunityBackendTester:
