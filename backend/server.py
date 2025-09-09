@@ -4631,5 +4631,70 @@ async def get_quotation(quotation_id: str, current_user: User = Depends(get_curr
     
     return prepare_for_json(quotation)
 
+@api_router.patch("/opportunities/{opportunity_id}/quotations/{quotation_id}/select")
+async def select_quotation(opportunity_id: str, quotation_id: str, current_user: User = Depends(get_current_user)):
+    """Select a quotation as the chosen one for the opportunity"""
+    # Check if opportunity exists
+    existing_opportunity = await db.opportunities.find_one({"id": opportunity_id})
+    if not existing_opportunity:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    
+    # Check if quotation exists
+    existing_quotation = await db.quotations.find_one({"id": quotation_id, "opportunity_id": opportunity_id})
+    if not existing_quotation:
+        raise HTTPException(status_code=404, detail="Quotation not found")
+    
+    # Deselect all other quotations for this opportunity
+    await db.quotations.update_many(
+        {"opportunity_id": opportunity_id},
+        {
+            "$set": {
+                "is_selected": False,
+                "updated_at": datetime.now(timezone.utc)
+            }
+        }
+    )
+    
+    # Select this quotation
+    await db.quotations.update_one(
+        {"id": quotation_id},
+        {
+            "$set": {
+                "is_selected": True,
+                "updated_at": datetime.now(timezone.utc)
+            }
+        }
+    )
+    
+    return {"message": "Quotation selected successfully"}
+
+@api_router.get("/opportunities/{opportunity_id}/quotations/{quotation_id}")
+async def get_quotation_by_id(opportunity_id: str, quotation_id: str, current_user: User = Depends(get_current_user)):
+    """Get a specific quotation by ID"""
+    quotation = await db.quotations.find_one({"id": quotation_id, "opportunity_id": opportunity_id})
+    if not quotation:
+        raise HTTPException(status_code=404, detail="Quotation not found")
+    
+    return parse_from_mongo(quotation)
+
+@api_router.put("/opportunities/{opportunity_id}/quotations/{quotation_id}")
+async def update_quotation(opportunity_id: str, quotation_id: str, quotation: QuotationCreate, current_user: User = Depends(get_current_user)):
+    """Update an existing quotation"""
+    existing_quotation = await db.quotations.find_one({"id": quotation_id, "opportunity_id": opportunity_id})
+    if not existing_quotation:
+        raise HTTPException(status_code=404, detail="Quotation not found")
+    
+    quotation_data = quotation.dict()
+    quotation_data["updated_at"] = datetime.now(timezone.utc)
+    quotation_data = prepare_for_mongo(quotation_data)
+    
+    await db.quotations.update_one(
+        {"id": quotation_id},
+        {"$set": quotation_data}
+    )
+    
+    updated_quotation = await db.quotations.find_one({"id": quotation_id})
+    return parse_from_mongo(updated_quotation)
+
 # Include router after all endpoints are defined
 app.include_router(api_router)
