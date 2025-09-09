@@ -256,7 +256,6 @@ export const LeadForm = () => {
       
       const submitData = {
         ...finalData,
-        checklist_completed: checklistItems.every(item => item.checked),
       };
       
       console.log('Submit data before processing:', submitData);
