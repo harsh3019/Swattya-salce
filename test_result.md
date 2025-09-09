@@ -803,6 +803,18 @@ frontend:
           agent: "testing"
           comment: "Lead listing functionality cannot be fully tested until lead creation is working. However, lead retrieval APIs are working correctly - GET /api/leads returns 6 existing leads with proper data structure, and GET /api/leads/{id} retrieves individual lead details successfully. The frontend implementation appears ready but depends on successful lead creation for complete testing."
 
+  - task: "Lead Creation Checklist Requirement Removal"
+    implemented: false
+    working: false
+    file: "backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL BACKEND ISSUE: CHECKLIST REQUIREMENT NOT REMOVED: Comprehensive testing of lead creation functionality reveals that the checklist requirement has NOT been removed from the backend as requested in the review. SPECIFIC ISSUE: Backend server.py lines 3533-3534 still enforce checklist completion with validation 'if not lead_data.checklist_completed: raise HTTPException(status_code=400, detail=\"Complete all checklist items to proceed\")'. IMPACT: ✅ Authentication working with admin/admin123, ✅ All master data APIs working (company-types, companies, sub-tender-types, product-services, users), ✅ Lead retrieval APIs working (GET /api/leads returns 6 leads, GET /api/leads/{id} works), ❌ ALL lead creation attempts fail with 400 error, ❌ Lead creation without checklist_completed field fails, ❌ Lead creation with checklist_completed=false fails, ❌ All billing type logic tests fail, ❌ Lead ID generation test fails. TESTING RESULTS: 52.9% success rate (9/17 tests passed) - all infrastructure working but core lead creation blocked. REQUIRED FIX: Remove or modify the checklist validation in backend/server.py create_lead function to allow lead creation without requiring checklist completion. This is blocking the entire lead creation workflow and preventing opportunity conversion."
+
   - task: "Lead Change Status API"
     implemented: true
     working: false
