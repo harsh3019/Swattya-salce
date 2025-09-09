@@ -324,7 +324,13 @@ const OpportunityList = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Opportunities</h1>
-          <p className="text-gray-600 mt-1">Manage sales opportunities and pipeline</p>
+          <p className="text-gray-600 mt-1">Manage sales opportunities from converted leads</p>
+        </div>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
+          <p className="text-sm text-blue-700">
+            <Target className="w-4 h-4 inline mr-1" />
+            Opportunities are created only by converting leads
+          </p>
         </div>
       </div>
 
