@@ -234,6 +234,10 @@ def verify_password(password: str, hashed: str) -> bool:
     """Verify password against hash"""
     return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
+def generate_id() -> str:
+    """Generate a random 6-digit ID"""
+    return str(random.randint(100000, 999999))
+
 def create_jwt_token(data: dict) -> str:
     """Create JWT token"""
     expire = datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRATION_HOURS)
