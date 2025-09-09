@@ -86,17 +86,33 @@ class LeadCreationTester:
     def test_lead_creation_without_checklist(self):
         """Test lead creation without checklist_completed field"""
         
-        # Sample lead data without checklist_completed field
+        # Get required master data first
+        companies_response = self.session.get(f"{BACKEND_URL}/companies")
+        company_id = None
+        if companies_response.status_code == 200:
+            companies = companies_response.json()
+            if isinstance(companies, list) and len(companies) > 0:
+                company_id = companies[0].get("id")
+            elif isinstance(companies, dict) and companies.get("data"):
+                company_id = companies["data"][0].get("id")
+        
+        services_response = self.session.get(f"{BACKEND_URL}/product-services")
+        service_id = None
+        if services_response.status_code == 200:
+            services = services_response.json()
+            if isinstance(services, list) and len(services) > 0:
+                service_id = services[0].get("id")
+        
+        # Correct lead data structure without checklist_completed field
         lead_data = {
-            "company_name": "Test Company",
-            "person_name": "John Doe", 
-            "designation": "Manager",
-            "mobile_number": "9876543210",
-            "email": "john@test.com",
-            "lead_owner": "admin",
-            "tender_type": "Tender",
-            "billing_type": "Prepaid",
-            "company_type": "Private"
+            "tender_type": "Non-Tender",  # Use Non-Tender to avoid billing_type requirement
+            "project_title": "Test Company Lead",
+            "company_id": company_id,
+            "state": "Maharashtra",
+            "lead_subtype": "Direct",
+            "source": "Website",
+            "product_service_id": service_id,
+            "lead_owner": "admin"
         }
         
         try:
