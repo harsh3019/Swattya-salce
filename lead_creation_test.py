@@ -362,7 +362,7 @@ class LeadCreationTester:
         
         lead_data = {
             "tender_type": "Non-Tender",
-            "project_title": "Lead ID Generation Test",
+            "project_title": f"Lead ID Generation Test - {datetime.now().strftime('%Y%m%d%H%M%S')}",  # Unique title
             "company_id": company_id,
             "state": "Karnataka",
             "lead_subtype": "Direct",
