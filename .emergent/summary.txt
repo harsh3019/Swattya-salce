@@ -1,59 +1,100 @@
 <analysis>
-The AI engineer successfully progressed the Sawayatta ERP project through several critical phases. Initially, the focus was on stabilizing the existing application by resolving fundamental frontend issues, specifically the broken authentication flow, incorrect  configurations, and non-functional permission-based UI elements. This involved iterative debugging, including leveraging the  and  to diagnose complex  and environmental issues. Post-stabilization, two major modules were developed: Company Registration and Contact Management. Both entailed comprehensive full-stack development—defining backend models and APIs with RBAC, and building responsive, multi-step frontend forms and listing pages with advanced features like AI duplicate detection and SPOC enforcement. The project is currently in the initial backend development phase of the Lead Management Module. The approach was highly iterative, with frequent testing and direct issue resolution as identified by testing agents.
+The AI engineer successfully progressed the Sawayatta ERP, transitioning from initial backend setup of the Lead Management Module to substantial frontend development and complex feature integration. The work began by completing backend CRUD for Product Services and Sub-Tender Types, ensuring proper master data initialization after fixing a  bug. Subsequently, a multi-stage LeadForm was developed, addressing  warnings and submission issues related to a mandatory checklist. The Lead Listing page with KPIs was implemented and debugged for data format mismatches. Most recently, a sophisticated Lead Change Status modal was built, featuring conditional UI for Convert to Opportunity, robust API integration, and seamless inclusion into the . The current focus has shifted to the ambitious Opportunity Management Module, with initial backend models and APIs for core masters and opportunities already integrated.
 </analysis>
 
 <product_requirements>
-The Sawayatta ERP is a full-stack system (React, FastAPI, MongoDB) with JWT authentication and Role-Based Access Control (RBAC). The initial problem involved a broken frontend: non-functional login, uninitialized sidebar, non-submitting CRUD forms, and missing permission-based UI buttons (Add/Edit/Delete/Export). The immediate fix involved correcting frontend authentication (JWT storage, Axios headers), enabling dynamic sidebar loading, and fixing CRUD forms for user management, followed by correctly integrating  for RBAC-driven UI buttons across master pages.
+The Sawayatta ERP is a full-stack system for managing business operations. Initially, the core problem involved fixing a broken authentication, dynamic sidebar, and RBAC-controlled UI elements on the frontend. After stabilization, two major modules were developed: Company Registration and Contact Management, both requiring comprehensive full-stack CRUD, multi-step forms, and advanced features like AI duplicate detection. The project is currently focused on the Lead Management Module and the new Opportunity Management Module.
 
-Subsequently, the following modules were requested:
-1.  **Company Registration Module**: A multi-step form (General Info, Location, Financials, Documents, Checklist) with client/server-side validation (unique name, conditional fields for GST/PAN/VAT), lead scoring, auto-save, notifications, audit trail, and bulk import/export. A comprehensive listing page with full CRUD was also required.
-2.  **Contact Management Module**: A multi-stage form (General Info, Contact Details, Additional Info) with validations for email/SPOC uniqueness, AI-based duplicate detection (fuzzy match), RBAC, and a master listing page supporting full CRUD, search, filter, sort, pagination, and bulk actions.
-3.  **Lead Management Module**: A comprehensive module for Sales with Partner Master, Product & Services Master, Sub-Tender Master, and KPIs. It includes a multi-stage lead form (General Info, Lead Details, Proofs & Checklist) with tender logic, various validations (Lead ID format, conditional fields), nurture/conversion logic, notifications, audit trail, and a Lead Listing page with KPIs (total, pending, approved, escalated), filters, search, and full CRUD.
+**Lead Management Module**:
+*   Comprehensive module for Sales with Partner Master, Product & Services Master, Sub-Tender Master.
+*   Multi-stage lead form (General Info, Lead Details, Proofs & Checklist) with tender logic, validations (Lead ID, conditional fields), nurture/conversion logic, notifications, audit trail.
+*   Lead Listing page with KPIs (total, pending, approved, escalated), filters, search, and full CRUD.
+*   A Lead Change Status modal: allows status changes (approved, rejected, convert_to_opp). Convert to Opportunity option only appears after a lead is approved. Creates an Opportunity via  if  is selected.
+*   Addition of  field to Lead form, conditionally displayed based on  (Tender or Pre-Tender) with Prepaid and Postpaid options.
+
+**Opportunity Management Module**:
+*   Supports an L1→L8 pipeline, multi-quotation flow, rate-card pricing, purchase-cost-driven P&L, multi-phase quotations (phases→groups→items), KPIs, RBAC, and audit logs.
+*   Listing page with KPIs and weighted revenue.
+*   Quotation system with profitability percentage calculation and colored badges.
+*   Integration with existing Lead Management. The work for this module is currently in its initial backend setup phase.
 </product_requirements>
 
 <key_technical_concepts>
 -   **Full-Stack**: React.js (Frontend), FastAPI (Backend), MongoDB (Database).
--   **Authentication/Authorization**: JWT, bcrypt hashing, Role-Based Access Control (RBAC).
--   **UI/Forms**: Shadcn UI, Tailwind CSS, , .
+-   **Authentication/Authorization**: JWT, bcrypt, Role-Based Access Control (RBAC).
+-   **UI/Forms**: Shadcn UI, Tailwind CSS, ,  for validation.
 -   **API Communication**: .
--   **Environment**: Kubernetes ingress rules, backend                          RUNNING   pid 27, uptime 0:00:04
-code-server                      RUNNING   pid 29, uptime 0:00:04
-frontend                         STOPPING  
-mongodb                          RUNNING   pid 35, uptime 0:00:04
-supervisor> .
--   **Debugging**: , , testing agents.
+-   **Environment**: Kubernetes, backend                          RUNNING   pid 27, uptime 0:00:05
+code-server                      RUNNING   pid 29, uptime 0:00:05
+frontend                         STOPPED   Sep 09 09:37 AM
+mongodb                          RUNNING   pid 31, uptime 0:00:05
+supervisor> , , .
+-   **Data Handling**: Pydantic models, UUIDs for IDs (no Mongo ObjectIDs).
 </key_technical_concepts>
 
 <code_architecture>
 
--   : This central FastAPI file defines all Pydantic models (User, Role, Company, Contact, Lead, Partner, ProductService, SubTenderType), CRUD API endpoints, RBAC logic, and database initialization. It underwent continuous modification to integrate new modules and fix routing/validation issues.
--   : Configures backend-specific environment variables for MongoDB connection and JWT secret.
--   : The main React component managing global routing (), context providers (Auth, Permission), and layout. It was updated to include routes for new modules like Company Registration, Company List, Contact Form, and Contact List.
--   : Stores frontend environment variables, primarily , which was a recurring fix point to ensure proper API routing in the Kubernetes environment.
--   : Handles user CRUD. Fixes involved  component integration with  and conditional password validation in edit mode.
--   : A reusable component providing a data table with RBAC-controlled Add/Edit/Delete/Export buttons. Its correct usage was vital for consistent UI.
--   , , : Modified to correctly utilize  and fix  component form integration.
--   : Created for the multi-step company registration form, supporting create/edit and auto-save.
--   : Created for displaying company data with CRUD, search, filter, pagination, and export capabilities.
--   : Created for the multi-step contact registration form.
--   : Created for displaying contact data, fixed for  empty string values.
+-   :
+    *   **Importance**: Central FastAPI application defining Pydantic models, CRUD APIs, RBAC logic, and database initialization ().
+    *   **Changes**:
+        *   Added CRUD APIs for  and  to enable frontend management (later UI removed).
+        *   Refactored  to correctly initialize Lead Management master data (Product Services, Sub-Tender Types) by creating  and ensuring it runs independently of  collection status. Removed duplicate initialization from .
+        *   Temporary debug endpoints were added and removed for master data initialization.
+        *   Fixed  function (KeyError: 'module_id') to correctly derive  from  data in role permissions.
+        *   Added  POST endpoint for changing lead status and conditionally converting to opportunity.
+        *   Updated Lead models (, , ) to include  with / options and pattern validation.
+        *   Added initial backend models and API endpoints for Opportunity Management core masters (e.g., , , , , ) and  model, along with their CRUD APIs and initialization in .
+
+-   :
+    *   **Importance**: Manages global routing () and context providers.
+    *   **Changes**:
+        *   Added imports and routes for  and  (later removed).
+        *   Added imports and routes for  and . Cleaned up duplicate routes.
+
+-   :
+    *   **Importance**: Multi-stage form for creating/editing leads.
+    *   **Changes**:
+        *   Fixed  empty string warnings by ensuring default values and proper handling of 'none' for optional fields (, , ).
+        *   Improved form submission logic and user feedback, particularly for the mandatory 5-item checklist in Step 3, with clear warnings and button state changes.
+        *   Added  dropdown to Step 1, conditionally displayed when  is Tender or Pre-Tender, with Prepaid and Postpaid options and corresponding validation.
+
+-   :
+    *   **Importance**: Displays lead data, including KPIs, search, filter, pagination, and actions.
+    *   **Changes**:
+        *   Implemented the main component for the Lead Listing page.
+        *   Fixed KPI display issue: adjusted frontend expectations to match backend API response field names (e.g.,  instead of ).
+        *   Integrated  button into the action column via 's new  prop.
+
+-   :
+    *   **Importance**: New component for managing lead status changes.
+    *   **Changes**: Created from scratch to allow users to approve, reject, or convert a lead to an opportunity. Includes conditional display of Convert to Opportunity option after approval, and UI for lead preview, dropdown, and action buttons.
+
+-   :
+    *   **Importance**: Reusable component providing a data table with RBAC-controlled actions.
+    *   **Changes**: Modified to accept an  prop to allow custom buttons (like the Lead Status Change button) in the action column without overriding standard actions.
+
+-   :
+    *   **Importance**: Documents the integration details and behavior of the .
+    *   **Changes**: Created to outline the UI, API contract, behavior, and deliverables for the modal.
 </code_architecture>
 
 <pending_tasks>
--   Complete the Lead Management Module:
-    -   Implement the frontend multi-stage form for leads.
-    -   Create the Partner Master frontend CRUD.
-    -   Build the Lead Listing page with KPIs, filters, search, sort, and bulk actions.
-    -   Implement lead nurture/conversion, file uploads, notifications, and audit trails.
+-   Complete the Opportunity Management Module:
+    -   Frontend development for Opportunity listing page with KPIs and weighted revenue.
+    -   Frontend development for Opportunity detail page (summary panel, stage ribbon, tabs).
+    -   Frontend for the Quotation system (builder with phases/groups/items, live totals, profitability display).
+    -   Implement RBAC on UI and APIs for the new module.
+    -   Add audit logging for create/update/delete/approve for opportunities and quotations.
+    -   Integrate full Opportunity Management masters with CRUD APIs.
 </pending_tasks>
 
 <current_work>
-The AI engineer is currently in the initial backend implementation phase of the **Lead Management Module**. This involves:
-1.  **Defining Backend Models**: Pydantic models for , , , and  have been added to .
-2.  **Implementing CRUD APIs**: Initial CRUD operations and validation logic for Leads, Partners, Products & Services, and Sub-Tender Types are being integrated into .
-3.  **Preparing Master Data Initialization**: The next step is to add initial seed data for  and  masters, and Partners into the database via the  in .
+The AI engineer is currently in the initial backend implementation phase of the **Opportunity Management Module**. This involves:
+1.  **Defining Backend Models**: Pydantic models for various Opportunity-related masters (e.g., , , , , ) and the core  model have been added to .
+2.  **Implementing CRUD APIs**: Initial CRUD operations for these masters and the Opportunity module are being integrated into .
+3.  **Preparing Master Data Initialization**: The engineer has just added the master data for the Opportunity Management system into the database via the  in . The focus is on core masters, opportunity listing, and a basic quotation system with profitability.
 </current_work>
 
 <optional_next_step>
-Initialize the master data for Product & Services and Sub-Tender Types in the backend .
+Initialize the master data for the newly added Opportunity Management models in .
 </optional_next_step>
