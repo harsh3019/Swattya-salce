@@ -11,8 +11,6 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Badge } from './ui/badge';
-import { Alert, AlertCircle, AlertDescription } from './ui/alert';
-import { Checkbox } from './ui/checkbox';
 import { Progress } from './ui/progress';
 import { Separator } from './ui/separator';
 import { toast } from 'sonner';
