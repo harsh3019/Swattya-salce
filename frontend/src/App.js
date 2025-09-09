@@ -542,6 +542,13 @@ function App() {
                 </ProtectedRoute>
               } />
               
+              {/* Opportunity Management Routes */}
+              <Route path="/opportunities" element={
+                <ProtectedRoute>
+                  <OpportunityList />
+                </ProtectedRoute>
+              } />
+              
               <Route path="/" element={<HomeRoute />} />
             </Routes>
           </BrowserRouter>
