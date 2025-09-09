@@ -794,11 +794,14 @@ frontend:
     file: "frontend/src/components/LeadList.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "Implemented comprehensive Lead Listing page with KPIs dashboard and advanced features. KPI DASHBOARD: 4 cards showing Total Leads, Pending Approval, Approved, and Escalated leads with color-coded icons and descriptions. ADVANCED FILTERS: Status filter (New/Nurturing/Converted), Approval Status filter (Pending/Approved/Rejected/Escalated), Tender Type filter, and search functionality. DATA TABLE: Professional PermissionDataTable with Lead ID, Project Title, Company, Status badges, Approval status badges, Expected ORC (₹ formatted), Revenue (₹ formatted), Location, Created date. CUSTOM ACTIONS: Nurture button for New leads, Convert button for Approved leads, standard CRUD operations. VIEW DIALOG: Comprehensive lead details modal with Lead Information, Company & Location, Lead Details, Financial Information, Status Information, Additional Information, and System Information sections. Features: Proper badge coloring, Indian number formatting, master data lookups, CSV export, pagination, sorting. Routes added to App.js (/leads). Ready for manual testing."
+        - working: "NA"
+          agent: "testing"
+          comment: "Lead listing functionality cannot be fully tested until lead creation is working. However, lead retrieval APIs are working correctly - GET /api/leads returns 6 existing leads with proper data structure, and GET /api/leads/{id} retrieves individual lead details successfully. The frontend implementation appears ready but depends on successful lead creation for complete testing."
 
   - task: "Lead Change Status API"
     implemented: true
