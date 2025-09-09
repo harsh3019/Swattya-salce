@@ -159,7 +159,7 @@ class ComprehensiveFixTester:
                 lead_id = data.get('id')
                 billing_type = data.get('billing_type')
                 
-                if billing_type == "Time & Material":
+                if billing_type == "postpaid":
                     self.log_test(
                         "POST /api/leads with Pre-Tender type and billing_type", 
                         True, 
