@@ -1492,6 +1492,11 @@ async def startup_event():
         if await db.product_services.count_documents({}) == 0:
             await initialize_lead_master_data()
             logger.info("Lead Management master data initialized")
+        
+        # Initialize Opportunity Management master data if not exists
+        if await db.mst_stages.count_documents({}) == 0:
+            await initialize_opportunity_master_data()
+            logger.info("Opportunity Management master data initialized")
             
     except Exception as e:
         logger.error(f"Startup error: {e}")
