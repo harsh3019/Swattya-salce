@@ -292,7 +292,10 @@ export const LeadForm = () => {
       
       console.log(`Making ${method.toUpperCase()} request to:`, url);
       
-      const response = await axios[method](url, submitData);
+      const token = localStorage.getItem('token');
+      const response = await axios[method](url, submitData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       console.log('API response:', response.data);
       
       // Clear localStorage
