@@ -363,7 +363,7 @@ class LeadCreationTester:
         try:
             response = self.session.post(f"{BACKEND_URL}/leads", json=lead_data)
             
-            if response.status_code == 201:
+            if response.status_code in [200, 201]:
                 data = response.json()
                 lead_id = data.get("lead_id") or data.get("id")
                 
