@@ -2939,7 +2939,7 @@ class LeadCreate(BaseModel):
     approval_status: str = Field(default="Pending", pattern=r'^(Pending|Approved|Rejected|Escalated)$')
     
     # Checklist
-    checklist_completed: bool = Field(default=False)
+    checklist_completed: Optional[bool] = Field(default=False)
 
 class LeadUpdate(BaseModel):
     # Allow partial updates
