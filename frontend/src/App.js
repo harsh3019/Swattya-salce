@@ -557,6 +557,11 @@ function App() {
                   <OpportunityDetail />
                 </ProtectedRoute>
               } />
+              <Route path="/opportunities/:id/stages" element={
+                <ProtectedRoute>
+                  <OpportunityStageForm />
+                </ProtectedRoute>
+              } />
               <Route path="/opportunities/:opportunityId/quotations/:quotationId" element={
                 <ProtectedRoute>
                   <QuotationBuilder />
