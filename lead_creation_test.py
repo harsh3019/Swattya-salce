@@ -106,7 +106,7 @@ class LeadCreationTester:
         # Correct lead data structure without checklist_completed field
         lead_data = {
             "tender_type": "Non-Tender",  # Use Non-Tender to avoid billing_type requirement
-            "project_title": "Test Company Lead",
+            "project_title": f"Test Company Lead - {datetime.now().strftime('%Y%m%d%H%M%S')}",  # Unique title
             "company_id": company_id,
             "state": "Maharashtra",
             "lead_subtype": "Direct",
