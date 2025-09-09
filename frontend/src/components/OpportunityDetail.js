@@ -540,11 +540,22 @@ const OpportunityDetail = () => {
         <TabsContent value="quotations" className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold">Quotations ({quotations.length})</h3>
-            {permissions.some(p => p.permission === 'Add' && p.menu === 'Opportunities') && (
-              <Button className="bg-blue-600 hover:bg-blue-700">
+            {/* Only show Create Quotation button in L4 stage (Proposal) */}
+            {permissions.some(p => p.permission === 'Add' && p.menu === 'Opportunities') && 
+             currentStage.code === 'L4' && (
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => navigate(`/opportunities/${id}/quotations/create`)}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Quotation
               </Button>
+            )}
+            {/* Show stage restriction message for non-L4 stages */}
+            {currentStage.code !== 'L4' && (
+              <div className="text-sm text-gray-600 bg-yellow-50 border border-yellow-200 rounded px-3 py-2">
+                📋 Quotations can only be created in <strong>L4 - Proposal</strong> stage
+              </div>
             )}
           </div>
 
@@ -553,70 +564,115 @@ const OpportunityDetail = () => {
               <CardContent className="p-12 text-center">
                 <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No quotations yet</h3>
-                <p className="text-gray-600 mb-4">Create your first quotation to start the proposal process</p>
-                {permissions.some(p => p.permission === 'Add' && p.menu === 'Opportunities') && (
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create First Quotation
-                  </Button>
+                {currentStage.code === 'L4' ? (
+                  <>
+                    <p className="text-gray-600 mb-4">Create your first quotation to start the proposal process</p>
+                    {permissions.some(p => p.permission === 'Add' && p.menu === 'Opportunities') && (
+                      <Button 
+                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={() => navigate(`/opportunities/${id}/quotations/create`)}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create First Quotation
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-gray-600">
+                    Move opportunity to <strong>L4 - Proposal</strong> stage to create quotations
+                  </p>
                 )}
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {quotations.map((quotation) => (
-                <Card key={quotation.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">{quotation.quotation_name}</CardTitle>
-                        <CardDescription className="font-mono text-sm">
-                          {quotation.quotation_id}
-                        </CardDescription>
+            <div className="space-y-4">
+              {/* Quotation Selection Info */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-2">
+                  <Award className="w-5 h-5 text-blue-600" />
+                  <h4 className="font-medium text-blue-900">Quotation Management</h4>
+                </div>
+                <p className="text-sm text-blue-700 mt-1">
+                  You can create multiple quotations, but only <strong>one can be selected</strong> to proceed with the opportunity.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {quotations.map((quotation) => (
+                  <Card key={quotation.id} className="hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg">{quotation.quotation_name}</CardTitle>
+                          <CardDescription className="font-mono text-sm">
+                            {quotation.quotation_id}
+                          </CardDescription>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <Badge variant="outline" className={getQuotationStatusColor(quotation.status)}>
+                            {quotation.status}
+                          </Badge>
+                          {quotation.is_selected && (
+                            <Badge className="bg-green-600 text-white">
+                              Selected
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                      <Badge variant="outline" className={getQuotationStatusColor(quotation.status)}>
-                        {quotation.status}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Grand Total</span>
-                        <span className="font-semibold">
-                          {formatCurrency(quotation.grand_total, opportunity.currency_id)}
-                        </span>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Grand Total</span>
+                          <span className="font-semibold">
+                            {formatCurrency(quotation.grand_total, opportunity.currency_id)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Profitability</span>
+                          <span className={`font-semibold ${getProfitabilityColor(quotation.profitability_percent)}`}>
+                            {quotation.profitability_percent.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Version</span>
+                          <span className="text-sm font-medium">v{quotation.version_no}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Valid Until</span>
+                          <span className="text-sm">
+                            {new Date(quotation.validity_date).toLocaleDateString('en-IN')}
+                          </span>
+                        </div>
+                        <div className="flex gap-2 pt-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => navigate(`/opportunities/${id}/quotations/${quotation.id}`)}
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            View
+                          </Button>
+                          <Button variant="outline" size="sm" className="flex-1">
+                            <Download className="w-4 h-4 mr-1" />
+                            Download
+                          </Button>
+                        </div>
+                        {!quotation.is_selected && quotation.status === 'Approved' && (
+                          <Button 
+                            size="sm" 
+                            className="w-full bg-green-600 hover:bg-green-700"
+                            onClick={() => handleSelectQuotation(quotation.id)}
+                          >
+                            Select This Quotation
+                          </Button>
+                        )}
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Profitability</span>
-                        <span className={`font-semibold ${getProfitabilityColor(quotation.profitability_percent)}`}>
-                          {quotation.profitability_percent.toFixed(1)}%
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Version</span>
-                        <span className="text-sm font-medium">v{quotation.version_no}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Valid Until</span>
-                        <span className="text-sm">
-                          {new Date(quotation.validity_date).toLocaleDateString('en-IN')}
-                        </span>
-                      </div>
-                      <div className="flex gap-2 pt-2">
-                        <Button variant="outline" size="sm" className="flex-1">
-                          <Eye className="w-4 h-4 mr-1" />
-                          View
-                        </Button>
-                        <Button variant="outline" size="sm" className="flex-1">
-                          <Download className="w-4 h-4 mr-1" />
-                          Download
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           )}
         </TabsContent>
