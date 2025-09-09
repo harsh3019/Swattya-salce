@@ -186,7 +186,7 @@ const PermissionDataTable = ({
                   <TableRow key={item.id}>
                     {(columns || []).map((column) => (
                       <TableCell key={column.key}>
-                        {column.render ? column.render(item[column.key], item) : item[column.key]}
+                        {column.render ? column.render(item) : item[column.key]}
                       </TableCell>
                     ))}
                     {(canView(modulePath) || canEdit(modulePath) || canDelete(modulePath)) && (
