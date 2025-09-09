@@ -551,16 +551,7 @@ function App() {
                   <OpportunityList />
                 </ProtectedRoute>
               } />
-              <Route path="/opportunities/add" element={
-                <ProtectedRoute>
-                  <OpportunityForm />
-                </ProtectedRoute>
-              } />
-              <Route path="/opportunities/edit/:id" element={
-                <ProtectedRoute>
-                  <OpportunityForm />
-                </ProtectedRoute>
-              } />
+              {/* Remove manual opportunity creation - only through lead conversion */}
               <Route path="/opportunities/:id" element={
                 <ProtectedRoute>
                   <OpportunityDetail />
