@@ -21,6 +21,7 @@ import LeadForm from './components/LeadForm';
 import LeadList from './components/LeadList';
 import OpportunityList from './components/OpportunityList';
 import OpportunityDetail from './components/OpportunityDetail';
+import OpportunityStageForm from './components/OpportunityStageForm';
 import QuotationBuilder from './components/QuotationBuilder';
 
 // Import new RBAC components
