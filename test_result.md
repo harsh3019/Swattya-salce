@@ -765,7 +765,11 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Lead Creation Fix Testing"
+    - "Opportunity Form Fix Testing" 
+    - "L1-L8 Stage Management Testing"
+    - "Opportunity Edit Fix Testing"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
