@@ -807,10 +807,49 @@ const OpportunityDetail = () => {
         {/* Documents Tab */}
         <TabsContent value="documents">
           <Card>
-            <CardContent className="p-12 text-center">
-              <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Document Management</h3>
-              <p className="text-gray-600">Document management will be implemented in the next phase</p>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Documents
+              </CardTitle>
+              <CardDescription>
+                All documents uploaded for this opportunity
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {documents.length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Documents</h3>
+                  <p className="text-gray-600">No documents have been uploaded for this opportunity yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {documents.map((document) => (
+                    <div key={document.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-8 h-8 text-blue-600" />
+                        <div>
+                          <h4 className="font-medium text-gray-900">{document.filename}</h4>
+                          <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
+                            <span className="capitalize">{document.document_type}</span>
+                            <span>•</span>
+                            <span>Uploaded by {getUserName(document.uploaded_by)}</span>
+                            <span>•</span>
+                            <span>{formatDate(document.uploaded_at)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleDownloadDocument(document)}>
+                          <Download className="w-4 h-4 mr-1" />
+                          Download
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
