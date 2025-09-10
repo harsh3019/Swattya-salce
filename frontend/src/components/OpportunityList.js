@@ -392,7 +392,7 @@ const OpportunityList = () => {
             <DollarSign className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{formatCurrency(kpis.weighted_pipeline)}</div>
+            <div className="text-2xl font-bold text-gray-900">{formatCurrency(kpis.weighted_revenue)}</div>
             <p className="text-xs text-gray-500 mt-1">Expected revenue</p>
           </CardContent>
         </Card>
