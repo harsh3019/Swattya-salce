@@ -260,7 +260,7 @@ const OpportunityDetail = () => {
     );
   }
 
-  const currentStage = getStageInfo(opportunity.stage_id);
+  const currentStage = getStageInfo(opportunity.current_stage);
   const companyInfo = getCompanyInfo(opportunity.company_id);
   const currencyInfo = getCurrencyInfo(opportunity.currency_id);
 
