@@ -95,6 +95,11 @@ const QuotationBuilder = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         setQuotationData(quotationRes.data);
+        
+        // Fetch sales prices for the existing rate card
+        if (quotationRes.data.rate_card_id) {
+          await fetchSalesPrices(quotationRes.data.rate_card_id);
+        }
       } else {
         // Initialize with default structure
         initializeDefaultStructure();
@@ -104,6 +109,21 @@ const QuotationBuilder = () => {
       setError('Failed to fetch quotation data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSalesPrices = async (rateCardId) => {
+    if (!rateCardId) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${baseURL}/api/mst/sales-prices/${rateCardId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSalesPrices(response.data || []);
+    } catch (error) {
+      console.error('Error fetching sales prices:', error);
+      setSalesPrices([]);
     }
   };
 
