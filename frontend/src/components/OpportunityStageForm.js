@@ -763,7 +763,27 @@ const OpportunityStageForm = () => {
           <div className="text-center py-6 text-gray-500">
             <FileText className="w-12 h-12 mx-auto mb-2 text-gray-400" />
             <p>No quotations created yet</p>
-            <p className="text-sm">Create quotations to proceed with this stage</p>
+            <p className="text-sm mb-4">Create quotations to proceed with this stage</p>
+            <Button 
+              onClick={() => navigate(`/opportunities/${id}/quotations/create`)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Create Quotation
+            </Button>
+          </div>
+        )}
+
+        {quotations.length > 0 && (
+          <div className="flex justify-center mt-4">
+            <Button 
+              variant="outline"
+              onClick={() => navigate(`/opportunities/${id}/quotations/create`)}
+              className="border-blue-200 text-blue-700 hover:bg-blue-50"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Another Quotation
+            </Button>
           </div>
         )}
       </CardContent>
