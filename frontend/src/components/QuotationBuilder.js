@@ -162,6 +162,8 @@ const QuotationBuilder = () => {
       id: generateId(),
       phase_name: `Phase ${quotationData.phases.length + 1}`,
       phase_order: quotationData.phases.length + 1,
+      start_date: '',
+      tenure_months: 12,
       groups: []
     };
     setQuotationData(prev => ({
