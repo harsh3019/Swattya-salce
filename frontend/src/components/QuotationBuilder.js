@@ -954,6 +954,20 @@ const QuotationBuilder = () => {
                     {formatCurrency(totals.total_one_time)}
                   </span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Sub Total</span>
+                  <span className="font-semibold text-gray-700">
+                    {formatCurrency(totals.sub_total)}
+                  </span>
+                </div>
+                {quotationData.overall_discount_percentage > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-orange-600">Overall Discount ({quotationData.overall_discount_percentage}%)</span>
+                    <span className="font-semibold text-orange-600">
+                      -{formatCurrency(totals.overall_discount_amount)}
+                    </span>
+                  </div>
+                )}
                 <Separator />
                 <div className="flex justify-between">
                   <span className="text-sm font-medium">Grand Total</span>
