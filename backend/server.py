@@ -3722,8 +3722,8 @@ async def change_lead_status(
             if lead.get("approval_status") != "Approved":
                 raise HTTPException(status_code=400, detail="Lead must be approved before conversion")
             
-            # Generate opportunity ID in POT-XXXXXXXX format
-            opportunity_id = generate_opportunity_id()
+            # Generate opportunity ID in OPP-XXXXXXX format  
+            opportunity_id = f"OPP-{''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', k=7))}"
             
             # Create opportunity with proper structure matching OpportunityBase model
             # Get default currency ID (INR)
