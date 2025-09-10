@@ -7,7 +7,7 @@ from datetime import datetime
 import time
 
 class DebugTester:
-    def __init__(self, base_url="https://lead-opp-crm.preview.emergentagent.com"):
+    def __init__(self, base_url="https://sawayatta-erp-1.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.token = None

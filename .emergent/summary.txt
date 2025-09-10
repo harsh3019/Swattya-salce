@@ -1,22 +1,23 @@
 <analysis>
-The AI engineer successfully progressed the Sawayatta ERP, transitioning from initial backend setup of the Lead Management Module to substantial frontend development and complex feature integration. The work began by completing backend CRUD for Product Services and Sub-Tender Types, ensuring proper master data initialization after fixing a  bug. Subsequently, a multi-stage LeadForm was developed, addressing  warnings and submission issues related to a mandatory checklist. The Lead Listing page with KPIs was implemented and debugged for data format mismatches. Most recently, a sophisticated Lead Change Status modal was built, featuring conditional UI for Convert to Opportunity, robust API integration, and seamless inclusion into the . The current focus has shifted to the ambitious Opportunity Management Module, with initial backend models and APIs for core masters and opportunities already integrated.
+The AI engineer has significantly advanced the Sawayatta ERP. Starting with consolidating backend components for Lead Management, the engineer established robust frontend features like the multi-stage  and  with KPIs, and a sophisticated . The focus then shifted to the comprehensive Opportunity Management Module, with initial backend models and APIs, followed by frontend implementation of the  and  pages. Critical bugs were addressed, including fixing data display for opportunities and resolving lead creation issues by implementing missing authorization headers and removing a problematic checklist. The most recent major work involved redesigning the Opportunity stage progression from a simple dropdown to a detailed multi-stage stepper with specific field requirements for each L1-L8 stage, along with implementing the crucial lead-to-opportunity conversion logic in the backend. The system now successfully converts leads into opportunities, setting their initial stage to L1 with an auto-generated OPP-ID.
 </analysis>
 
 <product_requirements>
-The Sawayatta ERP is a full-stack system for managing business operations. Initially, the core problem involved fixing a broken authentication, dynamic sidebar, and RBAC-controlled UI elements on the frontend. After stabilization, two major modules were developed: Company Registration and Contact Management, both requiring comprehensive full-stack CRUD, multi-step forms, and advanced features like AI duplicate detection. The project is currently focused on the Lead Management Module and the new Opportunity Management Module.
+The Sawayatta ERP manages business operations, focusing on Lead and Opportunity Management.
 
 **Lead Management Module**:
-*   Comprehensive module for Sales with Partner Master, Product & Services Master, Sub-Tender Master.
-*   Multi-stage lead form (General Info, Lead Details, Proofs & Checklist) with tender logic, validations (Lead ID, conditional fields), nurture/conversion logic, notifications, audit trail.
+*   A multi-stage form (General Info, Lead Details, Proofs & Checklist) with tender logic, validations, nurture/conversion logic.
 *   Lead Listing page with KPIs (total, pending, approved, escalated), filters, search, and full CRUD.
-*   A Lead Change Status modal: allows status changes (approved, rejected, convert_to_opp). Convert to Opportunity option only appears after a lead is approved. Creates an Opportunity via  if  is selected.
-*   Addition of  field to Lead form, conditionally displayed based on  (Tender or Pre-Tender) with Prepaid and Postpaid options.
+*   A Lead Change Status modal for approving, rejecting, or converting leads to opportunities, with the Convert to Opportunity option appearing post-approval.
+*    field in Lead form, conditionally displayed for Tender or Pre-Tender types.
+*   *Update*: The lead creation process was initially blocked; it required fixing missing authorization headers and removing a mandatory checklist. Lead-to-Opportunity conversion was a pending functionality, requiring proper OPP-ID generation and L1 stage setup.
 
 **Opportunity Management Module**:
-*   Supports an L1→L8 pipeline, multi-quotation flow, rate-card pricing, purchase-cost-driven P&L, multi-phase quotations (phases→groups→items), KPIs, RBAC, and audit logs.
-*   Listing page with KPIs and weighted revenue.
-*   Quotation system with profitability percentage calculation and colored badges.
-*   Integration with existing Lead Management. The work for this module is currently in its initial backend setup phase.
+*   Supports an L1→L8 pipeline, multi-quotation flow, rate-card pricing, P&L, multi-phase quotations (phases→groups→items), KPIs, RBAC, and audit logs.
+*   Listing page with KPIs (Total Opportunity, Open, Pipeline value, Weighted Revenue, Win Rate (%)) and weighted revenue.
+*   Quotation system with profitability percentage.
+*   Integration with existing Lead Management.
+*   *Update*: Opportunity creation is exclusively through Lead conversion; manual creation is disallowed. The L1-L8 stages must be implemented as a multi-stage stepper with detailed, validated fields for each stage, including read-only locks after L4 and after Won/Lost stages. Quotations can only be added in the L4 stage (Proposal), allowing multiple quotations but with a single selection for progression.
 </product_requirements>
 
 <key_technical_concepts>
@@ -24,77 +25,62 @@ The Sawayatta ERP is a full-stack system for managing business operations. Initi
 -   **Authentication/Authorization**: JWT, bcrypt, Role-Based Access Control (RBAC).
 -   **UI/Forms**: Shadcn UI, Tailwind CSS, ,  for validation.
 -   **API Communication**: .
--   **Environment**: Kubernetes, backend                          RUNNING   pid 27, uptime 0:00:05
-code-server                      RUNNING   pid 29, uptime 0:00:05
-frontend                         STOPPED   Sep 09 09:37 AM
-mongodb                          RUNNING   pid 31, uptime 0:00:05
-supervisor> , , .
--   **Data Handling**: Pydantic models, UUIDs for IDs (no Mongo ObjectIDs).
+-   **Environment**: Kubernetes, backend                          RUNNING   pid 27, uptime 0:00:04
+code-server                      RUNNING   pid 29, uptime 0:00:04
+frontend                         STOPPING  
+mongodb                          RUNNING   pid 33, uptime 0:00:04
+supervisor> .
+-   **Data Handling**: Pydantic models, UUIDs for IDs (no Mongo ObjectIDs), .
 </key_technical_concepts>
 
 <code_architecture>
 
 -   :
-    *   **Importance**: Central FastAPI application defining Pydantic models, CRUD APIs, RBAC logic, and database initialization ().
-    *   **Changes**:
-        *   Added CRUD APIs for  and  to enable frontend management (later UI removed).
-        *   Refactored  to correctly initialize Lead Management master data (Product Services, Sub-Tender Types) by creating  and ensuring it runs independently of  collection status. Removed duplicate initialization from .
-        *   Temporary debug endpoints were added and removed for master data initialization.
-        *   Fixed  function (KeyError: 'module_id') to correctly derive  from  data in role permissions.
-        *   Added  POST endpoint for changing lead status and conditionally converting to opportunity.
-        *   Updated Lead models (, , ) to include  with / options and pattern validation.
-        *   Added initial backend models and API endpoints for Opportunity Management core masters (e.g., , , , , ) and  model, along with their CRUD APIs and initialization in .
-
+    *   **Importance**: Core FastAPI application.
+    *   **Changes**: Added/updated Pydantic models for Opportunity (including stage-specific data like ), , . Implemented CRUD APIs for Opportunity masters and core Opportunity, including a  and  endpoints. Fixed  to correctly create an Opportunity and store  in Lead. Removed checklist validation for Leads. Initialized master data for new Opportunity-related models. RBAC setup for Opportunities menu confirmed.
 -   :
-    *   **Importance**: Manages global routing () and context providers.
-    *   **Changes**:
-        *   Added imports and routes for  and  (later removed).
-        *   Added imports and routes for  and . Cleaned up duplicate routes.
-
+    *   **Importance**: Manages global routing.
+    *   **Changes**: Added routes for , , , and . Removed  routes.
 -   :
-    *   **Importance**: Multi-stage form for creating/editing leads.
-    *   **Changes**:
-        *   Fixed  empty string warnings by ensuring default values and proper handling of 'none' for optional fields (, , ).
-        *   Improved form submission logic and user feedback, particularly for the mandatory 5-item checklist in Step 3, with clear warnings and button state changes.
-        *   Added  dropdown to Step 1, conditionally displayed when  is Tender or Pre-Tender, with Prepaid and Postpaid options and corresponding validation.
-
+    *   **Importance**: Multi-stage form for leads.
+    *   **Changes**: Fixed API calls to include  headers. Removed all checklist-related logic, state, and validation. Ensured  conditional display.
 -   :
-    *   **Importance**: Displays lead data, including KPIs, search, filter, pagination, and actions.
-    *   **Changes**:
-        *   Implemented the main component for the Lead Listing page.
-        *   Fixed KPI display issue: adjusted frontend expectations to match backend API response field names (e.g.,  instead of ).
-        *   Integrated  button into the action column via 's new  prop.
-
+    *   **Importance**: Displays lead data.
+    *   **Changes**: Minor adjustments to integrate .
 -   :
-    *   **Importance**: New component for managing lead status changes.
-    *   **Changes**: Created from scratch to allow users to approve, reject, or convert a lead to an opportunity. Includes conditional display of Convert to Opportunity option after approval, and UI for lead preview, dropdown, and action buttons.
-
+    *   **Importance**: Manages lead status changes.
+    *   **Changes**: Created from scratch, enables lead conversion to opportunity.
 -   :
-    *   **Importance**: Reusable component providing a data table with RBAC-controlled actions.
-    *   **Changes**: Modified to accept an  prop to allow custom buttons (like the Lead Status Change button) in the action column without overriding standard actions.
-
+    *   **Importance**: Reusable RBAC-controlled data table.
+    *   **Changes**: Modified to accept  prop for custom buttons.
 -   :
-    *   **Importance**: Documents the integration details and behavior of the .
-    *   **Changes**: Created to outline the UI, API contract, behavior, and deliverables for the modal.
+    *   **Importance**: Displays opportunity data and KPIs.
+    *   **Changes**: Created from scratch. Implemented KPI dashboard. Fixed data display issue (fetching  instead of ). Removed Create Opportunity button and added a message about lead conversion.
+-   :
+    *   **Importance**: Displays detailed opportunity information.
+    *   **Changes**: Created from scratch. Displays stage ribbon, summary panel, tabbed interface. Integrated  to handle stage progression. Enforces L4 stage restriction for quotation creation.
+-   :
+    *   **Importance**: Component for building quotations.
+    *   **Changes**: Created from scratch. Initial structure for handling quotation creation.
+-   :
+    *   **Importance**: New component to manage opportunity stage progression.
+    *   **Changes**: Created from scratch to implement the multi-stage stepper with stage-specific forms and validations. Replaced previous  component.
+-   : Documents  integration.
 </code_architecture>
 
 <pending_tasks>
--   Complete the Opportunity Management Module:
-    -   Frontend development for Opportunity listing page with KPIs and weighted revenue.
-    -   Frontend development for Opportunity detail page (summary panel, stage ribbon, tabs).
-    -   Frontend for the Quotation system (builder with phases/groups/items, live totals, profitability display).
-    -   Implement RBAC on UI and APIs for the new module.
-    -   Add audit logging for create/update/delete/approve for opportunities and quotations.
-    -   Integrate full Opportunity Management masters with CRUD APIs.
+-   Complete the detailed implementation of all stage-specific forms within  as per the requirements in Chat Message 190.
+-   Implement the full Quotation System Builder () with phases, groups, items, live totals, and profitability display.
+-   Implement audit logging for create/update/delete/approve for opportunities and quotations.
+-   Refine RBAC on UI and APIs for the new module as development progresses.
 </pending_tasks>
 
 <current_work>
-The AI engineer is currently in the initial backend implementation phase of the **Opportunity Management Module**. This involves:
-1.  **Defining Backend Models**: Pydantic models for various Opportunity-related masters (e.g., , , , , ) and the core  model have been added to .
-2.  **Implementing CRUD APIs**: Initial CRUD operations for these masters and the Opportunity module are being integrated into .
-3.  **Preparing Master Data Initialization**: The engineer has just added the master data for the Opportunity Management system into the database via the  in . The focus is on core masters, opportunity listing, and a basic quotation system with profitability.
+The AI engineer has just completed fixing a critical bug where leads were not being converted into opportunities upon status change. This involved uncommenting the opportunity creation logic in the  backend function in  and adding an  field to the  model for reference.
+
+Specifically, in , the code now correctly creates an  object from lead data, assigns an initial L1 - Prospect stage, generates a unique OPP-ID, and saves this new opportunity to the database. The  is linked to the newly created opportunity, and the lead itself is updated to store the generated . This work was followed by comprehensive backend and frontend testing, confirming the lead-to-opportunity conversion workflow is fully functional.
 </current_work>
 
 <optional_next_step>
-Initialize the master data for the newly added Opportunity Management models in .
+Proceed with the detailed implementation of the multi-stage stepper in  for L1-L8 stages, including all specified fields and validations.
 </optional_next_step>
