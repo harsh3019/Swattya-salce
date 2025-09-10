@@ -185,6 +185,7 @@ const QuotationBuilder = () => {
       id: generateId(),
       group_name: `Group ${quotationData.phases[phaseIndex].groups.length + 1}`,
       group_order: quotationData.phases[phaseIndex].groups.length + 1,
+      primary_category_id: '',
       items: []
     };
     
