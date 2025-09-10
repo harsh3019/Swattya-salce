@@ -81,7 +81,9 @@ const OpportunityList = () => {
         open: 0,
         won: 0,
         lost: 0,
-        weighted_pipeline: 0
+        pipeline_value: 0,
+        weighted_revenue: 0,
+        win_rate: 0
       });
     } catch (error) {
       console.error('Error fetching KPIs:', error);
