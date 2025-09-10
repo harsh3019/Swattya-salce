@@ -45,6 +45,7 @@ const QuotationBuilder = () => {
   const [rateCards, setRateCards] = useState([]);
   const [products, setProducts] = useState([]);
   const [currencies, setCurrencies] = useState([]);
+  const [salesPrices, setSalesPrices] = useState([]);
 
   // Totals
   const [totals, setTotals] = useState({
