@@ -140,6 +140,8 @@ const QuotationBuilder = () => {
           id: generateId(),
           phase_name: 'Phase 1 - Setup & Configuration',
           phase_order: 1,
+          start_date: '',
+          tenure_months: 12,
           groups: [
             {
               id: generateId(),
