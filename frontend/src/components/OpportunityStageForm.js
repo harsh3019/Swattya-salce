@@ -180,6 +180,71 @@ const OpportunityStageForm = () => {
     setValidationErrors(prev => prev.filter(error => !error.includes(field)));
   };
 
+  const handleFileUpload = async (files) => {
+    if (!files || files.length === 0) return;
+    
+    setUploading(true);
+    const token = localStorage.getItem('token');
+    
+    try {
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('document_type', 'proposal');
+        formData.append('description', 'Proposal document uploaded for L3 stage');
+        
+        const response = await axios.post(
+          `${baseURL}/api/opportunities/${id}/upload-document`,
+          formData,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data'
+            }
+          }
+        );
+        
+        return response.data;
+      });
+      
+      const uploadedFiles = await Promise.all(uploadPromises);
+      setUploadedDocuments(prev => [...prev, ...uploadedFiles]);
+      
+      // Update proposal_documents in stageData
+      const documentIds = uploadedFiles.map(doc => doc.id);
+      handleInputChange('proposal_documents', [...(stageData.proposal_documents || []), ...documentIds]);
+      
+      alert(`Successfully uploaded ${uploadedFiles.length} document(s)!`);
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      alert('Error uploading files. Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteDocument = async (documentId) => {
+    if (!confirm('Are you sure you want to delete this document?')) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(
+        `${baseURL}/api/opportunities/${id}/documents/${documentId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      setUploadedDocuments(prev => prev.filter(doc => doc.id !== documentId));
+      handleInputChange('proposal_documents', 
+        (stageData.proposal_documents || []).filter(docId => docId !== documentId)
+      );
+      
+      alert('Document deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      alert('Error deleting document. Please try again.');
+    }
+  };
+
   const validateCurrentStage = () => {
     const errors = [];
     
