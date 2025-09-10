@@ -152,17 +152,19 @@ const OpportunityStageForm = () => {
       const token = localStorage.getItem('token');
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [regionsRes, usersRes, quotationsRes, competitorsRes] = await Promise.all([
+      const [regionsRes, usersRes, quotationsRes, competitorsRes, documentsRes] = await Promise.all([
         axios.get(`${baseURL}/api/mst/regions`, { headers }),
         axios.get(`${baseURL}/api/users`, { headers }),
         axios.get(`${baseURL}/api/opportunities/${id}/quotations`, { headers }),
-        axios.get(`${baseURL}/api/mst/competitors`, { headers })
+        axios.get(`${baseURL}/api/mst/competitors`, { headers }),
+        axios.get(`${baseURL}/api/opportunities/${id}/documents`, { headers }).catch(() => ({ data: [] }))
       ]);
 
       setRegions(regionsRes.data || []);
       setUsers(usersRes.data || []);
       setQuotations(quotationsRes.data || []);
       setCompetitors(competitorsRes.data || []);
+      setUploadedDocuments(documentsRes.data || []);
     } catch (error) {
       console.error('Error fetching master data:', error);
     }
