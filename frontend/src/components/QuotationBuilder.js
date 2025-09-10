@@ -63,6 +63,35 @@ const QuotationBuilder = () => {
     fetchData();
   }, [opportunityId, quotationId]);
 
+  // Recalculate grand totals whenever quotation data changes
+  useEffect(() => {
+    let totalRecurring = 0;
+    let totalOneTime = 0;
+    let totalCost = 0;
+
+    quotationData.phases.forEach(phase => {
+      phase.groups.forEach(group => {
+        group.items.forEach(item => {
+          totalRecurring += parseFloat(item.total_recurring) || 0;
+          totalOneTime += parseFloat(item.total_one_time) || 0;
+          totalCost += parseFloat(item.total_cost) || 0;
+        });
+      });
+    });
+
+    const grandTotal = totalRecurring + totalOneTime;
+    const profitabilityPercent = grandTotal > 0 ? ((grandTotal - totalCost) / grandTotal * 100) : 0;
+
+    setQuotationData(prev => ({
+      ...prev,
+      total_recurring: totalRecurring,
+      total_one_time: totalOneTime,
+      grand_total: grandTotal,
+      total_cost: totalCost,
+      profitability_percent: profitabilityPercent
+    }));
+  }, [quotationData.phases]);
+
   useEffect(() => {
     calculateTotals();
   }, [quotationData.phases]);
