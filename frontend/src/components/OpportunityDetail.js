@@ -64,6 +64,7 @@ const OpportunityDetail = () => {
       if (id) {
         fetchOpportunity();
         fetchQuotations();
+        fetchDocuments();
       }
     };
 
@@ -73,6 +74,7 @@ const OpportunityDetail = () => {
       if (!document.hidden && id) {
         fetchOpportunity();
         fetchQuotations();
+        fetchDocuments();
       }
     });
 
