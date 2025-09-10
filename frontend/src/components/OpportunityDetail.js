@@ -23,7 +23,8 @@ import {
   ChevronRight,
   Plus,
   Eye,
-  Download
+  Download,
+  CheckCircle
 } from 'lucide-react';
 import { usePermissions } from '../contexts/PermissionContext';
 import axios from 'axios';
