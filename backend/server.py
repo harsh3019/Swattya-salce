@@ -4942,7 +4942,13 @@ async def validate_stage_data(stage: int, data: dict, opportunity_id: str) -> Li
             errors.append("Status is required for L2 - Qualification")
     
     elif stage == 3:  # L3 - Proposal/Bid
-        if not data.get("proposal_documents") or len(data["proposal_documents"]) == 0:
+        # Check for uploaded documents in database
+        uploaded_documents = await db.opportunity_documents.find({
+            "opportunity_id": opportunity_id,
+            "is_active": True
+        }).to_list(None)
+        
+        if not uploaded_documents:
             errors.append("Proposal Documents are required for L3 - Proposal/Bid")
         if not data.get("submission_date"):
             errors.append("Submission Date is required for L3 - Proposal/Bid")
