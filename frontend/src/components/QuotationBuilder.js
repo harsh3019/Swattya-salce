@@ -672,7 +672,7 @@ const QuotationBuilder = () => {
                           <div className="space-y-3">
                             {group.items.map((item, itemIndex) => (
                               <div key={item.id} className="border border-gray-100 rounded p-4">
-                                <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
+                                <div className={`grid grid-cols-1 gap-3 ${item.pricing_type === 'recurring' ? 'md:grid-cols-7' : 'md:grid-cols-6'}`}>
                                   <div>
                                     <Label className="text-xs">Product</Label>
                                     <Select 
