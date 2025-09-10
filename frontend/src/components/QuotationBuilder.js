@@ -167,8 +167,10 @@ const QuotationBuilder = () => {
     });
   };
 
-  const addItem = (phaseIndex, groupIndex) => {
-    console.log('Adding item to phase:', phaseIndex, 'group:', groupIndex);
+  const addItem = (phaseIndex, groupIndex, event) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+    
     const newItem = {
       id: generateId(),
       product_id: '',
