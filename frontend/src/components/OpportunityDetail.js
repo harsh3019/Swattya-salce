@@ -54,6 +54,30 @@ const OpportunityDetail = () => {
     }
   }, [id]);
 
+  // Refresh data when returning to this page (e.g., from stage management)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (id) {
+        fetchOpportunity();
+        fetchQuotations();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    // Also listen for page visibility changes
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && id) {
+        fetchOpportunity();
+        fetchQuotations();
+      }
+    });
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+    };
+  }, [id]);
+
   const fetchOpportunity = async () => {
     try {
       setLoading(true);
