@@ -37,6 +37,7 @@ const QuotationBuilder = () => {
     quotation_name: '',
     rate_card_id: '',
     validity_date: '',
+    overall_discount_percentage: 0,
     phases: []
   });
 
