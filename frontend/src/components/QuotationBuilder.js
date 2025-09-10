@@ -450,7 +450,7 @@ const QuotationBuilder = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => addGroup(phaseIndex)}
+                        onClick={(e) => addGroup(phaseIndex, e)}
                       >
                         <Plus className="w-4 h-4 mr-1" />
                         Add Group
