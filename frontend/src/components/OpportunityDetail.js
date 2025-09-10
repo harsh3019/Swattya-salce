@@ -715,7 +715,7 @@ const OpportunityDetail = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {quotations.map((quotation) => (
-                  <Card key={quotation.id} className="hover:shadow-md transition-shadow">
+                  <Card key={quotation.id} className={`hover:shadow-md transition-shadow ${quotation.is_selected ? 'border-2 border-green-500 bg-green-50' : ''}`}>
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div>
