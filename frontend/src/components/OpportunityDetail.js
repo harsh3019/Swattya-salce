@@ -100,6 +100,7 @@ const OpportunityDetail = () => {
 
   const fetchQuotations = async () => {
     try {
+      setLoadingQuotations(true);
       const token = localStorage.getItem('token');
       const response = await axios.get(`${baseURL}/api/opportunities/${id}/quotations`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -107,7 +108,62 @@ const OpportunityDetail = () => {
       setQuotations(response.data || []);
     } catch (error) {
       console.error('Error fetching quotations:', error);
+    } finally {
+      setLoadingQuotations(false);
     }
+  };
+
+  const fetchDocuments = async () => {
+    try {
+      setLoadingDocuments(true);
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${baseURL}/api/opportunities/${id}/documents`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDocuments(response.data || []);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    } finally {
+      setLoadingDocuments(false);
+    }
+  };
+
+  const handleDownloadDocument = async (document) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${baseURL}/api/opportunities/${id}/documents/${document.id}/download`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+      });
+      
+      // Create blob link to download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', document.filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      alert('Failed to download document');
+    }
+  };
+
+  const getUserName = (userId) => {
+    // This would ideally come from a users lookup or be included in the document data
+    return 'User'; // Placeholder - in production, lookup user name by ID
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const fetchMasterData = async () => {
