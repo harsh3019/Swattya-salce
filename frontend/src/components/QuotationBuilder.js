@@ -843,7 +843,7 @@ const QuotationBuilder = () => {
                                       <span className="text-gray-600">Total One-time: </span>
                                       <span className="font-medium text-blue-700">{formatCurrency(item.total_one_time)}</span>
                                       <div className="text-xs text-gray-500 mt-1">
-                                        ({formatCurrency(item.one_time_sale_price)} × {item.qty})
+                                        ({formatCurrency(item.one_time_sale_price)} × {item.qty}{item.discount_percentage > 0 ? ` - ${item.discount_percentage}%` : ''})
                                       </div>
                                     </div>
                                   )}
