@@ -473,6 +473,37 @@ const OpportunityDetail = () => {
                     <p className="text-gray-700 mt-1">{opportunity.product_interest}</p>
                   </div>
                 )}
+                
+                {/* Stage-specific Information */}
+                <div className="border-t pt-4">
+                  <label className="text-sm font-medium text-gray-500 mb-2 block">Stage Progress Details</label>
+                  <div className="space-y-2 text-sm">
+                    {opportunity.region_id && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Region (L1):</span>
+                        <span className="text-gray-900">Selected</span>
+                      </div>
+                    )}
+                    {opportunity.budget && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Budget (L2):</span>
+                        <span className="text-gray-900">{formatCurrency(parseFloat(opportunity.budget), opportunity.currency_id)}</span>
+                      </div>
+                    )}
+                    {opportunity.qualification_status && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Qualification (L2):</span>
+                        <span className="text-gray-900">{opportunity.qualification_status}</span>
+                      </div>
+                    )}
+                    {opportunity.submission_date && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Proposal Submitted (L3):</span>
+                        <span className="text-gray-900">{new Date(opportunity.submission_date).toLocaleDateString()}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
