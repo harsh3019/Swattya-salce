@@ -57,6 +57,10 @@ const OpportunityStageForm = () => {
   const [users, setUsers] = useState([]);
   const [quotations, setQuotations] = useState([]);
   const [competitors, setCompetitors] = useState([]);
+  
+  // File upload state
+  const [uploadedDocuments, setUploadedDocuments] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
   // Form data for each stage
   const [stageData, setStageData] = useState({
