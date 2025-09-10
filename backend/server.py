@@ -4950,9 +4950,8 @@ async def change_opportunity_stage(
         update_data["is_locked"] = True
         update_data["close_date"] = datetime.now(timezone.utc)
     
-    # Lock stages L1-L3 only after L3 submission (when moving from L3 to L4+)
-    if current_stage == 3 and target_stage >= 4:
-        update_data["locked_stages"] = [1, 2, 3]
+    # Note: L1-L3 read-only logic is now handled by frontend based on current_stage
+    # No need to set locked_stages for L1-L3 as frontend handles this via stage comparison
     
     # Add to stage history
     stage_history_entry = {
