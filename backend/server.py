@@ -464,23 +464,19 @@ async def get_sidebar_navigation(current_user: User = Depends(get_current_user))
         accessible_modules = {}
         
         for rp in role_permissions:
-            # Get permission details
+            # Get menu and permission details first
+            menu = await db.menus.find_one({"id": rp["menu_id"]})
             permission = await db.permissions.find_one({
                 "id": rp["permission_id"],
                 "status": "active"
             })
             
             # Only include if user has 'View' permission
-            if permission and permission["name"] == "View":
-                # Get module details
+            if permission and permission["name"] == "View" and menu:
+                # Get module details from menu
                 module = await db.modules.find_one({
-                    "id": rp["module_id"],
+                    "id": menu["module_id"],
                     "status": "active"
-                })
-                
-                # Get menu details
-                menu = await db.menus.find_one({
-                    "id": rp["menu_id"]
                 })
                 
                 if module and menu:
