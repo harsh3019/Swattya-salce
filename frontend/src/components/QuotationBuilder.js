@@ -796,6 +796,18 @@ const QuotationBuilder = () => {
                                     </div>
                                   )}
                                   <div>
+                                    <Label className="text-xs">Discount %</Label>
+                                    <Input
+                                      type="number"
+                                      className="h-8"
+                                      value={item.discount_percentage}
+                                      onChange={(e) => updateItem(phaseIndex, groupIndex, itemIndex, 'discount_percentage', e.target.value)}
+                                      placeholder="0"
+                                      min="0"
+                                      max="100"
+                                    />
+                                  </div>
+                                  <div>
                                     <Label className="text-xs">Cost</Label>
                                     <Input
                                       type="number"
