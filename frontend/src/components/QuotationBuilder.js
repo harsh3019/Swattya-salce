@@ -149,8 +149,10 @@ const QuotationBuilder = () => {
     }));
   };
 
-  const addGroup = (phaseIndex) => {
-    console.log('Adding group to phase:', phaseIndex);
+  const addGroup = (phaseIndex, event) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+    
     const newGroup = {
       id: generateId(),
       group_name: `Group ${quotationData.phases[phaseIndex].groups.length + 1}`,
