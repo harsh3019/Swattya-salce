@@ -266,7 +266,7 @@ const OpportunityStageForm = () => {
         break;
       
       case 3: // L3 - Proposal/Bid
-        if (!stageData.proposal_documents.length) errors.push('Proposal Documents are required');
+        if (!uploadedDocuments.length && !stageData.proposal_documents?.length) errors.push('Proposal Documents are required');
         if (!stageData.submission_date) errors.push('Submission Date is required');
         if (!stageData.internal_stakeholder_id) errors.push('Internal Stakeholder is required');
         break;
