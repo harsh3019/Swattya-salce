@@ -4781,8 +4781,8 @@ async def change_opportunity_stage(
     if current_stage >= 4 and target_stage < current_stage:
         raise HTTPException(status_code=400, detail="Cannot move backward from L4 and beyond")
     
-    # Stage-specific validation
-    validation_errors = await validate_stage_data(target_stage, stage_data, opportunity_id)
+    # Stage-specific validation - validate current stage before allowing progression
+    validation_errors = await validate_stage_data(current_stage, stage_data, opportunity_id)
     if validation_errors:
         raise HTTPException(status_code=400, detail={"validation_errors": validation_errors})
     
