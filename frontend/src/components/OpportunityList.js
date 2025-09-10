@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Target, TrendingUp, DollarSign, Award, Search, Filter, RefreshCw } from 'lucide-react';
+import { Plus, Target, TrendingUp, DollarSign, Award, Search, Filter, RefreshCw, Settings } from 'lucide-react';
 import PermissionDataTable from './PermissionDataTable';
 import { usePermissions } from '../contexts/PermissionContext';
 import axios from 'axios';
