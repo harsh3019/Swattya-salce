@@ -777,7 +777,7 @@ const OpportunityDetail = () => {
             <StageManagement
               opportunity={opportunity}
               stages={stages}
-              currentStage={getStageInfo(opportunity.stage_id)}
+              currentStage={getStageInfo(opportunity.current_stage)}
               onStageUpdate={handleStageUpdate}
               onClose={() => setStageDialogOpen(false)}
             />
