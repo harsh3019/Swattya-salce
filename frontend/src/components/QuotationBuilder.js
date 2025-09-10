@@ -567,7 +567,7 @@ const QuotationBuilder = () => {
                     {phase.groups.map((group, groupIndex) => (
                       <Card key={group.id} className="border border-gray-200">
                         <CardHeader className="pb-3">
-                          <div className="flex justify-between items-center">
+                          <div className="flex justify-between items-center mb-3">
                             <CardTitle className="text-md flex items-center gap-2">
                               <Package className="w-4 h-4 text-gray-600" />
                               <Input
@@ -587,6 +587,7 @@ const QuotationBuilder = () => {
                                 variant="outline"
                                 size="sm"
                                 onClick={(e) => addItem(phaseIndex, groupIndex, e)}
+                                disabled={!group.primary_category_id}
                               >
                                 <Plus className="w-4 h-4 mr-1" />
                                 Add Item
@@ -600,6 +601,34 @@ const QuotationBuilder = () => {
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
+                          </div>
+                          
+                          {/* Primary Category Selection */}
+                          <div className="border-t pt-3">
+                            <Label className="text-sm font-medium text-gray-600">Primary Category</Label>
+                            <Select 
+                              value={group.primary_category_id} 
+                              onValueChange={(value) => {
+                                setQuotationData(prev => {
+                                  const updatedPhases = [...prev.phases];
+                                  updatedPhases[phaseIndex].groups[groupIndex].primary_category_id = value;
+                                  // Clear existing items when category changes
+                                  updatedPhases[phaseIndex].groups[groupIndex].items = [];
+                                  return { ...prev, phases: updatedPhases };
+                                });
+                              }}
+                            >
+                              <SelectTrigger className="mt-1">
+                                <SelectValue placeholder="Select primary category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {primaryCategories.map((category) => (
+                                  <SelectItem key={category.id} value={category.id}>
+                                    {category.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
                         </CardHeader>
                         <CardContent>
