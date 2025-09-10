@@ -647,7 +647,7 @@ const QuotationBuilder = () => {
                                         <SelectValue placeholder="Select" />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        {products.map((product) => (
+                                        {getFilteredProducts(group.primary_category_id).map((product) => (
                                           <SelectItem key={product.id} value={product.id}>
                                             {product.name}
                                           </SelectItem>
