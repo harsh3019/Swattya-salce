@@ -307,21 +307,26 @@ const QuotationBuilder = () => {
         item[field] = value;
       }
       
-      // Recalculate item totals using correct formulas
+      // Recalculate item totals using correct formulas with discount
       const qty = parseFloat(item.qty) || 0;
       const tenure = parseFloat(item.tenure_months) || 1;
+      const discountPercentage = parseFloat(item.discount_percentage) || 0;
       
       if (item.pricing_type === 'recurring') {
-        // Formula: (Recurring price x qty) x tenure
-        item.total_recurring = (parseFloat(item.recurring_sale_price) || 0) * qty * tenure;
+        // Formula: ((Recurring price x qty) x tenure) - discount
+        const baseRecurring = (parseFloat(item.recurring_sale_price) || 0) * qty * tenure;
+        const discountAmount = baseRecurring * (discountPercentage / 100);
+        item.total_recurring = baseRecurring - discountAmount;
         item.total_one_time = 0;
-        // Purchase cost also multiplied by tenure for recurring
+        // Purchase cost also multiplied by tenure for recurring (no discount on cost)
         item.total_cost = (parseFloat(item.purchase_cost_snapshot) || 0) * qty * tenure;
       } else if (item.pricing_type === 'one-time') {
         item.total_recurring = 0;
-        // Formula: one-time cost x qty (tenure not applicable)
-        item.total_one_time = (parseFloat(item.one_time_sale_price) || 0) * qty;
-        // Purchase cost not multiplied by tenure for one-time
+        // Formula: (one-time cost x qty) - discount (tenure not applicable)
+        const baseOneTime = (parseFloat(item.one_time_sale_price) || 0) * qty;
+        const discountAmount = baseOneTime * (discountPercentage / 100);
+        item.total_one_time = baseOneTime - discountAmount;
+        // Purchase cost not multiplied by tenure for one-time (no discount on cost)
         item.total_cost = (parseFloat(item.purchase_cost_snapshot) || 0) * qty;
       } else {
         item.total_recurring = 0;
