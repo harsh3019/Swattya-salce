@@ -168,6 +168,7 @@ const QuotationBuilder = () => {
       quotation_name: `Quotation for ${opportunity?.project_title || 'Opportunity'}`,
       rate_card_id: rateCards[0]?.id || '',
       validity_date: defaultDate.toISOString().split('T')[0],
+      overall_discount_percentage: 0,
       phases: [
         {
           id: generateId(),
