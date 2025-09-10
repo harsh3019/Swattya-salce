@@ -695,26 +695,43 @@ const QuotationBuilder = () => {
                                       placeholder="Auto-filled from product"
                                     />
                                   </div>
-                                  <div>
-                                    <Label className="text-xs">Recurring Price</Label>
-                                    <Input
-                                      type="number"
-                                      className="h-8 bg-gray-50"
-                                      value={item.recurring_sale_price}
-                                      disabled
-                                      placeholder="Auto-filled from rate card"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label className="text-xs">One-time Price</Label>
-                                    <Input
-                                      type="number"
-                                      className="h-8 bg-gray-50"
-                                      value={item.one_time_sale_price}
-                                      disabled
-                                      placeholder="Auto-filled from rate card"
-                                    />
-                                  </div>
+                                  {/* Show only the applicable price type */}
+                                  {item.pricing_type === 'recurring' && (
+                                    <div>
+                                      <Label className="text-xs">Recurring Price</Label>
+                                      <Input
+                                        type="number"
+                                        className="h-8 bg-gray-50"
+                                        value={item.recurring_sale_price}
+                                        disabled
+                                        placeholder="Auto-filled from rate card"
+                                      />
+                                    </div>
+                                  )}
+                                  {item.pricing_type === 'one-time' && (
+                                    <div>
+                                      <Label className="text-xs">One-time Price</Label>
+                                      <Input
+                                        type="number"
+                                        className="h-8 bg-gray-50"
+                                        value={item.one_time_sale_price}
+                                        disabled
+                                        placeholder="Auto-filled from rate card"
+                                      />
+                                    </div>
+                                  )}
+                                  {item.pricing_type === 'none' && (
+                                    <div>
+                                      <Label className="text-xs">Price</Label>
+                                      <Input
+                                        type="number"
+                                        className="h-8 bg-gray-100"
+                                        value="0"
+                                        disabled
+                                        placeholder="No pricing configured"
+                                      />
+                                    </div>
+                                  )}
                                   <div>
                                     <Label className="text-xs">Cost</Label>
                                     <Input
