@@ -53,6 +53,8 @@ const QuotationBuilder = () => {
   const [totals, setTotals] = useState({
     total_recurring: 0,
     total_one_time: 0,
+    sub_total: 0,
+    overall_discount_amount: 0,
     grand_total: 0,
     total_cost: 0,
     profitability_percent: 0
