@@ -643,7 +643,22 @@ const OpportunityDetail = () => {
                 Create Quotation
               </Button>
             )}
-            {/* Show stage restriction message for non-L4 stages */}
+            {/* Show stage-specific messages */}
+            {currentStage.code === 'L4' && quotations.length === 0 && (
+              <div className="text-sm text-gray-700 bg-blue-50 border border-blue-200 rounded px-4 py-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <strong>Ready for Quotation Creation</strong>
+                </div>
+                <p>This opportunity is in <strong>L4 - Proposal</strong> stage. You can now create detailed quotations with:</p>
+                <ul className="mt-2 ml-4 text-xs space-y-1">
+                  <li>• Multi-phase project structure</li>
+                  <li>• Detailed item breakdown with pricing</li>
+                  <li>• Real-time profitability calculations</li>
+                  <li>• Professional quotation documents</li>
+                </ul>
+              </div>
+            )}
             {currentStage.code !== 'L4' && (
               <div className="text-sm text-gray-600 bg-yellow-50 border border-yellow-200 rounded px-3 py-2">
                 📋 Quotations can only be created in <strong>L4 - Proposal</strong> stage
