@@ -277,13 +277,23 @@ const QuotationBuilder = () => {
         item[field] = value;
       }
       
-      // Recalculate item totals
+      // Recalculate item totals based on pricing type
       const qty = parseFloat(item.qty) || 0;
       const tenure = parseFloat(item.tenure_months) || 1;
       
-      item.total_recurring = (parseFloat(item.recurring_sale_price) || 0) * qty * tenure;
-      item.total_one_time = (parseFloat(item.one_time_sale_price) || 0) * qty;
-      item.total_cost = (parseFloat(item.purchase_cost_snapshot) || 0) * qty * tenure;
+      if (item.pricing_type === 'recurring') {
+        item.total_recurring = (parseFloat(item.recurring_sale_price) || 0) * qty * tenure;
+        item.total_one_time = 0;
+        item.total_cost = (parseFloat(item.purchase_cost_snapshot) || 0) * qty * tenure;
+      } else if (item.pricing_type === 'one-time') {
+        item.total_recurring = 0;
+        item.total_one_time = (parseFloat(item.one_time_sale_price) || 0) * qty;
+        item.total_cost = (parseFloat(item.purchase_cost_snapshot) || 0) * qty;
+      } else {
+        item.total_recurring = 0;
+        item.total_one_time = 0;
+        item.total_cost = 0;
+      }
 
       return { ...prev, phases: updatedPhases };
     });
