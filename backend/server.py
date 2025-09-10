@@ -5083,5 +5083,118 @@ async def update_opportunity_stage(opportunity_id: str, stage_data: dict, curren
     
     return {"message": "Stage updated successfully"}
 
+# File upload for opportunity documents
+@api_router.post("/opportunities/{opportunity_id}/upload-document")
+async def upload_opportunity_document(
+    opportunity_id: str,
+    file: UploadFile = File(...), 
+    document_type: str = "proposal",
+    description: str = "",
+    current_user: User = Depends(get_current_user)
+):
+    """Upload document for opportunity (proposals, contracts, etc.)"""
+    
+    # Check if opportunity exists
+    opportunity = await db.opportunities.find_one({"id": opportunity_id})
+    if not opportunity:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    
+    # Validate file
+    if file.size > 10 * 1024 * 1024:  # 10MB limit for opportunity documents
+        raise HTTPException(status_code=400, detail="File size exceeds 10MB limit")
+    
+    allowed_types = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
+                     "application/msword", "image/png", "image/jpeg", "text/plain"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="File type not allowed. Only PDF, DOC, DOCX, PNG, JPG, TXT are supported")
+    
+    # Create uploads directory if it doesn't exist
+    upload_dir = Path("uploads/opportunity_documents")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    file_id = str(uuid.uuid4())
+    file_extension = Path(file.filename).suffix
+    filename = f"{file_id}{file_extension}"
+    file_path = upload_dir / filename
+    
+    # Save file
+    with open(file_path, "wb") as buffer:
+        content = await file.read()
+        buffer.write(content)
+    
+    # Create document record
+    document = {
+        "id": str(uuid.uuid4()),
+        "opportunity_id": opportunity_id,
+        "document_type": document_type,
+        "filename": filename,
+        "original_filename": file.filename,
+        "file_path": str(file_path),
+        "file_size": len(content),
+        "mime_type": file.content_type,
+        "description": description,
+        "uploaded_by": current_user.id,
+        "uploaded_at": datetime.now(timezone.utc),
+        "is_active": True
+    }
+    
+    await db.opportunity_documents.insert_one(document)
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="UPLOAD",
+        resource_type="OpportunityDocument",
+        resource_id=document["id"],
+        details=f"Uploaded document: {file.filename} for opportunity {opportunity_id}"
+    )
+    
+    return prepare_for_json(document)
+
+@api_router.get("/opportunities/{opportunity_id}/documents")
+async def get_opportunity_documents(opportunity_id: str, current_user: User = Depends(get_current_user)):
+    """Get all documents for an opportunity"""
+    
+    documents = await db.opportunity_documents.find({
+        "opportunity_id": opportunity_id,
+        "is_active": True
+    }).to_list(None)
+    
+    return [prepare_for_json(doc) for doc in documents]
+
+@api_router.delete("/opportunities/{opportunity_id}/documents/{document_id}")
+async def delete_opportunity_document(
+    opportunity_id: str, 
+    document_id: str, 
+    current_user: User = Depends(get_current_user)
+):
+    """Delete an opportunity document"""
+    
+    document = await db.opportunity_documents.find_one({
+        "id": document_id,
+        "opportunity_id": opportunity_id
+    })
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    # Mark as inactive (soft delete)
+    await db.opportunity_documents.update_one(
+        {"id": document_id},
+        {"$set": {"is_active": False, "updated_at": datetime.now(timezone.utc)}}
+    )
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="DELETE",
+        resource_type="OpportunityDocument",
+        resource_id=document_id,
+        details=f"Deleted document: {document['original_filename']}"
+    )
+    
+    return {"message": "Document deleted successfully"}
+
 # Include router after all endpoints are defined
 app.include_router(api_router)
