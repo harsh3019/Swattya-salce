@@ -481,7 +481,7 @@ const QuotationBuilder = () => {
             {quotationData.phases.map((phase, phaseIndex) => (
               <Card key={phase.id} className="border-l-4 border-l-blue-500">
                 <CardHeader>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-3">
                     <CardTitle className="flex items-center gap-2">
                       <Layers className="w-5 h-5 text-blue-600" />
                       <Input
@@ -513,6 +513,42 @@ const QuotationBuilder = () => {
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Phase Timeline Details */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-gray-100">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Start Date</Label>
+                      <Input
+                        type="date"
+                        value={phase.start_date}
+                        onChange={(e) => {
+                          setQuotationData(prev => {
+                            const updatedPhases = [...prev.phases];
+                            updatedPhases[phaseIndex].start_date = e.target.value;
+                            return { ...prev, phases: updatedPhases };
+                          });
+                        }}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Tenure (Months)</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={phase.tenure_months}
+                        onChange={(e) => {
+                          setQuotationData(prev => {
+                            const updatedPhases = [...prev.phases];
+                            updatedPhases[phaseIndex].tenure_months = parseInt(e.target.value) || 1;
+                            return { ...prev, phases: updatedPhases };
+                          });
+                        }}
+                        className="mt-1"
+                        placeholder="12"
+                      />
                     </div>
                   </div>
                 </CardHeader>
