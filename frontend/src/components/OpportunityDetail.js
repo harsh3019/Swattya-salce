@@ -156,6 +156,21 @@ const OpportunityDetail = () => {
     }
   };
 
+  const fetchActivities = async () => {
+    try {
+      setLoadingActivities(true);
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${baseURL}/api/opportunities/${id}/activities`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setActivities(response.data || []);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+    } finally {
+      setLoadingActivities(false);
+    }
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
       year: 'numeric',
@@ -164,6 +179,36 @@ const OpportunityDetail = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const getActivityIcon = (iconType) => {
+    switch (iconType) {
+      case 'target':
+        return <Target className="w-5 h-5 text-white" />;
+      case 'file-text':
+        return <FileText className="w-5 h-5 text-white" />;
+      case 'dollar-sign':
+        return <DollarSign className="w-5 h-5 text-white" />;
+      case 'check-circle':
+        return <CheckCircle className="w-5 h-5 text-white" />;
+      default:
+        return <Calendar className="w-5 h-5 text-white" />;
+    }
+  };
+
+  const getActivityIconBg = (color) => {
+    switch (color) {
+      case 'blue':
+        return 'bg-blue-500';
+      case 'green':
+        return 'bg-green-500';
+      case 'purple':
+        return 'bg-purple-500';
+      case 'orange':
+        return 'bg-orange-500';
+      default:
+        return 'bg-gray-500';
+    }
   };
 
   const fetchMasterData = async () => {
