@@ -461,6 +461,17 @@ const OpportunityList = () => {
         description="Manage sales opportunities and pipeline"
         modulePath="/opportunities"
         entityName="opportunities"
+        additionalActions={(opportunity) => (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleManageStages(opportunity)}
+            className="bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
+          >
+            <Settings className="w-3 h-3 mr-1" />
+            Manage Stages
+          </Button>
+        )}
       />
 
       {/* View Dialog */}
