@@ -4750,10 +4750,49 @@ async def get_competitors(current_user: User = Depends(get_current_user)):
 async def get_opportunities(current_user: User = Depends(get_current_user)):
     """Get all opportunities (from lead conversion only)"""
     try:
-        opportunities = await db.opportunities.find({"status": {"$ne": "Dropped"}}).to_list(None)
+        # Get all opportunities (handle both old and new data structures)
+        opportunities = await db.opportunities.find({
+            "$and": [
+                {"is_active": {"$ne": False}},
+                {"$or": [
+                    {"status": {"$ne": "Dropped"}},  # New structure
+                    {"status": {"$exists": False}}   # Old structure (no status field)
+                ]}
+            ]
+        }).to_list(None)
+        
+        # Normalize data for frontend compatibility
+        normalized_opportunities = []
+        for opp in opportunities:
+            normalized = prepare_for_json(opp)
+            
+            # Handle data structure differences
+            if not normalized.get("project_title") and normalized.get("name"):
+                normalized["project_title"] = normalized["name"]
+            
+            if not normalized.get("current_stage"):
+                if normalized.get("stage") == "Qualification":
+                    normalized["current_stage"] = 1
+                else:
+                    normalized["current_stage"] = 1
+            
+            if not normalized.get("status"):
+                normalized["status"] = "Active"
+                
+            if not normalized.get("win_probability") and normalized.get("probability"):
+                normalized["win_probability"] = normalized["probability"]
+                
+            if not normalized.get("expected_revenue") and normalized.get("expected_value"):
+                normalized["expected_revenue"] = normalized["expected_value"]
+                
+            if not normalized.get("lead_owner_id") and normalized.get("owner_user_id"):
+                normalized["lead_owner_id"] = normalized["owner_user_id"]
+                
+            normalized_opportunities.append(normalized)
+        
         return {
-            "opportunities": [prepare_for_json(opp) for opp in opportunities],
-            "total": len(opportunities)
+            "opportunities": normalized_opportunities,
+            "total": len(normalized_opportunities)
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching opportunities: {str(e)}")
