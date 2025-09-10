@@ -290,16 +290,7 @@ const OpportunityList = () => {
         </span>
       )
     },
-    {
-      key: 'weighted_revenue',
-      label: 'Weighted Revenue',
-      sortable: true,
-      render: (opportunity) => (
-        <span className="font-medium text-purple-600">
-          {formatCurrency(opportunity.weighted_revenue, opportunity.currency_id)}
-        </span>
-      )
-    },
+
     {
       key: 'win_probability',
       label: 'Win Probability',
