@@ -272,6 +272,7 @@ const QuotationBuilder = () => {
         item.one_time_sale_price = pricing.one_time_sale_price;
         item.purchase_cost_snapshot = pricing.purchase_cost_snapshot;
         item.unit = pricing.unit;
+        item.pricing_type = pricing.pricing_type;
       } else {
         item[field] = value;
       }
