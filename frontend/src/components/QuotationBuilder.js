@@ -241,11 +241,16 @@ const QuotationBuilder = () => {
     const salesPrice = salesPrices.find(sp => sp.product_id === productId);
     const product = products.find(p => p.id === productId);
     
+    // Product should have either recurring OR one-time pricing, not both
+    const hasRecurring = (salesPrice?.recurring_sale_price || 0) > 0;
+    const hasOneTime = (salesPrice?.one_time_sale_price || 0) > 0;
+    
     return {
-      recurring_sale_price: salesPrice?.recurring_sale_price || 0,
-      one_time_sale_price: salesPrice?.one_time_sale_price || 0,
+      recurring_sale_price: hasRecurring ? salesPrice.recurring_sale_price : 0,
+      one_time_sale_price: hasOneTime ? salesPrice.one_time_sale_price : 0,
       purchase_cost_snapshot: salesPrice?.purchase_cost || 0,
-      unit: product?.unit || 'License'
+      unit: product?.unit || 'License',
+      pricing_type: hasRecurring ? 'recurring' : hasOneTime ? 'one-time' : 'none'
     };
   };
 
