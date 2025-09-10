@@ -4807,15 +4807,6 @@ async def get_opportunities(current_user: User = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching opportunities: {str(e)}")
 
-@api_router.get("/opportunities/{opportunity_id}")
-async def get_opportunity_by_id(opportunity_id: str, current_user: User = Depends(get_current_user)):
-    """Get a specific opportunity by ID"""
-    opportunity = await db.opportunities.find_one({"id": opportunity_id})
-    if not opportunity:
-        raise HTTPException(status_code=404, detail="Opportunity not found")
-    
-    return prepare_for_json(opportunity)
-
 @api_router.get("/opportunities/kpis")
 async def get_opportunities_kpis(current_user: User = Depends(get_current_user)):
     """Get opportunity KPIs (Total, Open, Won, Lost, Pipeline Value, Weighted Revenue, Win Rate)"""
@@ -4885,6 +4876,15 @@ async def get_opportunities_kpis(current_user: User = Depends(get_current_user))
             "weighted_revenue": 0,
             "win_rate": 0
         }
+
+@api_router.get("/opportunities/{opportunity_id}")
+async def get_opportunity_by_id(opportunity_id: str, current_user: User = Depends(get_current_user)):
+    """Get a specific opportunity by ID"""
+    opportunity = await db.opportunities.find_one({"id": opportunity_id})
+    if not opportunity:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    
+    return prepare_for_json(opportunity)
 
 @api_router.post("/opportunities/{opportunity_id}/change-stage")
 async def change_opportunity_stage(
