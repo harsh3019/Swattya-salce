@@ -380,7 +380,18 @@ const OpportunityStageForm = () => {
   };
 
   const isStageNumberLocked = (stageNumber) => {
-    return opportunity?.locked_stages?.includes(stageNumber) || isOpportunityLocked();
+    // Always lock if opportunity is fully locked (Won/Lost/Dropped)
+    if (isOpportunityLocked()) {
+      return true;
+    }
+    
+    // L1-L3 are read-only only AFTER L3 submission (i.e., when current_stage > 3)
+    if (stageNumber <= 3 && (opportunity?.current_stage || 1) > 3) {
+      return true;
+    }
+    
+    // Check individual locked stages from backend  
+    return opportunity?.locked_stages?.includes(stageNumber);
   };
 
   const formatCurrency = (amount) => {
