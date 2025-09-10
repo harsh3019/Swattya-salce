@@ -34,6 +34,9 @@ const OpportunityDetail = () => {
   const { permissions } = usePermissions();
   const [opportunity, setOpportunity] = useState(null);
   const [quotations, setQuotations] = useState([]);
+  const [loadingQuotations, setLoadingQuotations] = useState(true);
+  const [documents, setDocuments] = useState([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stageDialogOpen, setStageDialogOpen] = useState(false);
