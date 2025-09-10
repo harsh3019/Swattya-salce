@@ -233,6 +233,11 @@ const QuotationBuilder = () => {
     };
   };
 
+  const getFilteredProducts = (primaryCategoryId) => {
+    if (!primaryCategoryId) return [];
+    return products.filter(product => product.primary_category_id === primaryCategoryId);
+  };
+
   const updateItem = (phaseIndex, groupIndex, itemIndex, field, value) => {
     setQuotationData(prev => {
       const updatedPhases = [...prev.phases];
