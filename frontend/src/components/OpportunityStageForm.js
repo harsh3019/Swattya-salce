@@ -642,12 +642,60 @@ const OpportunityStageForm = () => {
 
         <div>
           <Label htmlFor="proposal_documents">Proposal Documents *</Label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-gray-600">Upload proposal documents (PDF/DOC)</p>
-            <Button variant="outline" className="mt-2">
-              Choose Files
-            </Button>
+          <div className="space-y-4">
+            {/* File Upload Area */}
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+              <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-gray-600">Upload proposal documents (PDF/DOC/DOCX/PNG/JPG)</p>
+              <p className="text-sm text-gray-500 mb-2">Maximum file size: 10MB</p>
+              <input
+                type="file"
+                id="document-upload"
+                multiple
+                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt"
+                onChange={(e) => handleFileUpload(e.target.files)}
+                className="hidden"
+                disabled={uploading}
+              />
+              <Button 
+                variant="outline" 
+                className="mt-2"
+                onClick={() => document.getElementById('document-upload').click()}
+                disabled={uploading}
+              >
+                {uploading ? 'Uploading...' : 'Choose Files'}
+              </Button>
+            </div>
+            
+            {/* Uploaded Documents List */}
+            {uploadedDocuments.length > 0 && (
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Uploaded Documents</Label>
+                <div className="space-y-2 mt-2">
+                  {uploadedDocuments.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-4 h-4 text-blue-600" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{doc.original_filename}</p>
+                          <p className="text-xs text-gray-500">
+                            {(doc.file_size / 1024).toFixed(1)} KB • {new Date(doc.uploaded_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteDocument(doc.id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
