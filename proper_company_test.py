@@ -5,7 +5,7 @@ import json
 
 def test_proper_company_creation():
     """Test company creation with proper CompanyCreate model"""
-    base_url = "https://sawayatta-erp-1.preview.emergentagent.com/api"
+    base_url = "https://erp-quotation.preview.emergentagent.com/api"
     
     # Login
     login_response = requests.post(f'{base_url}/auth/login', 

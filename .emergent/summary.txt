@@ -1,23 +1,15 @@
 <analysis>
-The AI engineer has significantly advanced the Sawayatta ERP. Starting with consolidating backend components for Lead Management, the engineer established robust frontend features like the multi-stage  and  with KPIs, and a sophisticated . The focus then shifted to the comprehensive Opportunity Management Module, with initial backend models and APIs, followed by frontend implementation of the  and  pages. Critical bugs were addressed, including fixing data display for opportunities and resolving lead creation issues by implementing missing authorization headers and removing a problematic checklist. The most recent major work involved redesigning the Opportunity stage progression from a simple dropdown to a detailed multi-stage stepper with specific field requirements for each L1-L8 stage, along with implementing the crucial lead-to-opportunity conversion logic in the backend. The system now successfully converts leads into opportunities, setting their initial stage to L1 with an auto-generated OPP-ID.
+The AI engineer successfully built out significant portions of the Sawayatta ERP, particularly focusing on Lead and Opportunity Management. Initial efforts refined lead conversion, implemented a multi-stage , and developed  and . A major feature, the Opportunity Management Module, was then established, introducing an L1-L8 multi-stage stepper in , handling lead-to-opportunity conversion with OPP-ID generation, and integrating  and  pages. Throughout, the engineer addressed several critical bugs, including fixing  import errors, populating empty dropdowns (regions, competitors), and resolving complex validation issues in stage progression and document uploads. The Quotation System Builder was incrementally enhanced, adding primary category-product relationships, fixing duplicate item/group additions, integrating real-time rate card pricing, and implementing phase-specific start date/tenure. The last interaction before this summary involved identifying and commencing work on a sidebar visibility issue, followed by an extensive list of new requirements for the Opportunities module, including discount fields, edit quotation functionality, KPIs, stage locking logic, and tab refinements.
 </analysis>
 
 <product_requirements>
-The Sawayatta ERP manages business operations, focusing on Lead and Opportunity Management.
+The Sawayatta ERP is designed for comprehensive business operations, primarily focusing on Lead and Opportunity Management.
 
-**Lead Management Module**:
-*   A multi-stage form (General Info, Lead Details, Proofs & Checklist) with tender logic, validations, nurture/conversion logic.
-*   Lead Listing page with KPIs (total, pending, approved, escalated), filters, search, and full CRUD.
-*   A Lead Change Status modal for approving, rejecting, or converting leads to opportunities, with the Convert to Opportunity option appearing post-approval.
-*    field in Lead form, conditionally displayed for Tender or Pre-Tender types.
-*   *Update*: The lead creation process was initially blocked; it required fixing missing authorization headers and removing a mandatory checklist. Lead-to-Opportunity conversion was a pending functionality, requiring proper OPP-ID generation and L1 stage setup.
+**Lead Management Module:**
+The system features a multi-stage lead form (, , ) with tender logic, validations, and nurture/conversion mechanisms. A  page includes KPIs (total, pending, approved, escalated), filters, search, and full CRUD operations. A Lead Change Status modal facilitates approving, rejecting, or converting leads to opportunities, with conversion available post-approval. The  field is conditionally displayed for Tender or Pre-Tender types. Previously, lead creation had authorization issues and a problematic mandatory checklist, which were resolved, and lead-to-opportunity conversion was enhanced with proper OPP-ID generation and L1 stage setup.
 
-**Opportunity Management Module**:
-*   Supports an L1→L8 pipeline, multi-quotation flow, rate-card pricing, P&L, multi-phase quotations (phases→groups→items), KPIs, RBAC, and audit logs.
-*   Listing page with KPIs (Total Opportunity, Open, Pipeline value, Weighted Revenue, Win Rate (%)) and weighted revenue.
-*   Quotation system with profitability percentage.
-*   Integration with existing Lead Management.
-*   *Update*: Opportunity creation is exclusively through Lead conversion; manual creation is disallowed. The L1-L8 stages must be implemented as a multi-stage stepper with detailed, validated fields for each stage, including read-only locks after L4 and after Won/Lost stages. Quotations can only be added in the L4 stage (Proposal), allowing multiple quotations but with a single selection for progression.
+**Opportunity Management Module:**
+This module supports an L1→L8 pipeline, multi-quotation flow, rate-card pricing, P&L, multi-phase quotations (phases→groups→items), KPIs, RBAC, and audit logs. The listing page displays KPIs like Total Opportunity, Open, Pipeline value, Weighted Revenue, and Win Rate. A quotation system with profitability calculation is required. Opportunity creation is exclusively via lead conversion. The L1-L8 stages are implemented as a multi-stage stepper with detailed, validated fields, including read-only locks after L4 and after Won/Lost stages. Quotations can only be added in the L4 (Proposal) stage, allowing multiple quotations but a single selection for progression.
 </product_requirements>
 
 <key_technical_concepts>
@@ -25,28 +17,37 @@ The Sawayatta ERP manages business operations, focusing on Lead and Opportunity 
 -   **Authentication/Authorization**: JWT, bcrypt, Role-Based Access Control (RBAC).
 -   **UI/Forms**: Shadcn UI, Tailwind CSS, ,  for validation.
 -   **API Communication**: .
--   **Environment**: Kubernetes, backend                          RUNNING   pid 27, uptime 0:00:04
-code-server                      RUNNING   pid 29, uptime 0:00:04
-frontend                         STOPPING  
-mongodb                          RUNNING   pid 33, uptime 0:00:04
+-   **Environment**: Kubernetes, backend                          RUNNING   pid 27, uptime 0:00:05
+code-server                      RUNNING   pid 29, uptime 0:00:05
+frontend                         STOPPED   Sep 10 01:43 PM
+mongodb                          RUNNING   pid 34, uptime 0:00:05
 supervisor> .
 -   **Data Handling**: Pydantic models, UUIDs for IDs (no Mongo ObjectIDs), .
+-   **Frontend Enhancements**:  for debouncing, event handling (, ).
 </key_technical_concepts>
 
 <code_architecture>
 
 -   :
-    *   **Importance**: Core FastAPI application.
-    *   **Changes**: Added/updated Pydantic models for Opportunity (including stage-specific data like ), , . Implemented CRUD APIs for Opportunity masters and core Opportunity, including a  and  endpoints. Fixed  to correctly create an Opportunity and store  in Lead. Removed checklist validation for Leads. Initialized master data for new Opportunity-related models. RBAC setup for Opportunities menu confirmed.
+    *   **Importance**: Core FastAPI application, handles all backend logic and API endpoints.
+    *   **Changes**:
+        *   Added/updated Pydantic models for  (including ), , , , , .
+        *   Implemented CRUD APIs for Opportunity masters and core Opportunity.
+        *    logic refined for intelligent validation (current vs. target stage) and draft saving.
+        *   Added , ,  for document management.
+        *   Fixed  to correctly create an  with the new data structure ( ID, , , , , etc.) and store  in Lead.
+        *   Modified  endpoint to handle both old and new opportunity data structures for backward compatibility.
+        *   L3 stage validation logic updated to check  collection instead of .
+        *   Initialised master data for , , , , .
 -   :
     *   **Importance**: Manages global routing.
-    *   **Changes**: Added routes for , , , and . Removed  routes.
+    *   **Changes**: Routes for , , , and  confirmed/adjusted.
 -   :
     *   **Importance**: Multi-stage form for leads.
-    *   **Changes**: Fixed API calls to include  headers. Removed all checklist-related logic, state, and validation. Ensured  conditional display.
+    *   **Changes**: API calls now include  headers; checklist logic removed.
 -   :
     *   **Importance**: Displays lead data.
-    *   **Changes**: Minor adjustments to integrate .
+    *   **Changes**: Minor adjustments for  integration.
 -   :
     *   **Importance**: Manages lead status changes.
     *   **Changes**: Created from scratch, enables lead conversion to opportunity.
@@ -55,32 +56,59 @@ supervisor> .
     *   **Changes**: Modified to accept  prop for custom buttons.
 -   :
     *   **Importance**: Displays opportunity data and KPIs.
-    *   **Changes**: Created from scratch. Implemented KPI dashboard. Fixed data display issue (fetching  instead of ). Removed Create Opportunity button and added a message about lead conversion.
+    *   **Changes**: Created from scratch. Implemented KPI dashboard. Fixed data display. Removed Create Opportunity button. Added Manage Stages button via  prop. Updated  and  to correctly display company name and stage info.
 -   :
     *   **Importance**: Displays detailed opportunity information.
-    *   **Changes**: Created from scratch. Displays stage ribbon, summary panel, tabbed interface. Integrated  to handle stage progression. Enforces L4 stage restriction for quotation creation.
+    *   **Changes**: Created from scratch. Displays stage ribbon, summary panel, tabbed interface. Integrated . Fixed Dialog is not defined error by adding missing  imports. Added refresh mechanism on window focus. Updated  to use . Enhanced stage-specific data display in the summary panel. Enhanced L4 quotation creation messaging and empty states for quotations.
 -   :
     *   **Importance**: Component for building quotations.
-    *   **Changes**: Created from scratch. Initial structure for handling quotation creation.
+    *   **Changes**: Created from scratch with multi-level structure (phases→groups→items), live totals, profitability.
+        *   Implemented robust duplicate item/group prevention using  and time-based debouncing.
+        *   Integrated rate card pricing: auto-fetches  and  (made read-only).
+        *   Integrated product units: auto-fetches  from product master.
+        *   Enforced either/or pricing logic (recurring OR one-time, not both) with conditional UI.
+        *   Added  and  fields to phases.
+        *   Updated calculation logic for real-time updates:  and .
+        *   Dynamic grid column adjustment for recurring vs one-time products.
 -   :
-    *   **Importance**: New component to manage opportunity stage progression.
-    *   **Changes**: Created from scratch to implement the multi-stage stepper with stage-specific forms and validations. Replaced previous  component.
--   : Documents  integration.
+    *   **Importance**: Manages opportunity stage progression.
+    *   **Changes**: Created from scratch to implement multi-stage stepper. Added Create Quotation button to L4 stage. Implemented file upload UI for L3 stage, including state management, file upload functions, and display of uploaded documents.
+-   Temporary Python Scripts (, , , ):
+    *   **Importance**: Used for initial data population and data migration to ensure the new data structures and master data are available for testing and application functionality. These were temporary and cleaned up after use.
 </code_architecture>
 
 <pending_tasks>
--   Complete the detailed implementation of all stage-specific forms within  as per the requirements in Chat Message 190.
--   Implement the full Quotation System Builder () with phases, groups, items, live totals, and profitability display.
+-   Complete the detailed implementation of all stage-specific forms within  for L5-L8 (L1-L4 mostly done).
 -   Implement audit logging for create/update/delete/approve for opportunities and quotations.
 -   Refine RBAC on UI and APIs for the new module as development progresses.
+-   Fix sidebar visibility issue (currently only Dashboard is visible).
+-   Implement discount percentage field for each product item in quotation form with auto-calculation.
+-   Fix edit quotation to load existing data instead of a blank form.
+-   Display all required KPIs (Total Opportunities, Open, Won, Lost, Weighted Revenue, Pipeline Value) in the Opportunities Listing Page with real-time updates.
+-   Adjust stage locking logic: L1-L3 become read-only only after L3 submission; stages cannot be skipped; allow navigation between stages.
+-   Ensure current stage updates are immediately reflected in the Opportunities Listing Page.
+-   Highlight the selected quotation in the Opportunity Details → Quotations Tab.
+-   Fix the View button functionality for quotations in the detail page.
+-   Show all related Activities (calls, emails, notes, status updates) in the Activities tab, in reverse chronological order with timestamp and user.
+-   Show all uploaded documents in the Documents tab, including type, filename, uploader, timestamp, and download link.
 </pending_tasks>
 
 <current_work>
-The AI engineer has just completed fixing a critical bug where leads were not being converted into opportunities upon status change. This involved uncommenting the opportunity creation logic in the  backend function in  and adding an  field to the  model for reference.
+The AI engineer was most recently tasked with fixing several issues in the Sawayatta ERP. The immediate task before the summary request was to address a critical sidebar issue where only the Dashboard menu item was visible, while others (Leads, Opportunities, etc.) were missing. This is suspected to be an RBAC or menu data loading problem in .
 
-Specifically, in , the code now correctly creates an  object from lead data, assigns an initial L1 - Prospect stage, generates a unique OPP-ID, and saves this new opportunity to the database. The  is linked to the newly created opportunity, and the lead itself is updated to store the generated . This work was followed by comprehensive backend and frontend testing, confirming the lead-to-opportunity conversion workflow is fully functional.
+Following this, a comprehensive list of fixes and enhancements for the Opportunities module was provided by the user:
+1.  **Quotation Form Improvements**: Add a discount percentage input field for each product item in the quotation form, and implement auto-calculation for line totals: .
+2.  **Edit Quotation Functionality**: Fix the  feature, which currently displays a blank form, to properly load existing quotation data (phases, groups, items) with all values pre-filled.
+3.  **KPIs in Opportunities Listing Page**: Display key performance indicators (Total Opportunities, Open, Won, Lost, Weighted Revenue, Pipeline Value) in the Opportunities Listing Page, ensuring real-time updates as opportunities change.
+4.  **Stage Locking Issue**: Modify the stage locking mechanism. Instead of locking stages after L3, L1 to L3 should become read-only but still visible *after* L3 submission. Users must complete each stage sequentially and cannot skip stages, but should be able to navigate back and forth between completed/current stages.
+5.  **Stage Not Reflected**: Ensure that when a stage is completed, the current stage is immediately updated and reflected in the Opportunities Listing Page.
+6.  **Quotation Tab in Details Page**: In the Opportunity Details → Quotations Tab, highlight the selected quotation (the one linked at L4). Additionally, fix an issue where quotations are not showing/working properly after clicking the view button.
+7.  **Activities Tab**: Populate the Activities tab to show all related activities (calls, emails, notes, status updates), displayed in reverse chronological order with timestamps and user information.
+8.  **Documents Tab**: Implement functionality to show all uploaded documents in the Documents tab, including document type, file name, , , and provide a download link for each file.
+
+The AI engineer has just acknowledged these new tasks and started by investigating the  component to address the sidebar visibility issue.
 </current_work>
 
 <optional_next_step>
-Proceed with the detailed implementation of the multi-stage stepper in  for L1-L8 stages, including all specified fields and validations.
+Investigate and fix the sidebar visibility issue in  to show all menu items.
 </optional_next_step>

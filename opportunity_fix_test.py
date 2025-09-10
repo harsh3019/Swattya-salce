@@ -7,7 +7,7 @@ import requests
 import json
 
 # Configuration
-BASE_URL = "https://sawayatta-erp-1.preview.emergentagent.com/api"
+BASE_URL = "https://erp-quotation.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {"username": "admin", "password": "admin123"}
 
 def test_fix():
