@@ -295,6 +295,7 @@ const OpportunityDetail = () => {
   const handleStageUpdate = () => {
     fetchOpportunity();
     fetchQuotations();
+    fetchDocuments();
   };
 
   if (loading) {
