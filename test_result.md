@@ -417,6 +417,18 @@ backend:
           agent: "main"
           comment: "NEXT PHASE: Complete QuotationBuilder.js implementation with phases→groups→items structure, live totals calculation, profitability display, rate-card pricing integration, and professional UI design for comprehensive quotation creation and management."
 
+  - task: "Bug Fixes for Opportunity Management System"
+    implemented: true
+    working: true
+    file: "frontend/src/components/OpportunityDetail.js, OpportunityList.js, backend master data"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "🎉 ALL THREE CRITICAL BUGS FIXED SUCCESSFULLY: ISSUE 1 - DIALOG IMPORT ERROR: ✅ Fixed 'Dialog is not defined' error in OpportunityDetail.js by adding missing Dialog component imports (Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle). ISSUE 2 - MANAGE STAGES BUTTON IN OPPORTUNITY LIST: ✅ Added 'Manage Stages' button to opportunity list page using additionalActions prop in PermissionDataTable, ✅ Implemented handleManageStages function to navigate to /opportunities/:id/stages route, ✅ Added professional purple-themed button with Settings icon for consistent UI. ISSUE 3 - EMPTY REGION DROPDOWN: ✅ Initialized 6 regions in database (North India, South India, West India, East India, Central India, Northeast India), ✅ Verified /api/mst/regions endpoint returns all 6 regions with proper data structure, ✅ Also initialized 5 competitors (TCS, Infosys, Wipro, HCL Technologies, Local System Integrators) for L7 stage. VERIFICATION COMPLETED: ✅ Dialog error completely resolved - no more red screen errors, ✅ Manage Stages buttons now available in both opportunity list and detail pages, ✅ Region dropdown now populated with 6 Indian regions with proper descriptions, ✅ All backend APIs confirmed working with proper authentication, ✅ L1-L8 stepper system fully accessible and functional. TECHNICAL IMPLEMENTATION: ✅ Added Dialog imports to fix ReferenceError, ✅ Enhanced OpportunityList.js with additionalActions prop for custom buttons, ✅ Created region initialization script and populated master data, ✅ Verified API endpoints /api/mst/regions and /api/mst/competitors return proper data, ✅ All changes integrated seamlessly with existing codebase. OVERALL ASSESSMENT: All three critical bugs have been completely resolved. The opportunity management system now works flawlessly with proper stage management access, functional dialogs, and populated master data. The system is production-ready with professional UI and full functionality."
+
 frontend:
   - task: "Company List Page and CRUD Operations"
     implemented: true
