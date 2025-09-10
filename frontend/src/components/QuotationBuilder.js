@@ -378,12 +378,17 @@ const QuotationBuilder = () => {
       });
     });
 
-    const grandTotal = totalRecurring + totalOneTime;
+    const subTotal = totalRecurring + totalOneTime;
+    const overallDiscountPercent = parseFloat(quotationData.overall_discount_percentage) || 0;
+    const overallDiscountAmount = subTotal * (overallDiscountPercent / 100);
+    const grandTotal = subTotal - overallDiscountAmount;
     const profitabilityPercent = grandTotal > 0 ? ((grandTotal - totalCost) / grandTotal) * 100 : 0;
 
     setTotals({
       total_recurring: totalRecurring,
       total_one_time: totalOneTime,
+      sub_total: subTotal,
+      overall_discount_amount: overallDiscountAmount,
       grand_total: grandTotal,
       total_cost: totalCost,
       profitability_percent: profitabilityPercent
