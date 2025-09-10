@@ -243,7 +243,7 @@ const OpportunityList = () => {
       key: 'company_id',
       label: 'Company',
       render: (opportunity) => (
-        <span className="text-gray-700">{getCompanyName(opportunity.company_id)}</span>
+        <span className="text-gray-700">{opportunity.company_name || getCompanyName(opportunity.company_id)}</span>
       )
     },
     {
