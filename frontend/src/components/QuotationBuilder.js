@@ -213,12 +213,34 @@ const QuotationBuilder = () => {
     });
   };
 
+  const getProductPricing = (productId) => {
+    const salesPrice = salesPrices.find(sp => sp.product_id === productId);
+    const product = products.find(p => p.id === productId);
+    
+    return {
+      recurring_sale_price: salesPrice?.recurring_sale_price || 0,
+      one_time_sale_price: salesPrice?.one_time_sale_price || 0,
+      purchase_cost_snapshot: salesPrice?.purchase_cost || 0,
+      unit: product?.unit || 'License'
+    };
+  };
+
   const updateItem = (phaseIndex, groupIndex, itemIndex, field, value) => {
     setQuotationData(prev => {
       const updatedPhases = [...prev.phases];
       const item = updatedPhases[phaseIndex].groups[groupIndex].items[itemIndex];
       
-      item[field] = value;
+      // If product is being changed, auto-populate pricing
+      if (field === 'product_id' && value) {
+        const pricing = getProductPricing(value);
+        item.product_id = value;
+        item.recurring_sale_price = pricing.recurring_sale_price;
+        item.one_time_sale_price = pricing.one_time_sale_price;
+        item.purchase_cost_snapshot = pricing.purchase_cost_snapshot;
+        item.unit = pricing.unit;
+      } else {
+        item[field] = value;
+      }
       
       // Recalculate item totals
       const qty = parseFloat(item.qty) || 0;
