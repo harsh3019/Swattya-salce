@@ -80,15 +80,17 @@ const QuotationBuilder = () => {
       setOpportunity(opportunityRes.data);
 
       // Fetch master data
-      const [rateCardsRes, productsRes, currenciesRes] = await Promise.all([
+      const [rateCardsRes, productsRes, currenciesRes, primaryCategoriesRes] = await Promise.all([
         axios.get(`${baseURL}/api/mst/rate-cards`, { headers: { Authorization: `Bearer ${token}` }}),
         axios.get(`${baseURL}/api/mst/products`, { headers: { Authorization: `Bearer ${token}` }}),
-        axios.get(`${baseURL}/api/mst/currencies`, { headers: { Authorization: `Bearer ${token}` }})
+        axios.get(`${baseURL}/api/mst/currencies`, { headers: { Authorization: `Bearer ${token}` }}),
+        axios.get(`${baseURL}/api/mst/primary-categories`, { headers: { Authorization: `Bearer ${token}` }})
       ]);
 
       setRateCards(rateCardsRes.data || []);
       setProducts(productsRes.data || []);
       setCurrencies(currenciesRes.data || []);
+      setPrimaryCategories(primaryCategoriesRes.data || []);
 
       // If editing existing quotation, fetch quotation data
       if (quotationId && quotationId !== 'create') {
