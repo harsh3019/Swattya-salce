@@ -442,7 +442,10 @@ const QuotationBuilder = () => {
                   <Label htmlFor="rate_card_id">Rate Card</Label>
                   <Select 
                     value={quotationData.rate_card_id} 
-                    onValueChange={(value) => setQuotationData(prev => ({...prev, rate_card_id: value}))}
+                    onValueChange={(value) => {
+                      setQuotationData(prev => ({...prev, rate_card_id: value}));
+                      fetchSalesPrices(value);
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select rate card" />
