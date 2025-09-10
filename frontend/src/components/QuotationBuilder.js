@@ -781,18 +781,34 @@ const QuotationBuilder = () => {
                                     </Button>
                                   </div>
                                 </div>
-                                <div className="grid grid-cols-3 gap-3 mt-2 text-sm">
-                                  <div>
-                                    <span className="text-gray-600">Total Recurring: </span>
-                                    <span className="font-medium">{formatCurrency(item.total_recurring)}</span>
-                                  </div>
-                                  <div>
-                                    <span className="text-gray-600">Total One-time: </span>
-                                    <span className="font-medium">{formatCurrency(item.total_one_time)}</span>
-                                  </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2 text-sm bg-gray-50 p-3 rounded">
+                                  {item.pricing_type === 'recurring' && (
+                                    <div>
+                                      <span className="text-gray-600">Total Recurring: </span>
+                                      <span className="font-medium text-green-700">{formatCurrency(item.total_recurring)}</span>
+                                      <div className="text-xs text-gray-500 mt-1">
+                                        ({formatCurrency(item.recurring_sale_price)} × {item.qty} × {item.tenure_months}m)
+                                      </div>
+                                    </div>
+                                  )}
+                                  {item.pricing_type === 'one-time' && (
+                                    <div>
+                                      <span className="text-gray-600">Total One-time: </span>
+                                      <span className="font-medium text-blue-700">{formatCurrency(item.total_one_time)}</span>
+                                      <div className="text-xs text-gray-500 mt-1">
+                                        ({formatCurrency(item.one_time_sale_price)} × {item.qty})
+                                      </div>
+                                    </div>
+                                  )}
                                   <div>
                                     <span className="text-gray-600">Total Cost: </span>
-                                    <span className="font-medium">{formatCurrency(item.total_cost)}</span>
+                                    <span className="font-medium text-red-600">{formatCurrency(item.total_cost)}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-gray-600">Profit: </span>
+                                    <span className="font-medium text-green-600">
+                                      {formatCurrency((item.total_recurring + item.total_one_time) - item.total_cost)}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
