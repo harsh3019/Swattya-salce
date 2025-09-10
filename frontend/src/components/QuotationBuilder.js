@@ -554,6 +554,18 @@ const QuotationBuilder = () => {
                     onChange={(e) => setQuotationData(prev => ({...prev, validity_date: e.target.value}))}
                   />
                 </div>
+                <div>
+                  <Label htmlFor="overall_discount">Overall Discount %</Label>
+                  <Input
+                    id="overall_discount"
+                    type="number"
+                    value={quotationData.overall_discount_percentage}
+                    onChange={(e) => setQuotationData(prev => ({...prev, overall_discount_percentage: e.target.value}))}
+                    placeholder="0"
+                    min="0"
+                    max="100"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
