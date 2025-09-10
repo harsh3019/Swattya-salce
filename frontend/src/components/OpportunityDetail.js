@@ -127,7 +127,15 @@ const OpportunityDetail = () => {
   };
 
   const getStageInfo = (stageId) => {
-    const stage = stages.find(s => s.id === stageId);
+    // Handle both stage ID (UUID) and stage number (1-8)
+    let stage;
+    if (typeof stageId === 'number' || !isNaN(stageId)) {
+      // If it's a number, find by stage_order
+      stage = stages.find(s => s.stage_order === parseInt(stageId));
+    } else {
+      // If it's a UUID, find by ID
+      stage = stages.find(s => s.id === stageId);
+    }
     return stage ? { 
       name: stage.stage_name, 
       code: stage.stage_code,
