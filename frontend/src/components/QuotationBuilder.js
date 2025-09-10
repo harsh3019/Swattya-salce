@@ -255,6 +255,7 @@ const QuotationBuilder = () => {
         one_time_sale_price: 0,
         purchase_cost_snapshot: 0,
         tenure_months: 12,
+        discount_percentage: 0,
         total_recurring: 0,
         total_one_time: 0,
         total_cost: 0
