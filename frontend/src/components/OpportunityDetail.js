@@ -154,11 +154,6 @@ const OpportunityDetail = () => {
     }
   };
 
-  const getUserName = (userId) => {
-    // This would ideally come from a users lookup or be included in the document data
-    return 'User'; // Placeholder - in production, lookup user name by ID
-  };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
       year: 'numeric',
