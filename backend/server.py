@@ -5287,6 +5287,84 @@ async def upload_opportunity_document(
     
     return prepare_for_json(document)
 
+@api_router.get("/opportunities/{opportunity_id}/activities")
+async def get_opportunity_activities(opportunity_id: str, current_user: User = Depends(get_current_user)):
+    """Get all activities for an opportunity (stage changes, document uploads, quotations, etc.)"""
+    
+    activities = []
+    
+    # Get opportunity details
+    opportunity = await db.opportunities.find_one({"id": opportunity_id})
+    if not opportunity:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    
+    # Get stage history activities
+    stage_history = opportunity.get("stage_history", [])
+    for stage_entry in stage_history:
+        activities.append({
+            "id": f"stage_{len(activities)}",
+            "type": "stage_change",
+            "title": f"Stage changed from L{stage_entry.get('from_stage', 0)} to L{stage_entry.get('to_stage', 0)}",
+            "description": stage_entry.get("notes", ""),
+            "created_at": stage_entry.get("changed_at"),
+            "created_by": stage_entry.get("changed_by"),
+            "icon": "target",
+            "color": "blue"
+        })
+    
+    # Get document upload activities
+    documents = await db.opportunity_documents.find({
+        "opportunity_id": opportunity_id,
+        "is_active": True
+    }).to_list(None)
+    
+    for doc in documents:
+        activities.append({
+            "id": f"doc_{doc['id']}",
+            "type": "document_upload",
+            "title": f"Document uploaded: {doc['filename']}",
+            "description": f"Document type: {doc.get('document_type', 'Unknown')}",
+            "created_at": doc.get("uploaded_at"),
+            "created_by": doc.get("uploaded_by"),
+            "icon": "file-text",
+            "color": "green"
+        })
+    
+    # Get quotation activities
+    quotations = await db.quotations.find({
+        "opportunity_id": opportunity_id,
+        "is_active": True
+    }).to_list(None)
+    
+    for quotation in quotations:
+        activities.append({
+            "id": f"quote_{quotation['id']}",
+            "type": "quotation_created",
+            "title": f"Quotation created: {quotation['quotation_name']}",
+            "description": f"Quotation ID: {quotation.get('quotation_id', 'N/A')}",
+            "created_at": quotation.get("created_at"),
+            "created_by": quotation.get("created_by"),
+            "icon": "dollar-sign",
+            "color": "purple"
+        })
+        
+        if quotation.get("is_selected"):
+            activities.append({
+                "id": f"quote_select_{quotation['id']}",
+                "type": "quotation_selected", 
+                "title": f"Quotation selected: {quotation['quotation_name']}",
+                "description": f"Selected for progression to next stage",
+                "created_at": quotation.get("updated_at", quotation.get("created_at")),
+                "created_by": quotation.get("updated_by", quotation.get("created_by")),
+                "icon": "check-circle",
+                "color": "green"
+            })
+    
+    # Sort activities by created_at in reverse chronological order (newest first)
+    activities.sort(key=lambda x: x.get("created_at") or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
+    
+    return activities
+
 @api_router.get("/opportunities/{opportunity_id}/documents")
 async def get_opportunity_documents(opportunity_id: str, current_user: User = Depends(get_current_user)):
     """Get all documents for an opportunity"""
