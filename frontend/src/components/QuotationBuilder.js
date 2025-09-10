@@ -491,7 +491,7 @@ const QuotationBuilder = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => addItem(phaseIndex, groupIndex)}
+                                onClick={(e) => addItem(phaseIndex, groupIndex, e)}
                               >
                                 <Plus className="w-4 h-4 mr-1" />
                                 Add Item
