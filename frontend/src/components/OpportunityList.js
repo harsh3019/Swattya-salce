@@ -218,6 +218,10 @@ const OpportunityList = () => {
     return totalClosed > 0 ? ((kpis.won / totalClosed) * 100).toFixed(1) : '0.0';
   };
 
+  const handleManageStages = (opportunity) => {
+    navigate(`/opportunities/${opportunity.id}/stages`);
+  };
+
   const columns = [
     {
       key: 'opportunity_id',
