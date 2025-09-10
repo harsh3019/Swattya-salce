@@ -341,6 +341,7 @@ const OpportunityDetail = () => {
     fetchOpportunity();
     fetchQuotations();
     fetchDocuments();
+    fetchActivities();
   };
 
   if (loading) {
