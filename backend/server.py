@@ -3725,24 +3725,35 @@ async def change_lead_status(
             # Generate opportunity ID in POT-XXXXXXXX format
             opportunity_id = generate_opportunity_id()
             
-            # Create opportunity
+            # Create opportunity with proper structure matching OpportunityBase model
+            # Get default currency ID (INR)
+            inr_currency = await db.mst_currencies.find_one({"currency_code": "INR"})
+            currency_id = inr_currency["id"] if inr_currency else "default-inr-id"
+            
             opportunity_data = {
                 "id": opportunity_id,
-                "name": lead.get("project_title", ""),
-                "lead_id": lead_id,
+                "project_title": lead.get("project_title", "Converted Opportunity"),
                 "company_id": lead.get("company_id"),
-                "contact_id": lead.get("contact_id"),
-                "source": lead.get("source", "Lead Conversion"),
-                "stage": "Qualification",
-                "expected_value": lead.get("expected_orc", 0),
-                "currency": "INR",
-                "probability": 25,
-                "expected_close_date": None,
-                "owner_user_id": lead.get("lead_owner"),
+                "lead_id": lead_id,
+                "current_stage": 1,  # L1 - Prospect
+                "status": "Active",
+                "expected_revenue": float(lead.get("expected_orc", 0)),
+                "currency_id": currency_id,
+                "win_probability": 25.0,
+                "weighted_revenue": float(lead.get("expected_orc", 0)) * 0.25,
+                "lead_owner_id": lead.get("lead_owner"),
                 "created_by": current_user.id,
                 "created_at": datetime.now(timezone.utc),
                 "updated_at": datetime.now(timezone.utc),
-                "is_active": True
+                "is_active": True,
+                # Stage history for audit trail
+                "stage_history": [{
+                    "from_stage": 0,
+                    "to_stage": 1,
+                    "changed_by": current_user.id,
+                    "changed_at": datetime.now(timezone.utc),
+                    "notes": "Initial stage after lead conversion"
+                }]
             }
             
             await db.opportunities.insert_one(opportunity_data)
