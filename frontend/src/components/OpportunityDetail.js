@@ -854,10 +854,54 @@ const OpportunityDetail = () => {
         {/* Activities Tab */}
         <TabsContent value="activities">
           <Card>
-            <CardContent className="p-12 text-center">
-              <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Activity Timeline</h3>
-              <p className="text-gray-600">Activity tracking will be implemented in the next phase</p>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                Activity Timeline
+              </CardTitle>
+              <CardDescription>
+                All activities and changes related to this opportunity
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {activities.length === 0 ? (
+                <div className="text-center py-12">
+                  <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Activities</h3>
+                  <p className="text-gray-600">No activities have been recorded for this opportunity yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {activities.map((activity, index) => (
+                    <div key={activity.id} className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div className={`flex items-center justify-center w-10 h-10 rounded-full ${getActivityIconBg(activity.color)}`}>
+                          {getActivityIcon(activity.icon)}
+                        </div>
+                        {index < activities.length - 1 && (
+                          <div className="w-px h-8 bg-gray-200 mt-2"></div>
+                        )}
+                      </div>
+                      <div className="flex-1 pb-4">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h4 className="font-medium text-gray-900">{activity.title}</h4>
+                            {activity.description && (
+                              <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
+                            )}
+                          </div>
+                          <span className="text-sm text-gray-500 ml-4">
+                            {formatDate(activity.created_at)}
+                          </span>
+                        </div>
+                        <div className="mt-2 text-xs text-gray-500">
+                          by {getUserName(activity.created_by)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
