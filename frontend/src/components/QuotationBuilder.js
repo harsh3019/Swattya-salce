@@ -166,6 +166,7 @@ const QuotationBuilder = () => {
   };
 
   const addItem = (phaseIndex, groupIndex) => {
+    console.log('Adding item to phase:', phaseIndex, 'group:', groupIndex);
     const newItem = {
       id: generateId(),
       product_id: '',
