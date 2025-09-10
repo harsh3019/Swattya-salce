@@ -4816,6 +4816,76 @@ async def get_opportunity_by_id(opportunity_id: str, current_user: User = Depend
     
     return prepare_for_json(opportunity)
 
+@api_router.get("/opportunities/kpis")
+async def get_opportunities_kpis(current_user: User = Depends(get_current_user)):
+    """Get opportunity KPIs (Total, Open, Won, Lost, Pipeline Value, Weighted Revenue, Win Rate)"""
+    try:
+        # Get all active opportunities
+        opportunities = await db.opportunities.find({"is_active": True}).to_list(length=None)
+        
+        # Get all stages for probability calculation
+        stages = await db.mst_stages.find({"is_active": True}).to_list(length=None)
+        stage_probs = {stage["id"]: stage.get("probability", 0) for stage in stages}
+        
+        # Get currencies for conversion (assume default base currency)
+        currencies = await db.mst_currencies.find({"is_active": True}).to_list(length=None)
+        base_currency_rate = 1.0  # Default assumption
+        
+        total_opportunities = len(opportunities)
+        won_count = 0
+        lost_count = 0
+        open_count = 0
+        pipeline_value = 0.0
+        weighted_revenue = 0.0
+        
+        # Status categories for "Open" opportunities (exclude Won/Lost/Dropped)
+        open_statuses = ['Active', 'New', 'Nurturing', 'Proposal', 'Qualification', 
+                        'Negotiation', 'Discovery', 'Demonstration', 'Validation']
+        
+        for opp in opportunities:
+            status = opp.get('status', 'Active')
+            expected_revenue = float(opp.get('expected_revenue', 0))
+            stage_id = opp.get('stage_id', 1)
+            
+            # Count by status
+            if status == 'Won':
+                won_count += 1
+            elif status == 'Lost':
+                lost_count += 1
+            elif status in open_statuses:
+                open_count += 1
+                # Only include open opportunities in pipeline calculations
+                pipeline_value += expected_revenue
+                
+                # Calculate weighted revenue using stage probability
+                probability = stage_probs.get(stage_id, 0) / 100 if stage_probs.get(stage_id) else 0
+                weighted_revenue += expected_revenue * probability
+        
+        # Calculate win rate
+        win_rate = (won_count / total_opportunities * 100) if total_opportunities > 0 else 0
+        
+        return {
+            "total": total_opportunities,
+            "open": open_count,
+            "won": won_count,
+            "lost": lost_count,
+            "pipeline_value": round(pipeline_value, 2),
+            "weighted_revenue": round(weighted_revenue, 2),
+            "win_rate": round(win_rate, 2)
+        }
+        
+    except Exception as e:
+        print(f"Error calculating KPIs: {e}")
+        return {
+            "total": 0,
+            "open": 0,
+            "won": 0,
+            "lost": 0,
+            "pipeline_value": 0,
+            "weighted_revenue": 0,
+            "win_rate": 0
+        }
+
 @api_router.post("/opportunities/{opportunity_id}/change-stage")
 async def change_opportunity_stage(
     opportunity_id: str, 
