@@ -1025,8 +1025,33 @@ test_plan:
           comment: "🎉 SIDEBAR VISIBILITY ISSUE COMPLETELY RESOLVED: ROOT CAUSE IDENTIFIED: Backend get_sidebar_navigation function had incorrect data access pattern - was trying to get module_id directly from role_permissions records instead of from menu records. CRITICAL FIX IMPLEMENTED: ✅ Fixed data access pattern to match working permissions function - get menu first, then module from menu.module_id, ✅ Changed from 'rp[\"module_id\"]' to 'menu[\"module_id\"]' consistent with permissions API, ✅ Updated error-prone logic to match proven working pattern. VERIFICATION COMPLETED: ✅ Backend API test successful: /api/nav/sidebar now returns 3 modules (User Management, Sales, System), ✅ User Management: 8 menus (Users, Roles, Departments, Designations, Permissions, Modules, Menus, Role Permissions), ✅ Sales: 7 menus (Companies, Contacts, Channel Partners, Product Services, Sub-Tender Types, Leads, Opportunities), ✅ System: 1 menu (Activity Logs), ✅ All menus have proper structure with id, name, path, order_index fields, ✅ Backend logs show no more 'module_id' KeyError. OVERALL ASSESSMENT: The sidebar visibility issue has been completely resolved. The backend now correctly returns all modules and menus, enabling full navigation functionality in the frontend. Users can now access all sections including Leads, Opportunities, Companies, Contacts, and other modules that were previously hidden."
 
 agent_communication:
+  - task: "Quotation System Discount Implementation (Phase 2A)"
+    implemented: true
+    working: true
+    file: "frontend/src/components/QuotationBuilder.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "🎉 QUOTATION SYSTEM DISCOUNT FUNCTIONALITY FULLY IMPLEMENTED: INDIVIDUAL DISCOUNT FIELDS: ✅ Added discount_percentage field to item structure in addItem function, ✅ Updated calculation logic in updateItem to apply discounts: line_total = (qty × unit_price) - ((qty × unit_price) × discount% / 100), ✅ Added discount percentage input field for each product item with validation (0-100%), ✅ Enhanced formula display to show discount information in totals breakdown, ✅ Updated grid column count to accommodate new discount field (8 columns for recurring, 7 for one-time). OVERALL DISCOUNT FUNCTIONALITY: ✅ Added overall_discount_percentage field to quotation data structure, ✅ Added Overall Discount % input field in quotation header form, ✅ Updated calculateTotals function to apply overall discount after item-level discounts, ✅ Enhanced totals sidebar to show: Sub Total, Overall Discount (conditional display), Grand Total, ✅ Updated totals state to include sub_total and overall_discount_amount fields. CALCULATION LOGIC: ✅ Individual items: Applies item-level discount first, then overall discount applies to subtotal, ✅ Formula: Sub Total = Sum of all item totals (after individual discounts), Overall Discount Amount = Sub Total × (overall_discount_percentage / 100), Grand Total = Sub Total - Overall Discount Amount. UI ENHANCEMENTS: ✅ Professional discount input fields with proper validation and placeholders, ✅ Conditional display of overall discount in totals (only shows if > 0%), ✅ Enhanced formula display showing discount calculations, ✅ Color-coded totals sidebar with orange highlighting for discounts. OVERALL ASSESSMENT: Both individual item-level discounts and overall quotation-level discounts have been successfully implemented with proper calculation logic, professional UI, and real-time updates."
+
+  - task: "Edit Quotation Fix - Backend API"
+    implemented: true
+    working: true
+    file: "backend/server.py - get_quotation_by_id function"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "🎉 EDIT QUOTATION BACKEND API COMPLETELY FIXED: PROBLEM IDENTIFIED: Individual quotation API endpoint was returning 500 Internal Server Error due to JSON serialization issues with MongoDB ObjectId fields in complex nested quotation data structures. CRITICAL FIX IMPLEMENTED: ✅ Changed get_quotation_by_id function to use prepare_for_json() instead of parse_from_mongo(), ✅ prepare_for_json() properly handles MongoDB ObjectId removal and complex data serialization, ✅ Fixed ObjectId serialization errors: 'ObjectId object is not iterable' and 'vars() argument must have __dict__ attribute'. VERIFICATION COMPLETED: ✅ Backend API test successful: GET /api/opportunities/POT-RA6G5J6I/quotations/589835f7-b064-4055-b118-b9f0ac01045f now returns proper JSON, ✅ Quotation data structure includes: quotation_name, rate_card_id, validity_date, items, phases, totals, profitability, ✅ No more 500 Internal Server Errors for individual quotation retrieval, ✚ Backend API is ready to support Edit Quotation functionality in frontend. OVERALL ASSESSMENT: The Edit Quotation functionality was failing because the backend couldn't serve individual quotation data. This has been completely resolved, enabling the frontend QuotationBuilder to properly load existing quotation data for editing."
+
+agent_communication:
     - agent: "main"
-      message: "🎉 PHASE 1 COMPLETED: SIDEBAR VISIBILITY ISSUE FIXED - Backend API data access pattern corrected, all modules and menus now properly returned. Moving to Phase 2: Quotation System Enhancements."
+      message: "🎉 PHASE 1 & 2A COMPLETED: 1) Sidebar Visibility Issue Fixed, 2) Discount Functionality Implemented, 3) Edit Quotation Backend Fixed. Moving to Phase 2B: KPIs Implementation."
     - agent: "testing"
       message: "✅ COMPANY REGISTRATION MULTI-STEP FORM TESTING COMPLETED: Comprehensive testing shows the Company Registration form is well-implemented and functional. KEY FINDINGS: ✅ Access Control working (admin can access /company/add), ✅ Multi-step form structure excellent (Step 1 of 5 with proper labels), ✅ Progress bar functional (20% Complete), ✅ Step 1 General Info working (company name, GST/PAN fields, employee count), ✅ Professional UI with Shadcn components, ✅ Form validation structure present, ✅ Auto-save to localStorage implemented. MINOR ISSUES: Checkbox interaction has some UI overlay issues, cascading dropdowns and later steps require backend master data APIs to be fully functional. OVERALL: The multi-step company registration form is professionally built and ready for production use with proper backend API integration."
     - agent: "testing"
