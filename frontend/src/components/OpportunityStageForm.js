@@ -24,7 +24,8 @@ import {
   Calendar,
   Upload,
   Download,
-  Lock
+  Lock,
+  Plus
 } from 'lucide-react';
 import { usePermissions } from '../contexts/PermissionContext';
 import axios from 'axios';
