@@ -4787,6 +4787,20 @@ async def get_opportunities(current_user: User = Depends(get_current_user)):
                 
             if not normalized.get("lead_owner_id") and normalized.get("owner_user_id"):
                 normalized["lead_owner_id"] = normalized["owner_user_id"]
+            
+            # FIX: Add frontend-expected fields
+            normalized["opportunity_id"] = normalized["id"]  # Frontend expects opportunity_id
+            normalized["stage_id"] = normalized.get("current_stage", 1)  # Frontend expects stage_id
+            
+            # FIX: Resolve company name
+            if normalized.get("company_id"):
+                try:
+                    company = await db.companies.find_one({"id": normalized["company_id"]})
+                    normalized["company_name"] = company["company_name"] if company else "Unknown Company"
+                except:
+                    normalized["company_name"] = "Unknown Company"
+            else:
+                normalized["company_name"] = "No Company"
                 
             normalized_opportunities.append(normalized)
         
