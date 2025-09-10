@@ -177,24 +177,32 @@ const QuotationBuilder = () => {
     }));
   };
 
-  const addGroup = (phaseIndex, event) => {
+  const addGroup = useCallback((phaseIndex, event) => {
     event?.preventDefault();
     event?.stopPropagation();
     
-    const newGroup = {
-      id: generateId(),
-      group_name: `Group ${quotationData.phases[phaseIndex].groups.length + 1}`,
-      group_order: quotationData.phases[phaseIndex].groups.length + 1,
-      primary_category_id: '',
-      items: []
-    };
+    // Prevent rapid consecutive clicks
+    const now = Date.now();
+    if (window.lastGroupAddTime && (now - window.lastGroupAddTime) < 500) {
+      return;
+    }
+    window.lastGroupAddTime = now;
     
     setQuotationData(prev => {
+      const currentGroupsCount = prev.phases[phaseIndex]?.groups?.length || 0;
+      const newGroup = {
+        id: generateId(),
+        group_name: `Group ${currentGroupsCount + 1}`,
+        group_order: currentGroupsCount + 1,
+        primary_category_id: '',
+        items: []
+      };
+      
       const updatedPhases = [...prev.phases];
       updatedPhases[phaseIndex].groups.push(newGroup);
       return { ...prev, phases: updatedPhases };
     });
-  };
+  }, []);
 
   const addItem = (phaseIndex, groupIndex, event) => {
     event?.preventDefault();
