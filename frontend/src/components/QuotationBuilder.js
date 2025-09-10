@@ -834,7 +834,7 @@ const QuotationBuilder = () => {
                                       <span className="text-gray-600">Total Recurring: </span>
                                       <span className="font-medium text-green-700">{formatCurrency(item.total_recurring)}</span>
                                       <div className="text-xs text-gray-500 mt-1">
-                                        ({formatCurrency(item.recurring_sale_price)} × {item.qty} × {item.tenure_months}m)
+                                        ({formatCurrency(item.recurring_sale_price)} × {item.qty} × {item.tenure_months}m{item.discount_percentage > 0 ? ` - ${item.discount_percentage}%` : ''})
                                       </div>
                                     </div>
                                   )}
