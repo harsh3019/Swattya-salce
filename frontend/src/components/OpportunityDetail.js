@@ -37,6 +37,8 @@ const OpportunityDetail = () => {
   const [loadingQuotations, setLoadingQuotations] = useState(true);
   const [documents, setDocuments] = useState([]);
   const [loadingDocuments, setLoadingDocuments] = useState(true);
+  const [activities, setActivities] = useState([]);
+  const [loadingActivities, setLoadingActivities] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stageDialogOpen, setStageDialogOpen] = useState(false);
