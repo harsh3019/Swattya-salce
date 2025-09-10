@@ -587,30 +587,42 @@ const QuotationBuilder = () => {
                                     />
                                   </div>
                                   <div>
+                                    <Label className="text-xs">Unit</Label>
+                                    <Input
+                                      className="h-8 bg-gray-50"
+                                      value={item.unit}
+                                      disabled
+                                      placeholder="Auto-filled from product"
+                                    />
+                                  </div>
+                                  <div>
                                     <Label className="text-xs">Recurring Price</Label>
                                     <Input
                                       type="number"
-                                      className="h-8"
+                                      className="h-8 bg-gray-50"
                                       value={item.recurring_sale_price}
-                                      onChange={(e) => updateItem(phaseIndex, groupIndex, itemIndex, 'recurring_sale_price', e.target.value)}
+                                      disabled
+                                      placeholder="Auto-filled from rate card"
                                     />
                                   </div>
                                   <div>
                                     <Label className="text-xs">One-time Price</Label>
                                     <Input
                                       type="number"
-                                      className="h-8"
+                                      className="h-8 bg-gray-50"
                                       value={item.one_time_sale_price}
-                                      onChange={(e) => updateItem(phaseIndex, groupIndex, itemIndex, 'one_time_sale_price', e.target.value)}
+                                      disabled
+                                      placeholder="Auto-filled from rate card"
                                     />
                                   </div>
                                   <div>
                                     <Label className="text-xs">Cost</Label>
                                     <Input
                                       type="number"
-                                      className="h-8"
+                                      className="h-8 bg-gray-50"
                                       value={item.purchase_cost_snapshot}
-                                      onChange={(e) => updateItem(phaseIndex, groupIndex, itemIndex, 'purchase_cost_snapshot', e.target.value)}
+                                      disabled
+                                      placeholder="Auto-filled from rate card"
                                     />
                                   </div>
                                   <div className="flex items-end">
