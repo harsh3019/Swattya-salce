@@ -56,6 +56,7 @@ const OpportunityDetail = () => {
       fetchOpportunity();
       fetchQuotations();
       fetchDocuments();
+      fetchActivities();
       fetchMasterData();
     }
   }, [id]);
