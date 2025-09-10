@@ -68,6 +68,7 @@ const OpportunityDetail = () => {
         fetchOpportunity();
         fetchQuotations();
         fetchDocuments();
+        fetchActivities();
       }
     };
 
@@ -78,6 +79,7 @@ const OpportunityDetail = () => {
         fetchOpportunity();
         fetchQuotations();
         fetchDocuments();
+        fetchActivities();
       }
     });
 
