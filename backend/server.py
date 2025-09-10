@@ -5095,7 +5095,7 @@ async def get_quotation_by_id(opportunity_id: str, quotation_id: str, current_us
     if not quotation:
         raise HTTPException(status_code=404, detail="Quotation not found")
     
-    return parse_from_mongo(quotation)
+    return prepare_for_json(quotation)
 
 @api_router.put("/opportunities/{opportunity_id}/quotations/{quotation_id}")
 async def update_quotation(opportunity_id: str, quotation_id: str, quotation: QuotationCreate, current_user: User = Depends(get_current_user)):
