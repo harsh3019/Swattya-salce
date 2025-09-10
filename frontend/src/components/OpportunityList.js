@@ -394,7 +394,7 @@ const OpportunityList = () => {
             <Award className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{calculateWinRate()}%</div>
+            <div className="text-2xl font-bold text-gray-900">{kpis.win_rate}%</div>
             <p className="text-xs text-gray-500 mt-1">Success rate</p>
           </CardContent>
         </Card>
