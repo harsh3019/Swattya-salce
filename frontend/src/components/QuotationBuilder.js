@@ -277,17 +277,21 @@ const QuotationBuilder = () => {
         item[field] = value;
       }
       
-      // Recalculate item totals based on pricing type
+      // Recalculate item totals using correct formulas
       const qty = parseFloat(item.qty) || 0;
       const tenure = parseFloat(item.tenure_months) || 1;
       
       if (item.pricing_type === 'recurring') {
+        // Formula: (Recurring price x qty) x tenure
         item.total_recurring = (parseFloat(item.recurring_sale_price) || 0) * qty * tenure;
         item.total_one_time = 0;
+        // Purchase cost also multiplied by tenure for recurring
         item.total_cost = (parseFloat(item.purchase_cost_snapshot) || 0) * qty * tenure;
       } else if (item.pricing_type === 'one-time') {
         item.total_recurring = 0;
+        // Formula: one-time cost x qty (tenure not applicable)
         item.total_one_time = (parseFloat(item.one_time_sale_price) || 0) * qty;
+        // Purchase cost not multiplied by tenure for one-time
         item.total_cost = (parseFloat(item.purchase_cost_snapshot) || 0) * qty;
       } else {
         item.total_recurring = 0;
