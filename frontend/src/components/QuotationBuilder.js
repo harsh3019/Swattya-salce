@@ -150,6 +150,7 @@ const QuotationBuilder = () => {
   };
 
   const addGroup = (phaseIndex) => {
+    console.log('Adding group to phase:', phaseIndex);
     const newGroup = {
       id: generateId(),
       group_name: `Group ${quotationData.phases[phaseIndex].groups.length + 1}`,
