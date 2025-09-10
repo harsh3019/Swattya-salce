@@ -400,13 +400,29 @@ const OpportunityStageForm = () => {
 
   const renderStageForm = () => {
     if (isStageNumberLocked(currentStage)) {
+      const isReadOnlyStage = currentStage <= 3 && (opportunity?.current_stage || 1) > 3;
+      const isCompletedStage = currentStage < (opportunity?.current_stage || 1);
+      
       return (
-        <Card className="border-yellow-200 bg-yellow-50">
+        <Card className={isReadOnlyStage ? "border-blue-200 bg-blue-50" : "border-yellow-200 bg-yellow-50"}>
           <CardContent className="flex items-center justify-center p-12">
             <div className="text-center">
-              <Lock className="w-12 h-12 text-yellow-600 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-yellow-900 mb-2">Stage Locked</h3>
-              <p className="text-yellow-700">This stage is locked and cannot be modified.</p>
+              {isReadOnlyStage ? (
+                <>
+                  <CheckCircle className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-blue-900 mb-2">Stage Completed</h3>
+                  <p className="text-blue-700">
+                    This stage has been completed and is now read-only. 
+                    {isCompletedStage ? " You can view the submitted data below." : ""}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Lock className="w-12 h-12 text-yellow-600 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-yellow-900 mb-2">Stage Locked</h3>
+                  <p className="text-yellow-700">This stage is locked and cannot be modified.</p>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
