@@ -673,7 +673,11 @@ const OpportunityDetail = () => {
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No quotations yet</h3>
                 {currentStage.code === 'L4' ? (
                   <>
-                    <p className="text-gray-600 mb-4">Create your first quotation to start the proposal process</p>
+                    <p className="text-gray-600 mb-2">Create your first quotation to start the proposal process</p>
+                    <p className="text-sm text-gray-500 mb-4">
+                      Build comprehensive quotations with phases, groups, and items. 
+                      Track costs, calculate profitability, and manage multiple proposal options.
+                    </p>
                     {permissions.some(p => p.permission === 'Add' && p.menu === 'Opportunities') && (
                       <Button 
                         className="bg-blue-600 hover:bg-blue-700"
@@ -685,9 +689,14 @@ const OpportunityDetail = () => {
                     )}
                   </>
                 ) : (
-                  <p className="text-gray-600">
-                    Move opportunity to <strong>L4 - Proposal</strong> stage to create quotations
-                  </p>
+                  <>
+                    <p className="text-gray-600 mb-2">
+                      Move opportunity to <strong>L4 - Proposal</strong> stage to create quotations
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Complete L1-L3 stages to unlock quotation creation functionality
+                    </p>
+                  </>
                 )}
               </CardContent>
             </Card>
