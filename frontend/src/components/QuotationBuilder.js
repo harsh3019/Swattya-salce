@@ -204,30 +204,38 @@ const QuotationBuilder = () => {
     });
   }, []);
 
-  const addItem = (phaseIndex, groupIndex, event) => {
+  const addItem = useCallback((phaseIndex, groupIndex, event) => {
     event?.preventDefault();
     event?.stopPropagation();
     
-    const newItem = {
-      id: generateId(),
-      product_id: '',
-      qty: 1,
-      unit: 'License',
-      recurring_sale_price: 0,
-      one_time_sale_price: 0,
-      purchase_cost_snapshot: 0,
-      tenure_months: 12,
-      total_recurring: 0,
-      total_one_time: 0,
-      total_cost: 0
-    };
+    // Prevent rapid consecutive clicks
+    const now = Date.now();
+    if (window.lastItemAddTime && (now - window.lastItemAddTime) < 500) {
+      return;
+    }
+    window.lastItemAddTime = now;
 
     setQuotationData(prev => {
+      const currentItemsCount = prev.phases[phaseIndex]?.groups[groupIndex]?.items?.length || 0;
+      const newItem = {
+        id: generateId(),
+        product_id: '',
+        qty: 1,
+        unit: 'License',
+        recurring_sale_price: 0,
+        one_time_sale_price: 0,
+        purchase_cost_snapshot: 0,
+        tenure_months: 12,
+        total_recurring: 0,
+        total_one_time: 0,
+        total_cost: 0
+      };
+
       const updatedPhases = [...prev.phases];
       updatedPhases[phaseIndex].groups[groupIndex].items.push(newItem);
       return { ...prev, phases: updatedPhases };
     });
-  };
+  }, []);
 
   const getProductPricing = (productId) => {
     const salesPrice = salesPrices.find(sp => sp.product_id === productId);
