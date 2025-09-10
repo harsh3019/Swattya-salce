@@ -709,6 +709,20 @@ const QuotationBuilder = () => {
                                       placeholder="Auto-filled from product"
                                     />
                                   </div>
+                                  {/* Show tenure field only for recurring products */}
+                                  {item.pricing_type === 'recurring' && (
+                                    <div>
+                                      <Label className="text-xs">Tenure (Months)</Label>
+                                      <Input
+                                        type="number"
+                                        className="h-8"
+                                        value={item.tenure_months}
+                                        onChange={(e) => updateItem(phaseIndex, groupIndex, itemIndex, 'tenure_months', e.target.value)}
+                                        placeholder="12"
+                                        min="1"
+                                      />
+                                    </div>
+                                  )}
                                   {/* Show only the applicable price type */}
                                   {item.pricing_type === 'recurring' && (
                                     <div>
