@@ -121,6 +121,7 @@ const OpportunityStageForm = () => {
     if (id) {
       fetchOpportunity();
       fetchMasterData();
+      fetchL5Documents(); // Load L5 PO documents
     }
   }, [id]);
 
