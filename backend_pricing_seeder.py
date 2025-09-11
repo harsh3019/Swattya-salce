@@ -24,7 +24,7 @@ async def seed_sales_prices_and_purchase_costs():
     
     # Connect to MongoDB
     client = AsyncIOMotorClient(MONGO_URL)
-    db = client.sawayatta_erp
+    db = client[DB_NAME]
     
     try:
         # Get existing data
