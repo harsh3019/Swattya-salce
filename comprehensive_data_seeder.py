@@ -430,7 +430,7 @@ class ComprehensiveDataSeeder:
         lead_templates = [
             {
                 "tender_type": "Tender",
-                "billing_type": "Fixed Price",
+                "billing_type": "postpaid",
                 "project_title": "Enterprise CRM System Implementation",
                 "state": "Maharashtra",
                 "lead_subtype": "New Business",
@@ -441,7 +441,7 @@ class ComprehensiveDataSeeder:
             },
             {
                 "tender_type": "Pre-Tender", 
-                "billing_type": "Time & Material",
+                "billing_type": "prepaid",
                 "project_title": "Digital Transformation & ERP Deployment",
                 "state": "Karnataka",
                 "lead_subtype": "Expansion",
@@ -452,7 +452,7 @@ class ComprehensiveDataSeeder:
             },
             {
                 "tender_type": "Tender",
-                "billing_type": "Milestone Based",
+                "billing_type": "postpaid",
                 "project_title": "Mobile Application Development Suite",
                 "state": "Maharashtra", 
                 "lead_subtype": "New Business",
@@ -463,7 +463,7 @@ class ComprehensiveDataSeeder:
             },
             {
                 "tender_type": "Pre-Tender",
-                "billing_type": "Fixed Price",
+                "billing_type": "prepaid",
                 "project_title": "Cloud Migration and Infrastructure Setup",
                 "state": "International",
                 "lead_subtype": "Upgrade",
@@ -474,7 +474,7 @@ class ComprehensiveDataSeeder:
             },
             {
                 "tender_type": "Tender",
-                "billing_type": "Retainer",
+                "billing_type": "postpaid",
                 "project_title": "Startup Technology Consultation Package",
                 "state": "Telangana",
                 "lead_subtype": "New Business",
