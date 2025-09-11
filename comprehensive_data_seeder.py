@@ -330,6 +330,7 @@ class ComprehensiveDataSeeder:
                 "first_name": "Rajesh",
                 "last_name": "Kumar",
                 "email": "rajesh.kumar@techcorp.com",
+                "primary_phone": "+91-9876543210",
                 "mobile": "+91-9876543210",
                 "designation_id": designation_id,
                 "is_spoc": True,
