@@ -124,6 +124,47 @@ const QuotationBuilder = () => {
       setCurrencies(currenciesRes.data || []);
       setPrimaryCategories(primaryCategoriesRes.data || []);
 
+  // Convert backend quotation structure to frontend structure
+  const convertBackendQuotationToFrontend = (backendQuotation) => {
+    // Create a default phase and group structure and populate with items
+    const frontendQuotation = {
+      quotation_name: backendQuotation.quotation_name,
+      rate_card_id: backendQuotation.rate_card_id,
+      validity_date: backendQuotation.validity_date ? backendQuotation.validity_date.split('T')[0] : '',
+      overall_discount_percentage: 0,
+      phases: []
+    };
+
+    if (backendQuotation.items && backendQuotation.items.length > 0) {
+      // Create a single phase with a single group containing all items
+      const phase = {
+        id: generateId(),
+        phase_name: 'Phase 1 - Implementation',
+        phase_order: 1,
+        start_date: '',
+        tenure_months: 12,
+        groups: [{
+          id: generateId(),
+          group_name: 'Products & Services',
+          group_order: 1,
+          primary_category_id: primaryCategories[0]?.id || '',
+          items: backendQuotation.items.map(item => ({
+            ...item,
+            id: item.id || generateId(),
+            discount_percentage: 0 // Default discount
+          }))
+        }]
+      };
+      frontendQuotation.phases = [phase];
+    } else {
+      // Initialize with default empty structure
+      initializeDefaultStructure();
+      return;
+    }
+
+    return frontendQuotation;
+  };
+
       // If editing existing quotation, fetch quotation data
       if (quotationId && quotationId !== 'create') {
         const quotationRes = await axios.get(`${baseURL}/api/opportunities/${opportunityId}/quotations/${quotationId}`, {
