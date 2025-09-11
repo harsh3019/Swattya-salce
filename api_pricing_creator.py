@@ -162,6 +162,7 @@ class PricingDataCreator:
                             {"id": product['id']},
                             {"$set": {
                                 "primary_category_id": sw_category['id'],
+                                "category_id": sw_category['id'],  # Also set category_id for compatibility
                                 "unit": "License",
                                 "updated_at": datetime.utcnow()
                             }}
