@@ -170,7 +170,10 @@ const QuotationBuilder = () => {
         const quotationRes = await axios.get(`${baseURL}/api/opportunities/${opportunityId}/quotations/${quotationId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setQuotationData(quotationRes.data);
+        
+        // Convert backend structure to frontend structure
+        const frontendQuotation = convertBackendQuotationToFrontend(quotationRes.data);
+        setQuotationData(frontendQuotation);
         
         // Fetch sales prices for the existing rate card
         if (quotationRes.data.rate_card_id) {
