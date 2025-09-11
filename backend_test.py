@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 
 # Configuration
-BASE_URL = "https://erp-quotation.preview.emergentagent.com/api"
+BASE_URL = "https://crm-dashboard-45.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {
     "username": "admin", 
     "password": "admin123"
