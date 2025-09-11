@@ -5183,7 +5183,7 @@ async def update_quotation(opportunity_id: str, quotation_id: str, quotation: Qu
     )
     
     updated_quotation = await db.quotations.find_one({"id": quotation_id})
-    return parse_from_mongo(updated_quotation)
+    return prepare_for_json(updated_quotation)
 
 @api_router.patch("/opportunities/{opportunity_id}/stage")
 async def update_opportunity_stage(opportunity_id: str, stage_data: dict, current_user: User = Depends(get_current_user)):
