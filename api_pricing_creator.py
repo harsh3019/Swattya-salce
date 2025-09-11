@@ -138,15 +138,15 @@ class PricingDataCreator:
                     print(f"   ✅ Prepared purchase cost for {product['name']}: ₹{cost} ({cost_type})")
             
             # Clear existing data and insert new
-            await db.sales_prices.delete_many({})
-            await db.purchase_costs.delete_many({})
+            await db.mst_sales_prices.delete_many({})
+            await db.mst_purchase_costs.delete_many({})
             
             if sales_prices_data:
-                await db.sales_prices.insert_many(sales_prices_data)
+                await db.mst_sales_prices.insert_many(sales_prices_data)
                 print(f"\n✅ Inserted {len(sales_prices_data)} sales prices")
             
             if purchase_costs_data:
-                await db.purchase_costs.insert_many(purchase_costs_data)
+                await db.mst_purchase_costs.insert_many(purchase_costs_data)
                 print(f"✅ Inserted {len(purchase_costs_data)} purchase costs")
             
             # Update products with primary category
