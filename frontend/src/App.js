@@ -20,6 +20,7 @@ import { ContactList } from './components/ContactList';
 import LeadForm from './components/LeadForm';
 import LeadList from './components/LeadList';
 import OpportunityList from './components/OpportunityList';
+import OpportunityForm from './components/OpportunityForm';
 import OpportunityDetail from './components/OpportunityDetail';
 import OpportunityStageForm from './components/OpportunityStageForm';
 import QuotationBuilder from './components/QuotationBuilder';
