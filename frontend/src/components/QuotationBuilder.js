@@ -716,7 +716,7 @@ const QuotationBuilder = () => {
                               <SelectContent>
                                 {primaryCategories.map((category) => (
                                   <SelectItem key={category.id} value={category.id}>
-                                    {category.name}
+                                    {category.category_name}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
