@@ -283,7 +283,7 @@ const OpportunityForm = () => {
                       <SelectContent>
                         {companies.map((company) => (
                           <SelectItem key={company.id} value={company.id}>
-                            {company.company_name}
+                            {company.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
