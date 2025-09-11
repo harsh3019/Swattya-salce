@@ -25,7 +25,8 @@ import {
   Upload,
   Download,
   Lock,
-  Plus
+  Plus,
+  Trash2
 } from 'lucide-react';
 import { usePermissions } from '../contexts/PermissionContext';
 import axios from 'axios';
