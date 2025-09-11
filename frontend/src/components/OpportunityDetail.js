@@ -326,6 +326,26 @@ const OpportunityDetail = () => {
     navigate(`/opportunities/edit/${id}`);
   };
 
+  const handleDelete = async () => {
+    if (!confirm(`Are you sure you want to delete opportunity "${opportunity.project_title}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${baseURL}/api/opportunities/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      alert('Opportunity deleted successfully!');
+      navigate('/opportunities');
+    } catch (error) {
+      console.error('Error deleting opportunity:', error);
+      const errorMessage = error.response?.data?.detail || 'Failed to delete opportunity. Please try again.';
+      alert(errorMessage);
+    }
+  };
+
   const handleSelectQuotation = async (quotationId) => {
     try {
       const token = localStorage.getItem('token');
