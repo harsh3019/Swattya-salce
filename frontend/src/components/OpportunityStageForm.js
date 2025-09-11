@@ -247,6 +247,104 @@ const OpportunityStageForm = () => {
     }
   };
 
+  // Handle L5 document upload
+  const handleL5FileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // File size validation (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size must be less than 10MB');
+      return;
+    }
+
+    // File type validation
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/png', 'image/jpeg', 'text/plain'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Please upload PDF, DOC, DOCX, PNG, JPG, or TXT files only');
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('document_type', 'po_document');
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${baseURL}/api/opportunities/${id}/upload-document`,
+        formData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+
+      if (response.data) {
+        setL5UploadedDocuments(prev => [...prev, response.data]);
+        alert('PO document uploaded successfully!');
+      }
+    } catch (error) {
+      console.error('Error uploading L5 document:', error);
+      alert('Failed to upload document. Please try again.');
+    } finally {
+      setUploading(false);
+      // Clear the input
+      event.target.value = '';
+    }
+  };
+
+  // Delete L5 document
+  const deleteL5Document = async (documentId) => {
+    if (!confirm('Are you sure you want to delete this PO document?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(
+        `${baseURL}/api/opportunities/${id}/documents/${documentId}`,
+        {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      );
+
+      setL5UploadedDocuments(prev => prev.filter(doc => doc.id !== documentId));
+      alert('PO document deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting L5 document:', error);
+      alert('Failed to delete document. Please try again.');
+    }
+  };
+
+  // Download document
+  const downloadDocument = async (document) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `${baseURL}/api/opportunities/${id}/documents/${document.id}/download`,
+        {
+          headers: { 'Authorization': `Bearer ${token}` },
+          responseType: 'blob'
+        }
+      );
+
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', document.original_filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      alert('Failed to download document. Please try again.');
+    }
+  };
+
   const validateCurrentStage = () => {
     const errors = [];
     
