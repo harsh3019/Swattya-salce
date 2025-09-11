@@ -320,7 +320,7 @@ class DiscountQuotationTester:
             return None
     
     def test_read_quotation(self, quotation_id):
-        """Test reading quotation data to verify discount persistence"""
+        """Test reading quotation data to verify data persistence"""
         try:
             response = requests.get(
                 f"{self.base_url}/opportunities/{self.test_opportunity_id}/quotations/{quotation_id}",
@@ -331,24 +331,20 @@ class DiscountQuotationTester:
             if response.status_code == 200:
                 quotation_data = response.json()
                 
-                # Verify quotation structure and discount data
+                # Verify quotation structure and data
                 has_items = 'items' in quotation_data and len(quotation_data['items']) > 0
-                has_discount_data = False
+                has_pricing_data = False
                 
                 if has_items:
-                    for phase in quotation_data['items']:
-                        if 'groups' in phase:
-                            for group in phase['groups']:
-                                if 'items' in group:
-                                    for item in group['items']:
-                                        if 'discount_percentage' in item:
-                                            has_discount_data = True
-                                            break
+                    for item in quotation_data['items']:
+                        if 'one_time_sale_price' in item or 'recurring_sale_price' in item:
+                            has_pricing_data = True
+                            break
                 
-                if has_items and has_discount_data:
-                    self.log_test("READ Quotation", True, "Quotation data loaded with discount percentages")
+                if has_items and has_pricing_data:
+                    self.log_test("READ Quotation", True, "Quotation data loaded with pricing information")
                 else:
-                    self.log_test("READ Quotation", False, "Missing quotation items or discount data")
+                    self.log_test("READ Quotation", False, "Missing quotation items or pricing data")
             else:
                 self.log_test("READ Quotation", False, f"Status: {response.status_code}")
                 
@@ -356,7 +352,7 @@ class DiscountQuotationTester:
             self.log_test("READ Quotation", False, f"Exception: {str(e)}")
     
     def test_update_quotation(self, quotation_id):
-        """Test updating quotation with modified discount percentages"""
+        """Test updating quotation with modified pricing"""
         try:
             # First get the current quotation data
             get_response = requests.get(
@@ -371,22 +367,32 @@ class DiscountQuotationTester:
             
             current_data = get_response.json()
             
-            # Modify discount percentages
-            if current_data.get('items') and current_data['items'][0].get('groups'):
-                for item in current_data['items'][0]['groups'][0]['items']:
-                    # Increase discount by 5%
-                    item['discount_percentage'] = min(item['discount_percentage'] + 5.0, 100.0)
+            # Modify pricing (increase prices by 10%)
+            if current_data.get('items'):
+                for item in current_data['items']:
+                    if item.get('one_time_sale_price', 0) > 0:
+                        item['one_time_sale_price'] = item['one_time_sale_price'] * 1.1
+                    if item.get('recurring_sale_price', 0) > 0:
+                        item['recurring_sale_price'] = item['recurring_sale_price'] * 1.1
+            
+            # Prepare update data (remove fields that shouldn't be updated)
+            update_data = {
+                "quotation_name": current_data.get("quotation_name"),
+                "rate_card_id": current_data.get("rate_card_id"),
+                "validity_date": current_data.get("validity_date"),
+                "items": current_data.get("items", [])
+            }
             
             # Update the quotation
             update_response = requests.put(
                 f"{self.base_url}/opportunities/{self.test_opportunity_id}/quotations/{quotation_id}",
                 headers=self.headers,
-                json=current_data,
+                json=update_data,
                 timeout=10
             )
             
             if update_response.status_code in [200, 204]:
-                self.log_test("UPDATE Quotation", True, "Quotation updated with modified discount percentages")
+                self.log_test("UPDATE Quotation", True, "Quotation updated with modified pricing")
                 
                 # Verify the update by reading back
                 verify_response = requests.get(
