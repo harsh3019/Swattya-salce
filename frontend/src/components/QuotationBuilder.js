@@ -402,9 +402,35 @@ const QuotationBuilder = () => {
       setSaving(true);
       const token = localStorage.getItem('token');
 
+      // Flatten the phases/groups/items structure into a simple items array for backend
+      const flattenedItems = [];
+      quotationData.phases.forEach((phase, phaseIndex) => {
+        phase.groups.forEach((group, groupIndex) => {
+          group.items.forEach((item, itemIndex) => {
+            // Convert frontend item structure to backend QuotationItem structure
+            const backendItem = {
+              product_id: item.product_id,
+              qty: parseInt(item.qty) || 1,
+              unit: item.unit || 'License',
+              recurring_sale_price: parseFloat(item.recurring_sale_price) || 0,
+              one_time_sale_price: parseFloat(item.one_time_sale_price) || 0,
+              purchase_cost_snapshot: parseFloat(item.purchase_cost_snapshot) || 0,
+              tenure_months: parseInt(item.tenure_months) || 12,
+              total_recurring: parseFloat(item.total_recurring) || 0,
+              total_one_time: parseFloat(item.total_one_time) || 0,
+              total_cost: parseFloat(item.total_cost) || 0
+            };
+            flattenedItems.push(backendItem);
+          });
+        });
+      });
+
+      // Prepare quotation payload for backend
       const quotationPayload = {
-        ...quotationData,
-        ...totals
+        quotation_name: quotationData.quotation_name,
+        rate_card_id: quotationData.rate_card_id,
+        validity_date: quotationData.validity_date,
+        items: flattenedItems
       };
 
       let response;
@@ -424,7 +450,8 @@ const QuotationBuilder = () => {
       navigate(`/opportunities/${opportunityId}`);
     } catch (error) {
       console.error('Error saving quotation:', error);
-      alert('Error saving quotation. Please try again.');
+      const errorMessage = error.response?.data?.detail || 'Error saving quotation. Please try again.';
+      alert(errorMessage);
     } finally {
       setSaving(false);
     }
