@@ -272,35 +272,29 @@ class DiscountQuotationTester:
                 self.log_test("CREATE Quotation", False, "No products available")
                 return None
             
-            # Create quotation with discount items
+            # Create quotation with simple items structure (matching the backend model)
             quotation_data = {
                 "quotation_name": "Discount Testing Quotation",
                 "rate_card_id": "test-rate-card-001",
                 "validity_date": "2025-06-30T00:00:00Z",
                 "items": [
                     {
-                        "phase_name": "Phase 1 - Implementation",
-                        "groups": [
-                            {
-                                "group_name": "Software Licenses",
-                                "items": [
-                                    {
-                                        "product_id": products[0]['id'],
-                                        "quantity": 10,
-                                        "unit_price": 5000,
-                                        "discount_percentage": 15.0,
-                                        "pricing_type": "one_time"
-                                    },
-                                    {
-                                        "product_id": products[1]['id'] if len(products) > 1 else products[0]['id'],
-                                        "quantity": 5,
-                                        "unit_price": 8000,
-                                        "discount_percentage": 10.0,
-                                        "pricing_type": "recurring"
-                                    }
-                                ]
-                            }
-                        ]
+                        "product_id": products[0]['id'],
+                        "qty": 10,
+                        "unit": "License",
+                        "recurring_sale_price": 0,
+                        "one_time_sale_price": 5000,
+                        "purchase_cost_snapshot": 3000,
+                        "tenure_months": 1
+                    },
+                    {
+                        "product_id": products[1]['id'] if len(products) > 1 else products[0]['id'],
+                        "qty": 5,
+                        "unit": "License",
+                        "recurring_sale_price": 8000,
+                        "one_time_sale_price": 0,
+                        "purchase_cost_snapshot": 5000,
+                        "tenure_months": 12
                     }
                 ]
             }
