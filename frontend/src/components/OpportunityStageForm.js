@@ -61,6 +61,7 @@ const OpportunityStageForm = () => {
   
   // File upload state
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
+  const [l5UploadedDocuments, setL5UploadedDocuments] = useState([]);
   const [uploading, setUploading] = useState(false);
 
   // Form data for each stage
