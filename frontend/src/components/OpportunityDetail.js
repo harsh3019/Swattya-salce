@@ -415,6 +415,16 @@ const OpportunityDetail = () => {
               Edit Details
             </Button>
           )}
+          {permissions.some(p => p.permission === 'Delete' && p.menu === 'Opportunities') && (
+            <Button 
+              onClick={handleDelete} 
+              variant="outline"
+              className="bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </Button>
+          )}
         </div>
       </div>
 
