@@ -248,6 +248,13 @@ const OpportunityStageForm = () => {
     }
   };
 
+  // Generate PO number automatically
+  const generatePONumber = () => {
+    const timestamp = Date.now().toString().slice(-5); // Last 5 digits of timestamp
+    const poNumber = `PO-${timestamp}`;
+    handleInputChange('po_number', poNumber);
+  };
+
   // Handle L5 document upload
   const handleL5FileUpload = async (event) => {
     const file = event.target.files[0];
