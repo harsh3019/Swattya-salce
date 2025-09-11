@@ -165,7 +165,7 @@ const OpportunityForm = () => {
 
   const getCompanyName = (companyId) => {
     const company = companies.find(c => c.id === companyId);
-    return company ? company.company_name : 'Unknown Company';
+    return company ? company.name : 'Unknown Company';
   };
 
   const getStageName = (stageId) => {
