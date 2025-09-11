@@ -173,6 +173,19 @@ const OpportunityStageForm = () => {
     }
   };
 
+  const fetchL5Documents = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${baseURL}/api/opportunities/${id}/documents?document_type=po_document`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setL5UploadedDocuments(response.data || []);
+    } catch (error) {
+      console.error('Error fetching L5 documents:', error);
+      // Don't show error to user as this is not critical
+    }
+  };
+
   const handleInputChange = (field, value) => {
     setStageData(prev => ({
       ...prev,
