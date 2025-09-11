@@ -15,7 +15,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # MongoDB connection
-MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017/sawayatta_erp")
+MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+DB_NAME = os.environ.get("DB_NAME", "sawayatta_erp")
 
 async def seed_sales_prices_and_purchase_costs():
     """Seed sales prices and purchase costs directly into database"""
