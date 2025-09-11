@@ -131,7 +131,7 @@ class StageLockingTester:
             
             if response.status_code == 200:
                 data = response.json()
-                self.opportunities = data if isinstance(data, list) else data.get('data', [])
+                self.opportunities = data if isinstance(data, list) else data.get('opportunities', data.get('data', []))
                 count = len(self.opportunities)
                 
                 # Test for expected 6 opportunities
