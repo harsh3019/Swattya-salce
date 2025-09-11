@@ -959,12 +959,25 @@ const OpportunityStageForm = () => {
 
           <div>
             <Label htmlFor="po_number">PO Number *</Label>
-            <Input
-              id="po_number"
-              value={stageData.po_number}
-              onChange={(e) => handleInputChange('po_number', e.target.value)}
-              placeholder="Purchase Order number"
-            />
+            <div className="flex space-x-2">
+              <Input
+                id="po_number"
+                value={stageData.po_number}
+                onChange={(e) => handleInputChange('po_number', e.target.value)}
+                placeholder="Purchase Order number"
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={generatePONumber}
+                className="px-3"
+                title="Auto-generate PO number"
+              >
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Format: PO-XXXXX</p>
           </div>
 
           <div>
