@@ -158,7 +158,7 @@ class PricingDataCreator:
                     
                     # Update all products to have primary category
                     for product in products:
-                        await db.products.update_one(
+                        await db.mst_products.update_one(
                             {"id": product['id']},
                             {"$set": {
                                 "primary_category_id": sw_category['id'],
