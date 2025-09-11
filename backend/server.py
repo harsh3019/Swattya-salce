@@ -4886,6 +4886,105 @@ async def get_opportunity_by_id(opportunity_id: str, current_user: User = Depend
     
     return prepare_for_json(opportunity)
 
+@api_router.put("/opportunities/{opportunity_id}")
+async def update_opportunity(opportunity_id: str, opportunity_data: OpportunityUpdate, current_user: User = Depends(get_current_user)):
+    """Update an existing opportunity"""
+    # Check if opportunity exists
+    existing_opportunity = await db.opportunities.find_one({"id": opportunity_id})
+    if not existing_opportunity:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    
+    # Prepare update data (only include non-None fields)
+    update_data = {}
+    for field, value in opportunity_data.dict(exclude_unset=True).items():
+        if value is not None:
+            update_data[field] = value
+    
+    # Add update timestamp
+    update_data["updated_at"] = datetime.now(timezone.utc)
+    update_data["updated_by"] = current_user.id
+    
+    # Recalculate weighted revenue if revenue or probability changed
+    if "expected_revenue" in update_data or "win_probability" in update_data:
+        current_revenue = update_data.get("expected_revenue", existing_opportunity.get("expected_revenue", 0))
+        current_probability = update_data.get("win_probability", existing_opportunity.get("win_probability", 0))
+        update_data["weighted_revenue"] = (current_revenue * current_probability) / 100
+    
+    # Convert for MongoDB storage
+    update_data = prepare_for_mongo(update_data)
+    
+    # Update in database
+    await db.opportunities.update_one(
+        {"id": opportunity_id},
+        {"$set": update_data}
+    )
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="UPDATE",
+        resource_type="Opportunity",
+        resource_id=opportunity_id,
+        details=f"Updated opportunity: {existing_opportunity.get('project_title', 'Unknown')}"
+    )
+    
+    # Return updated opportunity
+    updated_opportunity = await db.opportunities.find_one({"id": opportunity_id})
+    return prepare_for_json(updated_opportunity)
+
+@api_router.delete("/opportunities/{opportunity_id}")
+async def delete_opportunity(opportunity_id: str, current_user: User = Depends(get_current_user)):
+    """Delete an opportunity (soft delete by setting is_active=False)"""
+    # Check if opportunity exists
+    existing_opportunity = await db.opportunities.find_one({"id": opportunity_id})
+    if not existing_opportunity:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+    
+    # Check if opportunity has quotations or is in advanced stages
+    quotations = await db.quotations.find({"opportunity_id": opportunity_id, "is_active": True}).to_list(None)
+    if quotations:
+        # Check if any quotation is selected
+        selected_quotations = [q for q in quotations if q.get("is_selected")]
+        if selected_quotations:
+            raise HTTPException(
+                status_code=400, 
+                detail="Cannot delete opportunity with selected quotations. Please unselect quotations first."
+            )
+    
+    # Soft delete the opportunity
+    update_data = {
+        "is_active": False,
+        "deleted_at": datetime.now(timezone.utc),
+        "deleted_by": current_user.id,
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    await db.opportunities.update_one(
+        {"id": opportunity_id},
+        {"$set": update_data}
+    )
+    
+    # Also soft delete related quotations
+    await db.quotations.update_many(
+        {"opportunity_id": opportunity_id, "is_active": True},
+        {"$set": {
+            "is_active": False,
+            "deleted_at": datetime.now(timezone.utc),
+            "deleted_by": current_user.id
+        }}
+    )
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="DELETE",
+        resource_type="Opportunity",
+        resource_id=opportunity_id,
+        details=f"Deleted opportunity: {existing_opportunity.get('project_title', 'Unknown')}"
+    )
+    
+    return {"message": "Opportunity deleted successfully"}
+
 @api_router.post("/opportunities/{opportunity_id}/change-stage")
 async def change_opportunity_stage(
     opportunity_id: str, 
