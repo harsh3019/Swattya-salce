@@ -873,12 +873,68 @@ const OpportunityStageForm = () => {
 
         <div>
           <Label htmlFor="po_file">PO File (Optional)</Label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-            <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-            <p className="text-gray-600 text-sm">Upload Purchase Order document</p>
-            <Button variant="outline" size="sm" className="mt-2">
-              Choose File
-            </Button>
+          <div className="space-y-3">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
+              <input
+                type="file"
+                id="po_file_input"
+                className="hidden"
+                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt"
+                onChange={handleL5FileUpload}
+              />
+              <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+              <p className="text-gray-600 text-sm mb-2">Upload Purchase Order document</p>
+              <p className="text-xs text-gray-500 mb-3">Supports: PDF, DOC, DOCX, PNG, JPG, TXT (Max: 10MB)</p>
+              <Button 
+                type="button"
+                variant="outline" 
+                size="sm" 
+                onClick={() => document.getElementById('po_file_input').click()}
+                disabled={uploading}
+              >
+                {uploading ? 'Uploading...' : 'Choose File'}
+              </Button>
+            </div>
+            
+            {/* Display uploaded L5 documents */}
+            {l5UploadedDocuments.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-gray-700">Uploaded PO Documents:</h4>
+                {l5UploadedDocuments.map((doc, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+                    <div className="flex items-center space-x-3">
+                      <FileText className="w-4 h-4 text-blue-500" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{doc.original_filename}</p>
+                        <p className="text-xs text-gray-500">
+                          {(doc.file_size / 1024).toFixed(1)} KB • {new Date(doc.uploaded_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => downloadDocument(doc)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        <Download className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => deleteL5Document(doc.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
