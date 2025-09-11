@@ -24,7 +24,8 @@ import {
   Plus,
   Eye,
   Download,
-  CheckCircle
+  CheckCircle,
+  Trash2
 } from 'lucide-react';
 import { usePermissions } from '../contexts/PermissionContext';
 import axios from 'axios';
