@@ -5552,5 +5552,454 @@ async def delete_opportunity_document(
     
     return {"message": "Document deleted successfully"}
 
+# ================ ORDER ACKNOWLEDGEMENT (OA) MODULE ================
+
+async def validate_oa_creation(opportunity_id: str) -> dict:
+    """Validate if OA can be created for the opportunity"""
+    errors = []
+    
+    # Check if opportunity exists and is Won
+    opportunity = await db.opportunities.find_one({"id": opportunity_id})
+    if not opportunity:
+        errors.append("Opportunity not found")
+        return {"valid": False, "errors": errors, "opportunity": None}
+    
+    if opportunity.get("status") != "Won":
+        errors.append("Order can only be created for Won opportunities")
+        return {"valid": False, "errors": errors, "opportunity": opportunity}
+    
+    # Check for duplicate OA
+    existing_oa = await db.order_acknowledgements.find_one({"opportunity_id": opportunity_id, "is_active": True})
+    if existing_oa:
+        errors.append("Order already exists for this opportunity")
+        return {"valid": False, "errors": errors, "opportunity": opportunity}
+    
+    return {"valid": True, "errors": [], "opportunity": opportunity}
+
+async def auto_fetch_oa_data(opportunity_id: str) -> dict:
+    """Auto-fetch OA data from opportunity and related quotation"""
+    try:
+        # Get opportunity details
+        opportunity = await db.opportunities.find_one({"id": opportunity_id})
+        if not opportunity:
+            raise HTTPException(status_code=404, detail="Opportunity not found")
+        
+        # Get company details for customer name
+        company = await db.companies.find_one({"id": opportunity.get("company_id")})
+        customer_name = company.get("name", "Unknown Customer") if company else "Unknown Customer"
+        
+        # Get selected quotation for the opportunity
+        selected_quotation = await db.quotations.find_one({
+            "opportunity_id": opportunity_id,
+            "is_selected": True,
+            "is_active": True
+        })
+        
+        if not selected_quotation:
+            # If no selected quotation, get the most recent one
+            quotations = await db.quotations.find({
+                "opportunity_id": opportunity_id,
+                "is_active": True
+            }).sort("created_at", -1).to_list(1)
+            selected_quotation = quotations[0] if quotations else None
+        
+        if not selected_quotation:
+            raise HTTPException(status_code=400, detail="No quotation found for this opportunity")
+        
+        # Get currency details
+        currency = await db.mst_currencies.find_one({"id": opportunity.get("currency_id")})
+        
+        # Convert quotation items to OA items format
+        oa_items = []
+        total_amount = 0
+        
+        if selected_quotation.get("items"):
+            for item in selected_quotation["items"]:
+                # Get product details
+                product = await db.mst_products.find_one({"id": item.get("product_id")})
+                product_name = product.get("name", "Unknown Product") if product else "Unknown Product"
+                
+                # Calculate item total
+                item_total = (item.get("total_recurring", 0) + item.get("total_one_time", 0))
+                
+                oa_item = {
+                    "product_id": item.get("product_id", ""),
+                    "product_name": product_name,
+                    "qty": item.get("qty", 1),
+                    "unit": item.get("unit", "License"),
+                    "unit_price": (item.get("recurring_sale_price", 0) + item.get("one_time_sale_price", 0)),
+                    "total_price": item_total
+                }
+                oa_items.append(oa_item)
+                total_amount += item_total
+        
+        return {
+            "customer_name": customer_name,
+            "total_amount": total_amount,
+            "currency_id": opportunity.get("currency_id", ""),
+            "profit_margin": selected_quotation.get("profitability_percent", 0),
+            "items": oa_items,
+            "quotation_id": selected_quotation.get("id"),
+            "currency_symbol": currency.get("symbol", "₹") if currency else "₹"
+        }
+        
+    except Exception as e:
+        print(f"Error auto-fetching OA data: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error fetching order data")
+
+async def check_gc_approval_required(total_amount: float, opportunity_id: str) -> bool:
+    """Check if GC approval is required based on amount and industry"""
+    try:
+        # High-value check (> $500K equivalent)
+        if total_amount > 500000:  # Assuming USD equivalent or INR 500K
+            return True
+        
+        # Check industry type from opportunity's company
+        opportunity = await db.opportunities.find_one({"id": opportunity_id})
+        if opportunity and opportunity.get("company_id"):
+            company = await db.companies.find_one({"id": opportunity["company_id"]})
+            if company:
+                # Get industry details
+                industry = await db.industries.find_one({"id": company.get("industry_id")}) 
+                if industry and industry.get("name", "").lower() in ["bfsi", "banking", "financial services", "insurance", "regulated"]:
+                    return True
+        
+        return False
+    except:
+        return False
+
+async def detect_oa_anomalies(oa_data: dict, opportunity_id: str) -> list:
+    """Basic AI-like anomaly detection for orders"""
+    anomalies = []
+    
+    try:
+        # Check for unusual profit margins
+        profit_margin = oa_data.get("profit_margin", 0)
+        if profit_margin > 95:
+            anomalies.append("Unusually high profit margin detected")
+        elif profit_margin < 5:
+            anomalies.append("Unusually low profit margin detected")
+        
+        # Check for duplicate customer orders in short timeframe
+        customer_name = oa_data.get("customer_name", "")
+        recent_orders = await db.order_acknowledgements.find({
+            "customer_name": customer_name,
+            "created_at": {"$gte": datetime.now(timezone.utc) - timedelta(days=30)},
+            "is_active": True
+        }).to_list(None)
+        
+        if len(recent_orders) > 3:
+            anomalies.append("Multiple orders from same customer in short period")
+        
+        # Check for round number amounts (potentially suspicious)
+        total_amount = oa_data.get("total_amount", 0)
+        if total_amount % 100000 == 0 and total_amount > 100000:
+            anomalies.append("Round number amount - please verify")
+        
+        return anomalies
+    except:
+        return []
+
+@api_router.get("/opportunities/{opportunity_id}/can-create-oa")
+async def can_create_oa(opportunity_id: str, current_user: User = Depends(get_current_user)):
+    """Check if OA can be created for the opportunity"""
+    validation_result = await validate_oa_creation(opportunity_id)
+    return validation_result
+
+@api_router.get("/opportunities/{opportunity_id}/oa-data")
+async def get_oa_auto_data(opportunity_id: str, current_user: User = Depends(get_current_user)):
+    """Get auto-fetched data for OA creation"""
+    validation_result = await validate_oa_creation(opportunity_id)
+    if not validation_result["valid"]:
+        raise HTTPException(status_code=400, detail=validation_result["errors"][0])
+    
+    auto_data = await auto_fetch_oa_data(opportunity_id)
+    
+    # Check for anomalies
+    anomalies = await detect_oa_anomalies(auto_data, opportunity_id)
+    auto_data["anomalies"] = anomalies
+    
+    return auto_data
+
+@api_router.post("/order-acknowledgements")
+async def create_order_acknowledgement(oa_data: OrderAcknowledgementCreate, current_user: User = Depends(get_current_user)):
+    """Create new Order Acknowledgement"""
+    
+    # Validate opportunity
+    validation_result = await validate_oa_creation(oa_data.opportunity_id)
+    if not validation_result["valid"]:
+        raise HTTPException(status_code=400, detail=validation_result["errors"][0])
+    
+    # Generate Order ID
+    order_id = generate_order_id()
+    
+    # Check if GC approval is required
+    gc_approval_required = await check_gc_approval_required(oa_data.total_amount, oa_data.opportunity_id)
+    
+    # Create OA document
+    oa_document = {
+        **oa_data.dict(),
+        "id": str(uuid.uuid4()),
+        "order_id": order_id,
+        "status": "Under Review" if gc_approval_required else "Draft",
+        "gc_approval_flag": gc_approval_required,
+        "attachments": [],
+        "created_by": current_user.id,
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
+        "is_active": True
+    }
+    
+    # Convert for MongoDB storage
+    oa_document = prepare_for_mongo(oa_document)
+    
+    # Insert into database
+    await db.order_acknowledgements.insert_one(oa_document)
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="CREATE",
+        resource_type="OrderAcknowledgement",
+        resource_id=oa_document["id"],
+        details=f"Created order {order_id} for opportunity {oa_data.opportunity_id}"
+    )
+    
+    # If GC approval required, could send notification here
+    if gc_approval_required:
+        print(f"GC Approval required for order {order_id} - amount: {oa_data.total_amount}")
+    
+    return prepare_for_json(oa_document)
+
+@api_router.get("/order-acknowledgements")
+async def get_order_acknowledgements(
+    status: Optional[str] = None,
+    customer: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 50,
+    current_user: User = Depends(get_current_user)
+):
+    """Get list of Order Acknowledgements with filters"""
+    
+    # Build filter query
+    filter_query = {"is_active": True}
+    
+    if status and status != "All":
+        filter_query["status"] = status
+    
+    if customer:
+        filter_query["customer_name"] = {"$regex": customer, "$options": "i"}
+    
+    if date_from:
+        filter_query["order_date"] = {"$gte": datetime.strptime(date_from, "%Y-%m-%d").date()}
+    
+    if date_to:
+        if "order_date" in filter_query:
+            filter_query["order_date"]["$lte"] = datetime.strptime(date_to, "%Y-%m-%d").date()
+        else:
+            filter_query["order_date"] = {"$lte": datetime.strptime(date_to, "%Y-%m-%d").date()}
+    
+    # Get total count
+    total = await db.order_acknowledgements.count_documents(filter_query)
+    
+    # Get orders with pagination
+    orders = await db.order_acknowledgements.find(filter_query).sort("created_at", -1).skip(skip).limit(limit).to_list(None)
+    
+    return {
+        "orders": [prepare_for_json(order) for order in orders],
+        "total": total,
+        "skip": skip,
+        "limit": limit
+    }
+
+@api_router.get("/order-acknowledgements/{order_id}")
+async def get_order_acknowledgement_by_id(order_id: str, current_user: User = Depends(get_current_user)):
+    """Get specific Order Acknowledgement by ID"""
+    order = await db.order_acknowledgements.find_one({"id": order_id, "is_active": True})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    return prepare_for_json(order)
+
+@api_router.put("/order-acknowledgements/{order_id}")
+async def update_order_acknowledgement(order_id: str, oa_data: OrderAcknowledgementUpdate, current_user: User = Depends(get_current_user)):
+    """Update existing Order Acknowledgement"""
+    
+    # Check if order exists
+    existing_order = await db.order_acknowledgements.find_one({"id": order_id, "is_active": True})
+    if not existing_order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Check if order is approved (needs re-approval for changes)
+    if existing_order.get("status") == "Approved":
+        # If editing approved order, require re-approval
+        oa_data_dict = oa_data.dict(exclude_unset=True)
+        oa_data_dict["status"] = "Under Review"
+        oa_data_dict["gc_approval_flag"] = True
+    else:
+        oa_data_dict = oa_data.dict(exclude_unset=True)
+    
+    # Update fields
+    oa_data_dict["updated_by"] = current_user.id
+    oa_data_dict["updated_at"] = datetime.now(timezone.utc)
+    
+    # Convert for MongoDB storage
+    update_data = prepare_for_mongo(oa_data_dict)
+    
+    # Update in database
+    await db.order_acknowledgements.update_one(
+        {"id": order_id},
+        {"$set": update_data}
+    )
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="UPDATE",
+        resource_type="OrderAcknowledgement",
+        resource_id=order_id,
+        details=f"Updated order {existing_order.get('order_id')}"
+    )
+    
+    # Get updated order
+    updated_order = await db.order_acknowledgements.find_one({"id": order_id})
+    return prepare_for_json(updated_order)
+
+@api_router.delete("/order-acknowledgements/{order_id}")
+async def delete_order_acknowledgement(order_id: str, current_user: User = Depends(get_current_user)):
+    """Delete Order Acknowledgement (soft delete)"""
+    
+    # Check if order exists
+    existing_order = await db.order_acknowledgements.find_one({"id": order_id, "is_active": True})
+    if not existing_order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Check if order can be deleted (not approved/fulfilled)
+    if existing_order.get("status") in ["Fulfilled"]:
+        raise HTTPException(status_code=400, detail="Cannot delete fulfilled orders")
+    
+    # Soft delete
+    await db.order_acknowledgements.update_one(
+        {"id": order_id},
+        {"$set": {
+            "is_active": False,
+            "deleted_at": datetime.now(timezone.utc),
+            "deleted_by": current_user.id
+        }}
+    )
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="DELETE",
+        resource_type="OrderAcknowledgement",
+        resource_id=order_id,
+        details=f"Deleted order {existing_order.get('order_id')}"
+    )
+    
+    return {"message": "Order deleted successfully"}
+
+@api_router.patch("/order-acknowledgements/{order_id}/status")
+async def update_order_status(order_id: str, status_data: dict, current_user: User = Depends(get_current_user)):
+    """Update order status (for approvals)"""
+    
+    # Check if order exists
+    existing_order = await db.order_acknowledgements.find_one({"id": order_id, "is_active": True})
+    if not existing_order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    new_status = status_data.get("status")
+    valid_statuses = ["Draft", "Under Review", "Approved", "Fulfilled", "Cancelled"]
+    
+    if new_status not in valid_statuses:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    
+    # Update status
+    await db.order_acknowledgements.update_one(
+        {"id": order_id},
+        {"$set": {
+            "status": new_status,
+            "updated_by": current_user.id,
+            "updated_at": datetime.now(timezone.utc)
+        }}
+    )
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="STATUS_CHANGE",
+        resource_type="OrderAcknowledgement",
+        resource_id=order_id,
+        details=f"Changed order {existing_order.get('order_id')} status to {new_status}"
+    )
+    
+    return {"message": f"Order status updated to {new_status}"}
+
+@api_router.post("/order-acknowledgements/{order_id}/upload-attachment")
+async def upload_order_attachment(
+    order_id: str,
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user)
+):
+    """Upload attachment for Order Acknowledgement"""
+    
+    # Check if order exists
+    existing_order = await db.order_acknowledgements.find_one({"id": order_id, "is_active": True})
+    if not existing_order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # File validation
+    if file.size > 5 * 1024 * 1024:  # 5MB limit
+        raise HTTPException(status_code=400, detail="File size must be less than 5MB")
+    
+    allowed_types = ["application/pdf", "image/jpeg", "image/png"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Only PDF, JPG, PNG files are allowed")
+    
+    # Create uploads directory
+    upload_dir = Path("uploads/order_attachments")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    file_id = str(uuid.uuid4())
+    file_extension = Path(file.filename).suffix
+    filename = f"{file_id}{file_extension}"
+    file_path = upload_dir / filename
+    
+    # Save file
+    with open(file_path, "wb") as buffer:
+        content = await file.read()
+        buffer.write(content)
+    
+    # Update order with attachment
+    attachment_data = {
+        "id": file_id,
+        "original_filename": file.filename,
+        "filename": filename,
+        "file_path": str(file_path),
+        "file_size": len(content),
+        "mime_type": file.content_type,
+        "uploaded_by": current_user.id,
+        "uploaded_at": datetime.now(timezone.utc)
+    }
+    
+    await db.order_acknowledgements.update_one(
+        {"id": order_id},
+        {"$push": {"attachments": attachment_data}}
+    )
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="UPLOAD",
+        resource_type="OrderAttachment",
+        resource_id=file_id,
+        details=f"Uploaded attachment {file.filename} for order {existing_order.get('order_id')}"
+    )
+    
+    return {"message": "Attachment uploaded successfully", "attachment": attachment_data}
+
 # Include router after all endpoints are defined
 app.include_router(api_router)
