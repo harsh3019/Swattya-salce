@@ -488,15 +488,28 @@ const OpportunityList = () => {
         modulePath="/opportunities"
         entityName="opportunities"
         additionalActions={(opportunity) => (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleManageStages(opportunity)}
-            className="bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
-          >
-            <Settings className="w-3 h-3 mr-1" />
-            Manage Stages
-          </Button>
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleManageStages(opportunity)}
+              className="bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200"
+            >
+              <Settings className="w-3 h-3 mr-1" />
+              Manage Stages
+            </Button>
+            {opportunity.status === 'Won' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleCreateOA(opportunity)}
+                className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                Create OA
+              </Button>
+            )}
+          </div>
         )}
       />
 
