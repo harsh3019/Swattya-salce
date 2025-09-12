@@ -4628,6 +4628,12 @@ def generate_opportunity_id():
     suffix = ''.join(random.choices(chars, k=7))
     return f'OPP-{suffix}'
 
+def generate_order_id():
+    """Generate order ID in ORD-XXXXXXX format"""
+    chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    suffix = ''.join(random.choices(chars, k=7))
+    return f'ORD-{suffix}'
+
 def generate_quotation_id():
     """Generate quotation ID in QUO-XXXXXXX format"""
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
