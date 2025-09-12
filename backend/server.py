@@ -4581,6 +4581,44 @@ class QuotationCreate(BaseModel):
     validity_date: datetime = Field(...)
     items: List[QuotationItem] = Field(default_factory=list)
 
+# Order Acknowledgement Models
+class OAItem(BaseModel):
+    product_id: str = Field(..., description="Reference to product/SKU")
+    product_name: str = Field(..., description="Product name")
+    qty: int = Field(..., ge=1)
+    unit: str = Field(..., max_length=20)
+    unit_price: float = Field(..., ge=0)
+    total_price: float = Field(..., ge=0)
+
+class OrderAcknowledgementBase(BaseModel):
+    opportunity_id: str = Field(..., description="Reference to won opportunity")
+    customer_name: str = Field(..., min_length=2, max_length=200)
+    order_date: date = Field(default_factory=lambda: datetime.now().date())
+    items: List[OAItem] = Field(default_factory=list)
+    total_amount: float = Field(..., ge=0)
+    currency_id: str = Field(..., description="Reference to currency")
+    profit_margin: float = Field(default=0, ge=0, le=100)
+    remarks: Optional[str] = Field(None, max_length=500)
+    
+class OrderAcknowledgementCreate(OrderAcknowledgementBase):
+    pass
+
+class OrderAcknowledgementUpdate(BaseModel):
+    customer_name: Optional[str] = Field(None, min_length=2, max_length=200)
+    order_date: Optional[date] = None
+    items: Optional[List[OAItem]] = None
+    total_amount: Optional[float] = Field(None, ge=0)
+    currency_id: Optional[str] = None
+    profit_margin: Optional[float] = Field(None, ge=0, le=100)
+    remarks: Optional[str] = Field(None, max_length=500)
+
+class OrderAcknowledgement(OrderAcknowledgementBase, BaseAuditModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    order_id: str = Field(..., pattern=r'^ORD-[A-Z0-9]{7}$')
+    status: str = Field(default="Draft", pattern=r'^(Draft|Under Review|Approved|Fulfilled|Cancelled)$')
+    gc_approval_flag: bool = Field(default=False)
+    attachments: List[str] = Field(default_factory=list, description="File attachment references")
+
 # ================ OPPORTUNITY MANAGEMENT ENDPOINTS ================
 
 # Helper functions
