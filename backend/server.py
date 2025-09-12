@@ -5571,6 +5571,9 @@ async def validate_oa_creation(opportunity_id: str) -> dict:
         errors.append("Opportunity not found")
         return {"valid": False, "errors": errors, "opportunity": None}
     
+    # Clean opportunity data for JSON serialization
+    opportunity = prepare_for_json(opportunity)
+    
     if opportunity.get("status") != "Won":
         errors.append("Order can only be created for Won opportunities")
         return {"valid": False, "errors": errors, "opportunity": opportunity}
