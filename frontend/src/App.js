@@ -575,6 +575,23 @@ function App() {
                   <QuotationBuilder />
                 </ProtectedRoute>
               } />
+
+              {/* Order Acknowledgement Routes */}
+              <Route path="/order-acknowledgements" element={
+                <ProtectedRoute>
+                  <OrderAcknowledgementList />
+                </ProtectedRoute>
+              } />
+              <Route path="/order-acknowledgements/create/:opportunityId" element={
+                <ProtectedRoute>
+                  <OrderAcknowledgementForm />
+                </ProtectedRoute>
+              } />
+              <Route path="/order-acknowledgements/edit/:orderId" element={
+                <ProtectedRoute>
+                  <OrderAcknowledgementForm />
+                </ProtectedRoute>
+              } />
               
               <Route path="/" element={<HomeRoute />} />
             </Routes>
