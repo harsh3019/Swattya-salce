@@ -235,6 +235,10 @@ const OpportunityList = () => {
     navigate(`/opportunities/${opportunity.id}/stages`);
   };
 
+  const handleCreateOA = (opportunity) => {
+    navigate(`/order-acknowledgements/create/${opportunity.id}`);
+  };
+
   const columns = [
     {
       key: 'opportunity_id',
