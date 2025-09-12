@@ -391,6 +391,11 @@ def parse_from_mongo(item: dict) -> dict:
         item['dob'] = datetime.fromisoformat(item['dob'])
     if isinstance(item.get('close_date'), str):
         item['close_date'] = datetime.fromisoformat(item['close_date'])
+    if isinstance(item.get('order_date'), str):
+        try:
+            item['order_date'] = datetime.fromisoformat(item['order_date']).date()
+        except:
+            pass
     return item
 
 def prepare_for_json(data: dict) -> dict:
