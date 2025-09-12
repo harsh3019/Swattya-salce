@@ -24,6 +24,8 @@ import OpportunityForm from './components/OpportunityForm';
 import OpportunityDetail from './components/OpportunityDetail';
 import OpportunityStageForm from './components/OpportunityStageForm';
 import QuotationBuilder from './components/QuotationBuilder';
+import OrderAcknowledgementList from './components/OrderAcknowledgementList';
+import OrderAcknowledgementForm from './components/OrderAcknowledgementForm';
 
 // Import new RBAC components
 import DynamicSidebar from './components/DynamicSidebar';
