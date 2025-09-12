@@ -375,6 +375,8 @@ def prepare_for_mongo(data: dict) -> dict:
         data['dob'] = data['dob'].isoformat()
     if isinstance(data.get('close_date'), datetime):
         data['close_date'] = data['close_date'].isoformat()
+    if isinstance(data.get('order_date'), date):
+        data['order_date'] = data['order_date'].isoformat()
     return data
 
 def parse_from_mongo(item: dict) -> dict:
