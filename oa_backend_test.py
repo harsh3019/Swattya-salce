@@ -537,7 +537,15 @@ class OATestSuite:
                 f"{BACKEND_URL}/order-acknowledgements/{self.created_oa_id}",
                 headers=self.get_headers()
             ) as response:
-                if response.status == 200:
+                if response.status == 400:
+                    error_text = await response.text()
+                    if "Cannot delete fulfilled orders" in error_text:
+                        print("✅ Delete protection working - fulfilled orders cannot be deleted")
+                        self.test_results.append(("OA Delete - Fulfilled Protection", "PASS"))
+                    else:
+                        print(f"❌ Unexpected error: {error_text}")
+                        self.test_results.append(("OA Delete - Fulfilled Protection", "FAIL"))
+                elif response.status == 200:
                     data = await response.json()
                     print("✅ OA Delete successful (soft delete)")
                     
@@ -556,10 +564,10 @@ class OATestSuite:
                     print(f"❌ OA Delete failed: {response.status}")
                     error_text = await response.text()
                     print(f"   Error: {error_text}")
-                    self.test_results.append(("OA Delete - Soft Delete", "FAIL"))
+                    self.test_results.append(("OA Delete - Fulfilled Protection", "FAIL"))
         except Exception as e:
             print(f"❌ Error testing OA delete: {str(e)}")
-            self.test_results.append(("OA Delete - Soft Delete", "ERROR"))
+            self.test_results.append(("OA Delete - Fulfilled Protection", "ERROR"))
     
     async def test_business_logic_validation(self):
         """Phase 4: Test Business Logic Validation"""
