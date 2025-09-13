@@ -236,7 +236,7 @@ const OpportunityList = () => {
   };
 
   const handleCreateOA = (opportunity) => {
-    navigate(`/order-acknowledgements/create/${opportunity.id}`);
+    navigate(`/order-analysis/create/${opportunity.id}`);
   };
 
   const columns = [
