@@ -5794,8 +5794,8 @@ async def create_order_analysis(oa_data: OrderAnalysisCreate, current_user: User
     
     return prepare_for_json(oa_document)
 
-@api_router.get("/order-acknowledgements")
-async def get_order_acknowledgements(
+@api_router.get("/order-analysis")
+async def get_order_analysis_list(
     status: Optional[str] = None,
     customer: Optional[str] = None,
     date_from: Optional[str] = None,
