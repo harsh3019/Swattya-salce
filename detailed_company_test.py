@@ -53,7 +53,7 @@ def analyze_company_inheritance():
         
         for lead in leads[:3]:  # Show first 3 leads
             company_id = lead.get('company_id')
-            company_name = next((c['company_name'] for c in companies if c['id'] == company_id), 'Unknown')
+            company_name = next((c.get('company_name', c.get('name', 'Unknown')) for c in companies if c.get('id') == company_id), 'Unknown')
             print(f"   • Lead: {lead.get('project_title')}")
             print(f"     Company ID: {company_id}")
             print(f"     Company Name: {company_name}")
