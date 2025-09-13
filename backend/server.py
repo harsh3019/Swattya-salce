@@ -5645,8 +5645,11 @@ async def reject_quotation(
     """Reject a quotation - Manager/Admin only"""
     
     # Check role permissions - only Manager or Admin can reject
+    # Special handling for admin username
     user_role = current_user.role.lower() if hasattr(current_user, 'role') else 'user'
-    if user_role not in ['manager', 'admin']:
+    is_admin_user = current_user.username.lower() == 'admin'
+    
+    if not is_admin_user and user_role not in ['manager', 'admin']:
         raise HTTPException(
             status_code=403, 
             detail="Only Managers and Admins can reject quotations"
