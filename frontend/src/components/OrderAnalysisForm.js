@@ -66,6 +66,49 @@ const OrderAnalysisForm = () => {
     }
   }, [opportunityId, orderId]);
 
+  const loadExistingOrder = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem('token');
+
+      // Load existing order
+      const response = await axios.get(`${baseURL}/api/order-analysis/${orderId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const orderData = response.data;
+      setOriginalOrder(orderData);
+
+      // Pre-fill form with existing order data
+      setFormData({
+        opportunity_id: orderData.opportunity_id || '',
+        customer_name: orderData.customer_name || '',
+        order_date: orderData.order_date ? new Date(orderData.order_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        total_amount: orderData.total_amount || 0,
+        currency_id: orderData.currency_id || '',
+        profit_margin: orderData.profit_margin || 0,
+        remarks: orderData.remarks || '',
+        items: orderData.items || []
+      });
+
+      // Set auto data for currency display (simplified for edit mode)
+      setAutoData({
+        currency_symbol: orderData.currency_symbol || '₹',
+        customer_name: orderData.customer_name || '',
+        total_amount: orderData.total_amount || 0,
+        profit_margin: orderData.profit_margin || 0,
+        items: orderData.items || []
+      });
+
+    } catch (error) {
+      console.error('Error loading order:', error);
+      setError(error.response?.data?.detail || 'Error loading order data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const checkOAEligibility = async () => {
     try {
       setLoading(true);
