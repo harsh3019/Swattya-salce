@@ -5744,8 +5744,9 @@ async def get_oa_auto_data(opportunity_id: str, current_user: User = Depends(get
     
     return auto_data
 
-@api_router.post("/order-acknowledgements")
-async def create_order_acknowledgement(oa_data: OrderAcknowledgementCreate, current_user: User = Depends(get_current_user)):
+@api_router.post("/order-analysis")
+async def create_order_analysis(oa_data: OrderAnalysisCreate, current_user: User = Depends(get_current_user)):
+    """Create new Order Analysis"""
     """Create new Order Acknowledgement"""
     
     # Validate opportunity
