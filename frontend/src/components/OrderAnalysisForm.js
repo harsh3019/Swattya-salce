@@ -116,8 +116,8 @@ const OrderAnalysisForm = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      alert('Order Acknowledgement created successfully!');
-      navigate('/order-acknowledgements');
+      alert('Order Analysis created successfully!');
+      navigate('/order-analysis');
     } catch (error) {
       console.error('Error saving OA:', error);
       alert(error.response?.data?.detail || 'Error saving Order Acknowledgement');
