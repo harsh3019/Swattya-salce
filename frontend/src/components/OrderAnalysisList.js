@@ -25,7 +25,7 @@ import PermissionDataTable from './PermissionDataTable';
 import { usePermissions } from '../contexts/PermissionContext';
 import axios from 'axios';
 
-const OrderAcknowledgementList = () => {
+const OrderAnalysisList = () => {
   const navigate = useNavigate();
   const { permissions } = usePermissions();
   const [orders, setOrders] = useState([]);
