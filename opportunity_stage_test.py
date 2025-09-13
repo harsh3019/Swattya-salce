@@ -230,14 +230,22 @@ class OpportunityStageTestRunner:
         print("\n📈 TESTING STAGE PROGRESSION DATA")
         print("=" * 45)
         
-        if not self.opportunities_data:
+        # Handle both list and dict response formats
+        if isinstance(self.opportunities_data, dict):
+            opportunities_list = self.opportunities_data.get('opportunities', [])
+        elif isinstance(self.opportunities_data, list):
+            opportunities_list = self.opportunities_data
+        else:
+            opportunities_list = []
+            
+        if not opportunities_list:
             self.log_test("Stage Progression Test", False, "No opportunities data available")
             return False
         
         # Look for opportunities that should have progressed beyond L1
         opportunities_analysis = []
         
-        for opp in self.opportunities_data:
+        for opp in opportunities_list:
             current_stage = opp.get('current_stage', 1)
             created_at = opp.get('created_at', '')
             opp_id = opp.get('opportunity_id') or opp.get('id')
