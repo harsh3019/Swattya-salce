@@ -5564,6 +5564,222 @@ async def upload_opportunity_document(
     
     return prepare_for_json(document)
 
+# Quotation Approval Workflow Endpoints
+@api_router.post("/quotations/{quotation_id}/approve")
+async def approve_quotation(
+    quotation_id: str,
+    approval_notes: str = "",
+    current_user: User = Depends(get_current_user)
+):
+    """Approve a quotation - Manager/Admin only"""
+    
+    # Check role permissions - only Manager or Admin can approve
+    user_role = current_user.role.lower() if hasattr(current_user, 'role') else 'user'
+    if user_role not in ['manager', 'admin']:
+        raise HTTPException(
+            status_code=403, 
+            detail="Only Managers and Admins can approve quotations"
+        )
+    
+    # Check if quotation exists
+    quotation = await db.quotations.find_one({"id": quotation_id, "is_active": True})
+    if not quotation:
+        raise HTTPException(status_code=404, detail="Quotation not found")
+    
+    # Check if quotation is in Draft status
+    if quotation.get("status") != "Draft":
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Can only approve quotations in Draft status. Current status: {quotation.get('status')}"
+        )
+    
+    # Update quotation status to Approved
+    approval_data = {
+        "status": "Approved",
+        "approved_by": current_user.id,
+        "approved_at": datetime.now(timezone.utc),
+        "approval_notes": approval_notes,
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    await db.quotations.update_one(
+        {"id": quotation_id},
+        {"$set": prepare_for_mongo(approval_data)}
+    )
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="APPROVE",
+        resource_type="Quotation",
+        resource_id=quotation_id,
+        details=f"Approved quotation {quotation.get('quotation_id', quotation_id)}" + 
+               (f" with notes: {approval_notes}" if approval_notes else "")
+    )
+    
+    # Get updated quotation
+    updated_quotation = await db.quotations.find_one({"id": quotation_id})
+    
+    logger.info(f"Quotation {quotation.get('quotation_id')} approved by {current_user.username}")
+    
+    return {
+        "message": "Quotation approved successfully",
+        "quotation_id": quotation.get("quotation_id"),
+        "status": "Approved",
+        "approved_by": current_user.username,
+        "approved_at": approval_data["approved_at"].isoformat(),
+        "quotation": prepare_for_json(updated_quotation)
+    }
+
+@api_router.post("/quotations/{quotation_id}/reject")
+async def reject_quotation(
+    quotation_id: str,
+    rejection_reason: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Reject a quotation - Manager/Admin only"""
+    
+    # Check role permissions - only Manager or Admin can reject
+    user_role = current_user.role.lower() if hasattr(current_user, 'role') else 'user'
+    if user_role not in ['manager', 'admin']:
+        raise HTTPException(
+            status_code=403, 
+            detail="Only Managers and Admins can reject quotations"
+        )
+    
+    # Validate rejection reason
+    if not rejection_reason.strip():
+        raise HTTPException(status_code=400, detail="Rejection reason is required")
+    
+    # Check if quotation exists
+    quotation = await db.quotations.find_one({"id": quotation_id, "is_active": True})
+    if not quotation:
+        raise HTTPException(status_code=404, detail="Quotation not found")
+    
+    # Check if quotation is in Draft status
+    if quotation.get("status") != "Draft":
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Can only reject quotations in Draft status. Current status: {quotation.get('status')}"
+        )
+    
+    # Update quotation status to Rejected
+    rejection_data = {
+        "status": "Rejected",
+        "rejected_by": current_user.id,
+        "rejected_at": datetime.now(timezone.utc),
+        "rejection_reason": rejection_reason,
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    await db.quotations.update_one(
+        {"id": quotation_id},
+        {"$set": prepare_for_mongo(rejection_data)}
+    )
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="REJECT",
+        resource_type="Quotation",
+        resource_id=quotation_id,
+        details=f"Rejected quotation {quotation.get('quotation_id', quotation_id)} - Reason: {rejection_reason}"
+    )
+    
+    # Get updated quotation
+    updated_quotation = await db.quotations.find_one({"id": quotation_id})
+    
+    logger.info(f"Quotation {quotation.get('quotation_id')} rejected by {current_user.username}")
+    
+    return {
+        "message": "Quotation rejected successfully",
+        "quotation_id": quotation.get("quotation_id"),
+        "status": "Rejected",
+        "rejected_by": current_user.username,
+        "rejected_at": rejection_data["rejected_at"].isoformat(),
+        "rejection_reason": rejection_reason,
+        "quotation": prepare_for_json(updated_quotation)
+    }
+
+@api_router.get("/quotations/pending-approval")
+async def get_pending_quotations(current_user: User = Depends(get_current_user)):
+    """Get all quotations pending approval - Manager/Admin only"""
+    
+    # Check role permissions - only Manager or Admin can view pending approvals
+    user_role = current_user.role.lower() if hasattr(current_user, 'role') else 'user'
+    if user_role not in ['manager', 'admin']:
+        raise HTTPException(
+            status_code=403, 
+            detail="Only Managers and Admins can view pending quotations"
+        )
+    
+    # Get all quotations with Draft status
+    pending_quotations = await db.quotations.find({
+        "status": "Draft",
+        "is_active": True
+    }).sort("created_at", -1).to_list(None)
+    
+    # Enhance with opportunity and creator information
+    enhanced_quotations = []
+    for quotation in pending_quotations:
+        # Get opportunity info
+        opportunity = await db.opportunities.find_one({"id": quotation.get("opportunity_id")})
+        opportunity_info = {
+            "opportunity_id": opportunity.get("opportunity_id", "N/A") if opportunity else "N/A",
+            "project_title": opportunity.get("project_title", "N/A") if opportunity else "N/A",
+            "expected_revenue": opportunity.get("expected_revenue", 0) if opportunity else 0
+        }
+        
+        # Get creator info
+        creator = await db.users.find_one({"id": quotation.get("created_by")})
+        creator_info = {
+            "created_by_name": creator.get("username", "Unknown") if creator else "Unknown",
+            "created_by_email": creator.get("email", "N/A") if creator else "N/A"
+        }
+        
+        enhanced_quotation = prepare_for_json(quotation)
+        enhanced_quotation.update(opportunity_info)
+        enhanced_quotation.update(creator_info)
+        enhanced_quotations.append(enhanced_quotation)
+    
+    return {
+        "message": f"Found {len(enhanced_quotations)} quotations pending approval",
+        "count": len(enhanced_quotations),
+        "quotations": enhanced_quotations
+    }
+
+@api_router.get("/quotations/approved")
+async def get_approved_quotations(current_user: User = Depends(get_current_user)):
+    """Get all approved quotations available for L4 stage selection"""
+    
+    # Get all approved quotations
+    approved_quotations = await db.quotations.find({
+        "status": "Approved",
+        "is_active": True
+    }).sort("approved_at", -1).to_list(None)
+    
+    # Enhance with opportunity information
+    enhanced_quotations = []
+    for quotation in approved_quotations:
+        # Get opportunity info
+        opportunity = await db.opportunities.find_one({"id": quotation.get("opportunity_id")})
+        if opportunity:
+            opportunity_info = {
+                "opportunity_id": opportunity.get("opportunity_id", "N/A"),
+                "project_title": opportunity.get("project_title", "N/A"),
+                "current_stage": opportunity.get("current_stage", 1)
+            }
+            
+            enhanced_quotation = prepare_for_json(quotation)
+            enhanced_quotation.update(opportunity_info)
+            enhanced_quotations.append(enhanced_quotation)
+    
+    return {
+        "message": f"Found {len(enhanced_quotations)} approved quotations",
+        "count": len(enhanced_quotations),
+        "quotations": enhanced_quotations
+    }
+
 @api_router.get("/opportunities/{opportunity_id}/activities")
 async def get_opportunity_activities(opportunity_id: str, current_user: User = Depends(get_current_user)):
     """Get all activities for an opportunity (stage changes, document uploads, quotations, etc.)"""
