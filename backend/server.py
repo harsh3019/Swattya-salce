@@ -5804,7 +5804,7 @@ async def get_order_analysis_list(
     limit: int = 50,
     current_user: User = Depends(get_current_user)
 ):
-    """Get list of Order Acknowledgements with filters"""
+    """Get list of Order Analysis with filters"""
     
     # Build filter query
     filter_query = {"is_active": True}
