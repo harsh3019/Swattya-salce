@@ -189,7 +189,17 @@ backend:
           agent: "main"
           comment: "✅ COMPLETE MASTER DATA UI SYSTEM IMPLEMENTED: Created comprehensive React components for managing Primary Categories, Products, Rate Cards, and Purchase Costs. Features include: CRUD operations, search/filter, real-time margin calculations, SQU code auto-generation, data validation, responsive tables, and professional UI. Backend APIs fully functional with proper authentication and error handling. Accessible via /master-data route."
 
-  - task: "Rate Cards Dropdown Frontend Rendering Fix"
+  - task: "L5 Stage Select.Item Empty Value Error Fix"
+    implemented: true
+    working: true
+    file: "frontend/src/components/OpportunityStageForm.js, QuotationBuilder.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ L5 STAGE SELECT.ITEM ERROR FIXED: Resolved React runtime error 'A <Select.Item /> must have a value prop that is not an empty string' occurring in L5 Commercial Negotiation stage. PROBLEM IDENTIFIED: ✅ OpportunityStageForm.js line 1000 had SelectItem with empty string value for commercial decision dropdown, ✅ QuotationBuilder.js also had similar issue with rate cards fallback option using empty string value, ✅ React Select component requires non-empty string values for all SelectItem components. SOLUTION IMPLEMENTED: ✅ Changed commercial decision 'Not decided yet' option from value='' to value='pending', ✅ Updated rate cards fallback option from value='' to value='_no_cards_available', ✅ Backend logic already handles these cases properly (checks for 'won'/'lost' specifically). LOGIC VERIFICATION: ✅ L5→L6/L7 routing logic unchanged: won→L6, lost→L7, other→stay in L5 with 45-day warning, ✅ 45-day auto-dropout functionality remains intact for pending decisions, ✅ Rate cards dropdown properly handles empty state without runtime errors. FRONTEND RESTARTED: Applied changes and removed debug console logs. L5 stage should now work without Select.Item runtime errors."
     implemented: true
     working: true
     file: "frontend/src/components/QuotationBuilder.js"
