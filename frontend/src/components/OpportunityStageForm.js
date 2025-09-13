@@ -97,6 +97,7 @@ const OpportunityStageForm = () => {
     po_number: '',
     po_date: '',
     po_file: '',
+    commercial_decision: '', // won/lost decision
     
     // L6 - Won
     final_value: '',
