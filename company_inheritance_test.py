@@ -189,7 +189,7 @@ class CompanyInheritanceTest:
             
             # Step 1: Approve the lead
             approve_response = self.session.post(f"{BACKEND_URL}/leads/{lead_id}/status", 
-                                               params={"status": "approved"})
+                                               json={"status": "approved"})
             
             if approve_response.status_code != 200:
                 self.log_result("Lead Approval", False, 
