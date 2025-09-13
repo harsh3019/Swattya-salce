@@ -27,6 +27,13 @@ import QuotationBuilder from './components/QuotationBuilder';
 import OrderAnalysisList from './components/OrderAnalysisList';
 import OrderAnalysisForm from './components/OrderAnalysisForm';
 
+// Import Master Data Components
+import MasterDataDashboard from './components/MasterDataDashboard';
+import PrimaryCategoriesManager from './components/PrimaryCategoriesManager';
+import ProductsManager from './components/ProductsManager';
+import RateCardsManager from './components/RateCardsManager';
+import PurchaseCostsManager from './components/PurchaseCostsManager';
+
 // Import new RBAC components
 import DynamicSidebar from './components/DynamicSidebar';
 import ForbiddenPage from './components/ForbiddenPage';
