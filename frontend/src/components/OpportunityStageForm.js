@@ -946,9 +946,46 @@ const OpportunityStageForm = () => {
           <DollarSign className="w-5 h-5" />
           L5 - Commercial Negotiation
         </CardTitle>
-        <CardDescription>Price negotiation and commercial terms</CardDescription>
+        <CardDescription>Price negotiation and commercial terms - Make Won/Lost decision</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Won/Lost Decision Section */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <h4 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
+            <Target className="w-4 h-4" />
+            Commercial Decision
+          </h4>
+          <div>
+            <Label htmlFor="commercial_decision">Won/Lost Decision</Label>
+            <Select 
+              value={stageData.commercial_decision || ''} 
+              onValueChange={(value) => handleInputChange('commercial_decision', value)}
+            >
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Select outcome after negotiation" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Not decided yet</SelectItem>
+                <SelectItem value="won">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    Won - Deal Closed Successfully
+                  </div>
+                </SelectItem>
+                <SelectItem value="lost">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-red-600" />
+                    Lost - Deal Did Not Close
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-gray-600 mt-1">
+              💡 If no decision is made within 45 days, opportunity will automatically move to L8 (Dropped)
+            </p>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="updated_price">Updated Price *</Label>
