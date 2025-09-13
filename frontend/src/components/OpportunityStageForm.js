@@ -455,18 +455,49 @@ const OpportunityStageForm = () => {
       setSaving(true);
       const token = localStorage.getItem('token');
       
-      const nextStage = currentStage + 1;
+      // Special handling for L5 Commercial Negotiation
+      let nextStage;
+      let stageNotes;
+      
+      if (currentStage === 5) {
+        // L5 → L6/L7 based on commercial decision
+        const decision = stageData.commercial_decision;
+        
+        if (decision === 'won') {
+          nextStage = 6; // L6 - Won
+          stageNotes = 'Deal won - moving to L6 Won stage';
+        } else if (decision === 'lost') {
+          nextStage = 7; // L7 - Lost  
+          stageNotes = 'Deal lost - moving to L7 Lost stage';
+        } else {
+          // No decision made - save current stage and warn about 45-day auto-dropout
+          nextStage = currentStage;
+          stageNotes = 'Commercial negotiation ongoing - no final decision yet';
+          alert('⚠️ No Won/Lost decision made. If no decision is made within 45 days, this opportunity will automatically move to L8 (Dropped).');
+        }
+      } else {
+        // Normal sequential progression for other stages
+        nextStage = currentStage + 1;
+        stageNotes = `Advanced from ${STAGES[currentStage - 1]?.name} to ${STAGES[nextStage - 1]?.name}`;
+      }
       
       await axios.post(`${baseURL}/api/opportunities/${id}/change-stage`, {
         target_stage: nextStage,
         stage_data: stageData,
-        notes: `Advanced from ${STAGES[currentStage - 1].name} to ${STAGES[nextStage - 1].name}`
+        notes: stageNotes
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
       setCurrentStage(nextStage);
-      alert(`Successfully moved to ${STAGES[nextStage - 1].name}!`);
+      
+      if (nextStage !== currentStage) {
+        const stageName = STAGES[nextStage - 1]?.name || `L${nextStage}`;
+        alert(`✅ Successfully moved to ${stageName}!`);
+      } else {
+        alert('💾 Stage data saved successfully!');
+      }
+      
     } catch (error) {
       console.error('Error advancing stage:', error);
       if (error.response?.data?.validation_errors) {
