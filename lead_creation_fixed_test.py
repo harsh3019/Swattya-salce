@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://crm-dashboard-45.preview.emergentagent.com/api"
+BACKEND_URL = "https://sawayatta-erp-2.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {"username": "admin", "password": "admin123"}
 
 class LeadCreationTester:

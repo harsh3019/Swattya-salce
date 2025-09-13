@@ -12,7 +12,7 @@ import tempfile
 from datetime import datetime
 
 # Configuration
-BASE_URL = "https://1b435344-f8f5-4a8b-98d4-64db783ac8b5.preview.emergentagent.com/api"
+BASE_URL = "https://sawayatta-erp-2.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {
     "username": "admin", 
     "password": "admin123"

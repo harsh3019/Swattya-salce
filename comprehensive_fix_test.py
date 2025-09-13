@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import uuid
 
 # Configuration
-BASE_URL = "https://crm-dashboard-45.preview.emergentagent.com/api"
+BASE_URL = "https://sawayatta-erp-2.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {
     "username": "admin", 
     "password": "admin123"
