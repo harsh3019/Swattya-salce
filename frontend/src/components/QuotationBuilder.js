@@ -124,6 +124,9 @@ const QuotationBuilder = () => {
       setCurrencies(currenciesRes.data || []);
       setPrimaryCategories(primaryCategoriesRes.data || []);
 
+      // Debug log for rate cards
+      console.log('✅ Rate cards loaded:', rateCardsRes.data?.length || 0, rateCardsRes.data);
+
   // Convert backend quotation structure to frontend structure
   const convertBackendQuotationToFrontend = (backendQuotation) => {
     // Create a default phase and group structure and populate with items
