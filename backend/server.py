@@ -6482,5 +6482,401 @@ async def delete_order_analysis_attachment(
     
     return {"message": "Attachment deleted successfully"}
 
+# Master Data Management API Endpoints
+
+@api_router.get("/mst/primary-categories")
+async def get_primary_categories(current_user: User = Depends(get_current_user)):
+    """Get all primary categories"""
+    try:
+        categories = await db.mst_primary_categories.find({"is_active": True}).sort("category_name", 1).to_list(None)
+        return [prepare_for_json(category) for category in categories]
+    except Exception as e:
+        logger.error(f"Error fetching primary categories: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching primary categories")
+
+@api_router.post("/mst/primary-categories")
+async def create_primary_category(
+    category_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new primary category"""
+    try:
+        category_id = str(uuid.uuid4())
+        category_record = {
+            "id": category_id,
+            "category_name": category_data.get("category_name"),
+            "category_code": category_data.get("category_code"),
+            "description": category_data.get("description", ""),
+            "is_active": category_data.get("is_active", True),
+            "created_by": current_user.id,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        await db.mst_primary_categories.insert_one(prepare_for_mongo(category_record))
+        
+        return {
+            "message": "Primary category created successfully",
+            "id": category_id,
+            "category": prepare_for_json(category_record)
+        }
+    except Exception as e:
+        logger.error(f"Error creating primary category: {e}")
+        raise HTTPException(status_code=500, detail="Error creating primary category")
+
+@api_router.put("/mst/primary-categories/{category_id}")
+async def update_primary_category(
+    category_id: str,
+    category_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Update a primary category"""
+    try:
+        existing = await db.mst_primary_categories.find_one({"id": category_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Primary category not found")
+        
+        update_data = {
+            "category_name": category_data.get("category_name"),
+            "category_code": category_data.get("category_code"),
+            "description": category_data.get("description", ""),
+            "is_active": category_data.get("is_active", True),
+            "updated_by": current_user.id,
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        await db.mst_primary_categories.update_one(
+            {"id": category_id},
+            {"$set": prepare_for_mongo(update_data)}
+        )
+        
+        return {"message": "Primary category updated successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating primary category: {e}")
+        raise HTTPException(status_code=500, detail="Error updating primary category")
+
+@api_router.delete("/mst/primary-categories/{category_id}")
+async def delete_primary_category(
+    category_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a primary category"""
+    try:
+        existing = await db.mst_primary_categories.find_one({"id": category_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Primary category not found")
+        
+        await db.mst_primary_categories.delete_one({"id": category_id})
+        return {"message": "Primary category deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting primary category: {e}")
+        raise HTTPException(status_code=500, detail="Error deleting primary category")
+
+@api_router.get("/mst/products")
+async def get_products(current_user: User = Depends(get_current_user)):
+    """Get all products"""
+    try:
+        products = await db.mst_products.find({"is_active": True}).sort("name", 1).to_list(None)
+        return [prepare_for_json(product) for product in products]
+    except Exception as e:
+        logger.error(f"Error fetching products: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching products")
+
+@api_router.post("/mst/products")
+async def create_product(
+    product_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new product"""
+    try:
+        product_id = str(uuid.uuid4())
+        product_record = {
+            "id": product_id,
+            "name": product_data.get("name"),
+            "product_code": product_data.get("product_code"),
+            "squ_code": product_data.get("squ_code"),
+            "primary_category_id": product_data.get("primary_category_id"),
+            "description": product_data.get("description", ""),
+            "unit": product_data.get("unit"),
+            "is_active": product_data.get("is_active", True),
+            "created_by": current_user.id,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        await db.mst_products.insert_one(prepare_for_mongo(product_record))
+        
+        return {
+            "message": "Product created successfully",
+            "id": product_id,
+            "product": prepare_for_json(product_record)
+        }
+    except Exception as e:
+        logger.error(f"Error creating product: {e}")
+        raise HTTPException(status_code=500, detail="Error creating product")
+
+@api_router.put("/mst/products/{product_id}")
+async def update_product(
+    product_id: str,
+    product_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Update a product"""
+    try:
+        existing = await db.mst_products.find_one({"id": product_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Product not found")
+        
+        update_data = {
+            "name": product_data.get("name"),
+            "product_code": product_data.get("product_code"),
+            "squ_code": product_data.get("squ_code"),
+            "primary_category_id": product_data.get("primary_category_id"),
+            "description": product_data.get("description", ""),
+            "unit": product_data.get("unit"),
+            "is_active": product_data.get("is_active", True),
+            "updated_by": current_user.id,
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        await db.mst_products.update_one(
+            {"id": product_id},
+            {"$set": prepare_for_mongo(update_data)}
+        )
+        
+        return {"message": "Product updated successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating product: {e}")
+        raise HTTPException(status_code=500, detail="Error updating product")
+
+@api_router.delete("/mst/products/{product_id}")
+async def delete_product(
+    product_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a product"""
+    try:
+        existing = await db.mst_products.find_one({"id": product_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Product not found")
+        
+        await db.mst_products.delete_one({"id": product_id})
+        return {"message": "Product deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting product: {e}")
+        raise HTTPException(status_code=500, detail="Error deleting product")
+
+@api_router.get("/mst/rate-cards")
+async def get_rate_cards(current_user: User = Depends(get_current_user)):
+    """Get all rate cards"""
+    try:
+        rate_cards = await db.mst_rate_cards.find({"is_active": True}).sort("rate_card_name", 1).to_list(None)
+        return [prepare_for_json(card) for card in rate_cards]
+    except Exception as e:
+        logger.error(f"Error fetching rate cards: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching rate cards")
+
+@api_router.post("/mst/rate-cards")
+async def create_rate_card(
+    card_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new rate card"""
+    try:
+        card_id = str(uuid.uuid4())
+        card_record = {
+            "id": card_id,
+            "rate_card_name": card_data.get("rate_card_name"),
+            "rate_card_code": card_data.get("rate_card_code"),
+            "effective_from": datetime.fromisoformat(card_data.get("effective_from")) if card_data.get("effective_from") else None,
+            "effective_to": datetime.fromisoformat(card_data.get("effective_to")) if card_data.get("effective_to") else None,
+            "description": card_data.get("description", ""),
+            "is_active": card_data.get("is_active", True),
+            "created_by": current_user.id,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        await db.mst_rate_cards.insert_one(prepare_for_mongo(card_record))
+        
+        return {
+            "message": "Rate card created successfully",
+            "id": card_id,
+            "rate_card": prepare_for_json(card_record)
+        }
+    except Exception as e:
+        logger.error(f"Error creating rate card: {e}")
+        raise HTTPException(status_code=500, detail="Error creating rate card")
+
+@api_router.put("/mst/rate-cards/{card_id}")
+async def update_rate_card(
+    card_id: str,
+    card_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Update a rate card"""
+    try:
+        existing = await db.mst_rate_cards.find_one({"id": card_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Rate card not found")
+        
+        update_data = {
+            "rate_card_name": card_data.get("rate_card_name"),
+            "rate_card_code": card_data.get("rate_card_code"),
+            "effective_from": datetime.fromisoformat(card_data.get("effective_from")) if card_data.get("effective_from") else None,
+            "effective_to": datetime.fromisoformat(card_data.get("effective_to")) if card_data.get("effective_to") else None,
+            "description": card_data.get("description", ""),
+            "is_active": card_data.get("is_active", True),
+            "updated_by": current_user.id,
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        await db.mst_rate_cards.update_one(
+            {"id": card_id},
+            {"$set": prepare_for_mongo(update_data)}
+        )
+        
+        return {"message": "Rate card updated successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating rate card: {e}")
+        raise HTTPException(status_code=500, detail="Error updating rate card")
+
+@api_router.delete("/mst/rate-cards/{card_id}")
+async def delete_rate_card(
+    card_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a rate card"""
+    try:
+        existing = await db.mst_rate_cards.find_one({"id": card_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Rate card not found")
+        
+        await db.mst_rate_cards.delete_one({"id": card_id})
+        return {"message": "Rate card deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting rate card: {e}")
+        raise HTTPException(status_code=500, detail="Error deleting rate card")
+
+@api_router.get("/mst/purchase-costs")
+async def get_purchase_costs(current_user: User = Depends(get_current_user)):
+    """Get all purchase costs"""
+    try:
+        costs = await db.mst_purchase_costs.find({"is_active": True}).sort("created_at", -1).to_list(None)
+        return [prepare_for_json(cost) for cost in costs]
+    except Exception as e:
+        logger.error(f"Error fetching purchase costs: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching purchase costs")
+
+@api_router.post("/mst/purchase-costs")
+async def create_purchase_cost(
+    cost_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new purchase cost"""
+    try:
+        cost_id = str(uuid.uuid4())
+        cost_record = {
+            "id": cost_id,
+            "product_id": cost_data.get("product_id"),
+            "purchase_cost": float(cost_data.get("purchase_cost", 0)),
+            "cost_type": cost_data.get("cost_type", "standard"),
+            "vendor": cost_data.get("vendor", ""),
+            "effective_date": datetime.fromisoformat(cost_data.get("effective_date")) if cost_data.get("effective_date") else datetime.now(timezone.utc),
+            "notes": cost_data.get("notes", ""),
+            "is_active": cost_data.get("is_active", True),
+            "created_by": current_user.id,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        await db.mst_purchase_costs.insert_one(prepare_for_mongo(cost_record))
+        
+        return {
+            "message": "Purchase cost created successfully",
+            "id": cost_id,
+            "cost": prepare_for_json(cost_record)
+        }
+    except Exception as e:
+        logger.error(f"Error creating purchase cost: {e}")
+        raise HTTPException(status_code=500, detail="Error creating purchase cost")
+
+@api_router.put("/mst/purchase-costs/{cost_id}")
+async def update_purchase_cost(
+    cost_id: str,
+    cost_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Update a purchase cost"""
+    try:
+        existing = await db.mst_purchase_costs.find_one({"id": cost_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Purchase cost not found")
+        
+        update_data = {
+            "product_id": cost_data.get("product_id"),
+            "purchase_cost": float(cost_data.get("purchase_cost", 0)),
+            "cost_type": cost_data.get("cost_type", "standard"),
+            "vendor": cost_data.get("vendor", ""),
+            "effective_date": datetime.fromisoformat(cost_data.get("effective_date")) if cost_data.get("effective_date") else None,
+            "notes": cost_data.get("notes", ""),
+            "is_active": cost_data.get("is_active", True),
+            "updated_by": current_user.id,
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        await db.mst_purchase_costs.update_one(
+            {"id": cost_id},
+            {"$set": prepare_for_mongo(update_data)}
+        )
+        
+        return {"message": "Purchase cost updated successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating purchase cost: {e}")
+        raise HTTPException(status_code=500, detail="Error updating purchase cost")
+
+@api_router.delete("/mst/purchase-costs/{cost_id}")
+async def delete_purchase_cost(
+    cost_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a purchase cost"""
+    try:
+        existing = await db.mst_purchase_costs.find_one({"id": cost_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Purchase cost not found")
+        
+        await db.mst_purchase_costs.delete_one({"id": cost_id})
+        return {"message": "Purchase cost deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting purchase cost: {e}")
+        raise HTTPException(status_code=500, detail="Error deleting purchase cost")
+
+@api_router.get("/mst/sales-prices")
+async def get_sales_prices(current_user: User = Depends(get_current_user)):
+    """Get all sales prices"""
+    try:
+        prices = await db.mst_sales_prices.find({"is_active": True}).sort("created_at", -1).to_list(None)
+        return [prepare_for_json(price) for price in prices]
+    except Exception as e:
+        logger.error(f"Error fetching sales prices: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching sales prices")
+
 # Include router after all endpoints are defined
 app.include_router(api_router)
