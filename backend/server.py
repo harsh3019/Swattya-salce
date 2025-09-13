@@ -5209,6 +5209,8 @@ async def validate_stage_data(stage: int, data: dict, opportunity_id: str) -> Li
             })
             if not quotation:
                 errors.append("Selected quotation not found or not associated with this opportunity")
+            elif quotation.get("status") != "Approved":
+                errors.append(f"Only approved quotations can be selected for L4 stage. Current quotation status: {quotation.get('status', 'Unknown')}")
     
     elif stage == 5:  # L5 - Commercial Negotiation
         if not data.get("updated_price"):
