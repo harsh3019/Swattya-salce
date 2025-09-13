@@ -620,7 +620,7 @@ const QuotationBuilder = () => {
                     <SelectContent>
                       {console.log('🔍 Rendering rate cards dropdown:', rateCards.length, rateCards)}
                       {rateCards.length === 0 ? (
-                        <SelectItem value="" disabled>No rate cards available</SelectItem>
+                        <SelectItem value="_no_cards_available" disabled>No rate cards available</SelectItem>
                       ) : (
                         rateCards.map((card) => (
                           <SelectItem key={card.id} value={card.id}>
