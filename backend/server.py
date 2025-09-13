@@ -5855,9 +5855,9 @@ async def get_order_analysis_by_id(order_id: str, current_user: User = Depends(g
     
     return prepare_for_json(order)
 
-@api_router.put("/order-acknowledgements/{order_id}")
-async def update_order_acknowledgement(order_id: str, oa_data: OrderAcknowledgementUpdate, current_user: User = Depends(get_current_user)):
-    """Update existing Order Acknowledgement"""
+@api_router.put("/order-analysis/{order_id}")
+async def update_order_analysis(order_id: str, oa_data: OrderAnalysisUpdate, current_user: User = Depends(get_current_user)):
+    """Update existing Order Analysis"""
     
     # Check if order exists
     existing_order = await db.order_acknowledgements.find_one({"id": order_id, "is_active": True})
