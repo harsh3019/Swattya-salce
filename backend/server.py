@@ -4567,6 +4567,7 @@ class OpportunityUpdate(BaseModel):
     po_number: Optional[str] = None
     po_date: Optional[date] = None
     po_file: Optional[str] = None
+    commercial_decision: Optional[str] = None  # "won", "lost", or None
     final_value: Optional[float] = None
     client_poc: Optional[str] = None
     delivery_team: Optional[List[str]] = None
