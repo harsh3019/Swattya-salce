@@ -617,7 +617,7 @@ const QuotationBuilder = () => {
                     <SelectContent>
                       {rateCards.map((card) => (
                         <SelectItem key={card.id} value={card.id}>
-                          {card.name}
+                          {card.rate_card_name} ({card.rate_card_code})
                         </SelectItem>
                       ))}
                     </SelectContent>
