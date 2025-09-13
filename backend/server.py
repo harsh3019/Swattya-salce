@@ -4830,6 +4830,9 @@ async def get_opportunities(current_user: User = Depends(get_current_user)):
             ]
         }).to_list(None)
         
+        # Check for 45-day auto-dropout opportunities (L5 → L8)
+        await check_and_auto_dropout_opportunities(opportunities)
+        
         # Normalize data for frontend compatibility
         normalized_opportunities = []
         for opp in opportunities:
