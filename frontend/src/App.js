@@ -627,6 +627,11 @@ function App() {
                   <PurchaseCostsManager />
                 </ProtectedRoute>
               } />
+              <Route path="/master-data/sales-prices" element={
+                <ProtectedRoute>
+                  <SalesPricesManager />
+                </ProtectedRoute>
+              } />
               
               <Route path="/" element={<HomeRoute />} />
             </Routes>
