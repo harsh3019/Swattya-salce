@@ -5245,6 +5245,106 @@ async def get_opportunity_quotations(opportunity_id: str, current_user: User = D
     
     return [prepare_for_json(quot) for quot in quotations]
 
+async def check_and_auto_dropout_opportunities(opportunities):
+    """
+    Check L5 opportunities for 45-day auto-dropout to L8
+    Real-time check implementation as requested
+    """
+    try:
+        from datetime import timedelta
+        
+        now = datetime.now(timezone.utc)
+        dropout_threshold = timedelta(days=45)
+        
+        for opportunity in opportunities:
+            # Only check L5 opportunities
+            if opportunity.get("current_stage") != 5:
+                continue
+                
+            # Skip if already has a commercial decision
+            if opportunity.get("commercial_decision") in ["won", "lost"]:
+                continue
+                
+            # Check if opportunity has been in L5 for 45+ days
+            last_stage_change = None
+            
+            # Look for last stage change to L5 in stage_history
+            stage_history = opportunity.get("stage_history", [])
+            for entry in reversed(stage_history):  # Check most recent first
+                if entry.get("to_stage") == 5:
+                    last_stage_change = entry.get("changed_at")
+                    break
+            
+            # If no stage history found, use updated_at as fallback
+            if not last_stage_change:
+                last_stage_change = opportunity.get("updated_at")
+            
+            # If still no date, skip this opportunity
+            if not last_stage_change:
+                continue
+                
+            # Convert to datetime if it's a string
+            if isinstance(last_stage_change, str):
+                try:
+                    last_stage_change = datetime.fromisoformat(last_stage_change.replace('Z', '+00:00'))
+                except:
+                    continue
+            
+            # Check if 45 days have passed
+            time_in_l5 = now - last_stage_change
+            
+            if time_in_l5 >= dropout_threshold:
+                # Auto-dropout to L8
+                print(f"Auto-dropping opportunity {opportunity['id']} to L8 after {time_in_l5.days} days in L5")
+                
+                update_data = {
+                    "current_stage": 8,
+                    "status": "Dropped",
+                    "is_locked": True,
+                    "updated_at": now,
+                    "drop_reason": f"Automatically dropped after {time_in_l5.days} days in L5 Commercial Negotiation without decision",
+                    "auto_dropout_date": now
+                }
+                
+                # Add to stage history
+                stage_history_entry = {
+                    "from_stage": 5,
+                    "to_stage": 8,
+                    "changed_by": "system",
+                    "changed_at": now,
+                    "reason": "45-day auto-dropout",
+                    "notes": f"Automatically moved to L8 after {time_in_l5.days} days without Won/Lost decision"
+                }
+                
+                if "stage_history" not in opportunity:
+                    opportunity["stage_history"] = []
+                opportunity["stage_history"].append(stage_history_entry)
+                update_data["stage_history"] = opportunity["stage_history"]
+                
+                # Update in database
+                await db.opportunities.update_one(
+                    {"id": opportunity["id"]},
+                    {"$set": prepare_for_mongo(update_data)}
+                )
+                
+                # Update the opportunity object for current response
+                opportunity.update(update_data)
+                
+                # Log audit trail
+                await log_audit_trail(
+                    user_id="system",
+                    action="AUTO_DROPOUT",
+                    resource_type="Opportunity", 
+                    resource_id=opportunity["id"],
+                    details=f"Auto-dropped opportunity to L8 after {time_in_l5.days} days in L5"
+                )
+                
+                logger.info(f"Auto-dropped opportunity {opportunity['id']} from L5 to L8 after {time_in_l5.days} days")
+        
+    except Exception as e:
+        logger.error(f"Error in auto-dropout check: {e}")
+        # Don't raise exception to avoid breaking the main opportunities API
+
 @api_router.post("/opportunities/{opportunity_id}/quotations")
 async def create_quotation(
     opportunity_id: str,
