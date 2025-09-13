@@ -5899,9 +5899,9 @@ async def update_order_analysis(order_id: str, oa_data: OrderAnalysisUpdate, cur
     updated_order = await db.order_acknowledgements.find_one({"id": order_id})
     return prepare_for_json(updated_order)
 
-@api_router.delete("/order-acknowledgements/{order_id}")
-async def delete_order_acknowledgement(order_id: str, current_user: User = Depends(get_current_user)):
-    """Delete Order Acknowledgement (soft delete)"""
+@api_router.delete("/order-analysis/{order_id}")
+async def delete_order_analysis(order_id: str, current_user: User = Depends(get_current_user)):
+    """Delete Order Analysis (soft delete)"""
     
     # Check if order exists
     existing_order = await db.order_acknowledgements.find_one({"id": order_id, "is_active": True})
