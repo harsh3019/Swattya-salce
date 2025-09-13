@@ -39,10 +39,11 @@ const iconMap = {
   'Opportunities': TrendingUp,
   'Activity Logs': Activity,
   'Dashboard': Home,
-  'Primary Categories': Database,
-  'Products': Database,
-  'Rate Cards': Database,
-  'Purchase Costs': Database
+  'Primary Categories': Tags,
+  'Products': Package,
+  'Rate Cards': CreditCard,
+  'Sales Prices': DollarSign,
+  'Purchase Costs': Calculator
 };
 
 const DynamicSidebar = () => {
