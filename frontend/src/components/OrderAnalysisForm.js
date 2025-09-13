@@ -178,9 +178,9 @@ const OrderAnalysisForm = () => {
             Back to Opportunities
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create Order Acknowledgement</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Create Order Analysis</h1>
             <p className="text-gray-600 mt-1">
-              Generate order from won opportunity
+              Generate order analysis from won opportunity
             </p>
           </div>
         </div>
