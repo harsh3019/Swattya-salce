@@ -15,7 +15,12 @@ import {
   Target,
   TrendingUp,
   Home,
-  Database
+  Database,
+  Tags,
+  Package,
+  CreditCard,
+  DollarSign,
+  Calculator
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
