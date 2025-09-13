@@ -33,6 +33,7 @@ import PrimaryCategoriesManager from './components/PrimaryCategoriesManager';
 import ProductsManager from './components/ProductsManager';
 import RateCardsManager from './components/RateCardsManager';
 import PurchaseCostsManager from './components/PurchaseCostsManager';
+import SalesPricesManager from './components/SalesPricesManager';
 
 // Import new RBAC components
 import DynamicSidebar from './components/DynamicSidebar';
