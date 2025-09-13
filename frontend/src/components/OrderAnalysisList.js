@@ -257,8 +257,8 @@ const OrderAnalysisList = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Order Acknowledgements</h1>
-          <p className="text-gray-600 mt-1">Manage order acknowledgements and approvals</p>
+          <h1 className="text-3xl font-bold text-gray-900">Order Analysis</h1>
+          <p className="text-gray-600 mt-1">Manage order analysis and approvals</p>
         </div>
       </div>
 
