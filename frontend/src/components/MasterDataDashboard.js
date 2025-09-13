@@ -170,6 +170,7 @@ const MasterDataDashboard = () => {
                 <li>Add Products with SQU codes</li>
                 <li>Set up Rate Cards</li>
                 <li>Configure Purchase Costs</li>
+                <li>Set Sales Prices with margins</li>
               </ol>
             </div>
             <div>
