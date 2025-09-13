@@ -141,6 +141,30 @@ backend:
           agent: "main"
           comment: "✅ 45-DAY AUTO-DROPOUT IMPLEMENTED: Real-time check function added to opportunities API. Automatically moves L5 opportunities to L8 (Dropped) after 45 days without Won/Lost decision. Includes proper stage_history logging, audit trail, and system notifications. Integrated into GET /api/opportunities endpoint."
 
+  - task: "Issue #3: Company Data Inheritance Fix"
+    implemented: true
+    working: true
+    file: "backend/server.py line 4873 - company name resolution fix"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing + main"
+          comment: "✅ ISSUE #3 FULLY RESOLVED: Fixed backend company name resolution (company.get('company_name', company.get('name', 'Unknown Company'))). All opportunities now display proper company names instead of 'Unknown Company'. Company data inheritance from leads to opportunities working perfectly (7/7 opportunities with resolved company names)."
+
+  - task: "Master Data Creation - Products, Rate Cards, Purchase Costs"
+    implemented: true
+    working: true
+    file: "Database collections: mst_products, mst_rate_cards, mst_sales_prices, mst_purchase_costs"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ MASTER DATA CREATED: Products (22 with SQU codes), Rate Cards (6), Sales Prices (77), Purchase Costs (22). All products now have SQU codes like 'SQU-CRM-001', 'SQU-WEB-001'. Pricing structure with 35% margins established. Ready for quotation creation and pricing workflows."
+
   - task: "Admin Authentication"
     implemented: true
     working: true
