@@ -26,13 +26,18 @@ const iconMap = {
   'User Management': UsersIcon,
   'Sales': Building,
   'System': Settings,
+  'Master Data': Database,
   'Users': UsersIcon,
   'Companies': Building,
   'Contacts': Phone,
   'Leads': Target,
   'Opportunities': TrendingUp,
   'Activity Logs': Activity,
-  'Dashboard': Home
+  'Dashboard': Home,
+  'Primary Categories': Database,
+  'Products': Database,
+  'Rate Cards': Database,
+  'Purchase Costs': Database
 };
 
 const DynamicSidebar = () => {
