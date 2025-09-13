@@ -105,6 +105,42 @@
 user_problem_statement: "Resolve SAWAYATTA ERP Critical Issues: 1) OPPORTUNITY STAGE MANAGEMENT - Fix stage progression and form navigation so current stage reflects in list and 'Manage Stages' opens correct form. 2) STAGE FLOW LOGIC CORRECTION - Implement L1→L2→L3→L4→L5→(L6 Won/L7 Lost/L8 Auto-Dropped) flow with Won/Lost decision in L5 and 45-day auto-dropout logic. 3) COMPANY DATA INHERITANCE - Ensure company info flows from Leads to Opportunities. 4) QUOTATION APPROVAL WORKFLOW - Add Manager/Admin approval process. 5) MASTER DATA CREATION - Create Primary Categories, Products with SQU codes, Rate Cards, Pricing Management. 6) OA FORM EDITING - Enable editing of Order Analysis forms. 7) DOCUMENT UPLOAD IN OA - Fix file upload functionality."
 
 backend:
+  - task: "Issue #1: Opportunity Stage Management Fix"
+    implemented: true
+    working: true
+    file: "backend/server.py, frontend/src/components/OpportunityStageForm.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ ISSUE #1 FULLY RESOLVED: Stage master data fixed (L1-L8 proper format), opportunities created at multiple stages (L1,L2,L4,L6), 'Manage Stages' opens at correct current stage for ALL stages. OpportunityStageForm.js correctly sets currentStage from oppData.current_stage. Stage display shows proper 'L2 - Qualification' format in opportunities list."
+
+  - task: "Issue #2: Stage Flow Logic Correction - L5 Won/Lost Decision"
+    implemented: true
+    working: true
+    file: "frontend/src/components/OpportunityStageForm.js, backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ L5 WON/LOST DECISION IMPLEMENTED: Added commercial_decision dropdown to L5 form with 'won'/'lost' options. Updated handleSaveAndNext to route L5→L6 (won) or L5→L7 (lost). Backend models updated with commercial_decision field. Successfully tested L5→L6 Won transition. Frontend shows 45-day auto-dropout warning."
+
+  - task: "Issue #2: 45-Day Auto-Dropout Logic"
+    implemented: true
+    working: true
+    file: "backend/server.py - check_and_auto_dropout_opportunities function"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ 45-DAY AUTO-DROPOUT IMPLEMENTED: Real-time check function added to opportunities API. Automatically moves L5 opportunities to L8 (Dropped) after 45 days without Won/Lost decision. Includes proper stage_history logging, audit trail, and system notifications. Integrated into GET /api/opportunities endpoint."
+
   - task: "Admin Authentication"
     implemented: true
     working: true
