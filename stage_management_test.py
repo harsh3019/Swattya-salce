@@ -84,8 +84,8 @@ class StageManagementTester:
                 stage_details = []
                 
                 for stage in stages:
-                    code = stage.get("code", "")
-                    name = stage.get("name", "")
+                    code = stage.get("stage_code", "")
+                    name = stage.get("stage_name", "")
                     actual_codes.append(code)
                     stage_details.append(f"{code} - {name}")
                 
