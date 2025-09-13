@@ -101,7 +101,7 @@ class StageManagementTester:
                     ("L2", "Qualification"), 
                     ("L3", "Proposal"),
                     ("L4", "Technical Qualification"),
-                    ("L5", "Negotiation"),
+                    ("L5", "Commercial Negotiation"),
                     ("L6", "Won"),
                     ("L7", "Lost"),
                     ("L8", "Dropped")
