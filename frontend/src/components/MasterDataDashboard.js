@@ -8,7 +8,8 @@ import {
   Calculator,
   Plus,
   Settings,
-  Database
+  Database,
+  DollarSign
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
