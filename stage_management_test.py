@@ -340,13 +340,13 @@ class StageManagementTester:
                 stages = response.json()
                 
                 # Verify each stage has required fields
-                required_fields = ["id", "code", "name", "stage_order"]
+                required_fields = ["id", "stage_code", "stage_name", "stage_order"]
                 completeness_correct = True
                 
                 for stage in stages:
                     missing_fields = [field for field in required_fields if not stage.get(field)]
                     if missing_fields:
-                        self.log_test("Stage Data Completeness", False, f"Stage {stage.get('code', 'Unknown')} missing fields: {missing_fields}")
+                        self.log_test("Stage Data Completeness", False, f"Stage {stage.get('stage_code', 'Unknown')} missing fields: {missing_fields}")
                         completeness_correct = False
                 
                 if completeness_correct:
