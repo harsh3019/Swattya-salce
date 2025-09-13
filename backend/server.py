@@ -4870,7 +4870,7 @@ async def get_opportunities(current_user: User = Depends(get_current_user)):
             if normalized.get("company_id"):
                 try:
                     company = await db.companies.find_one({"id": normalized["company_id"]})
-                    normalized["company_name"] = company["company_name"] if company else "Unknown Company"
+                    normalized["company_name"] = company.get("company_name", company.get("name", "Unknown Company")) if company else "Unknown Company"
                 except:
                     normalized["company_name"] = "Unknown Company"
             else:
