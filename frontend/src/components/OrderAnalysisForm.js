@@ -52,10 +52,19 @@ const OrderAnalysisForm = () => {
   const baseURL = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
-    if (opportunityId) {
+    if (orderId) {
+      // Edit mode - load existing order
+      setIsEditMode(true);
+      loadExistingOrder();
+    } else if (opportunityId) {
+      // Create mode - check eligibility and load data from opportunity
+      setIsEditMode(false);
       checkOAEligibility();
+    } else {
+      setError('Invalid parameters - missing order ID or opportunity ID');
+      setLoading(false);
     }
-  }, [opportunityId]);
+  }, [opportunityId, orderId]);
 
   const checkOAEligibility = async () => {
     try {
