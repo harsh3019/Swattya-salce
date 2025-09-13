@@ -394,10 +394,10 @@ const OrderAnalysisList = () => {
         onView={handleViewOrder}
         onEdit={handleEditOrder}
         onDelete={handleDeleteOrder}
-        title="Order Acknowledgements"
-        description="Manage order acknowledgements and track their status"
-        modulePath="/order-acknowledgements"
-        entityName="order-acknowledgements"
+        title="Order Analysis"
+        description="Manage order analysis and track their status"
+        modulePath="/order-analysis"
+        entityName="order-analysis"
       />
 
       {/* Order Details Dialog */}
