@@ -48,7 +48,7 @@ const MasterDataDashboard = () => {
       id: 'sales-prices',
       title: 'Sales Prices',
       description: 'Manage selling prices for products in rate cards',
-      icon: Calculator,
+      icon: DollarSign,
       color: 'bg-emerald-500',
       path: '/master-data/sales-prices',
       stats: 'Price Records'
