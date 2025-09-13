@@ -4775,17 +4775,14 @@ async def get_stages(current_user: User = Depends(get_current_user)):
 @api_router.get("/mst/rate-cards")
 async def get_rate_cards(current_user: User = Depends(get_current_user)):
     """Get all active rate cards"""
-    current_date = datetime.now(timezone.utc)
-    query = {
-        "is_active": True,
-        "effective_from": {"$lte": current_date},
-        "$or": [
-            {"effective_to": None},
-            {"effective_to": {"$gte": current_date}}
-        ]
-    }
-    rate_cards = await db.mst_rate_cards.find(query).to_list(None)
-    return [prepare_for_json(card) for card in rate_cards]
+    try:
+        # For now, just return all active rate cards without date filtering
+        # to avoid datetime comparison issues
+        rate_cards = await db.mst_rate_cards.find({"is_active": True}).sort("rate_card_name", 1).to_list(None)
+        return [prepare_for_json(card) for card in rate_cards]
+    except Exception as e:
+        logger.error(f"Error fetching rate cards: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching rate cards")
 
 @api_router.get("/mst/sales-prices/{rate_card_id}")
 async def get_sales_prices_by_rate_card(rate_card_id: str, current_user: User = Depends(get_current_user)):
