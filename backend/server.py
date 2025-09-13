@@ -5201,7 +5201,7 @@ async def validate_stage_data(stage: int, data: dict, opportunity_id: str) -> Li
         if not data.get("selected_quotation_id"):
             errors.append("Selected Quotation is required for L4 - Technical Qualification")
         
-        # Verify quotation exists
+        # Verify quotation exists and is approved
         if data.get("selected_quotation_id"):
             quotation = await db.quotations.find_one({
                 "id": data["selected_quotation_id"],
