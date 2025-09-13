@@ -109,12 +109,12 @@ class StageManagementTester:
                 
                 format_correct = True
                 for expected_code, expected_name in expected_stages:
-                    found_stage = next((s for s in stages if s.get("code") == expected_code), None)
+                    found_stage = next((s for s in stages if s.get("stage_code") == expected_code), None)
                     if not found_stage:
                         self.log_test("Stage Format Verification", False, f"Stage {expected_code} not found")
                         format_correct = False
-                    elif expected_name.lower() not in found_stage.get("name", "").lower():
-                        self.log_test("Stage Format Verification", False, f"Stage {expected_code} name mismatch. Expected: {expected_name}, Got: {found_stage.get('name')}")
+                    elif expected_name.lower() not in found_stage.get("stage_name", "").lower():
+                        self.log_test("Stage Format Verification", False, f"Stage {expected_code} name mismatch. Expected: {expected_name}, Got: {found_stage.get('stage_name')}")
                         format_correct = False
                 
                 if format_correct:
