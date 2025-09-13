@@ -389,9 +389,16 @@ class OpportunityStageTestRunner:
         
         # Summary of findings
         print(f"\n🔍 KEY FINDINGS:")
-        if self.opportunities_data:
-            total_opps = len(self.opportunities_data)
-            beyond_l1 = sum(1 for opp in self.opportunities_data if opp.get('current_stage', 1) > 1)
+        if isinstance(self.opportunities_data, dict):
+            opportunities_list = self.opportunities_data.get('opportunities', [])
+        elif isinstance(self.opportunities_data, list):
+            opportunities_list = self.opportunities_data
+        else:
+            opportunities_list = []
+            
+        if opportunities_list:
+            total_opps = len(opportunities_list)
+            beyond_l1 = sum(1 for opp in opportunities_list if opp.get('current_stage', 1) > 1)
             
             print(f"  • Total Opportunities: {total_opps}")
             print(f"  • Opportunities Beyond L1: {beyond_l1}")
