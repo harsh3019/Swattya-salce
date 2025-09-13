@@ -350,7 +350,7 @@ class StageManagementTester:
                         completeness_correct = False
                 
                 if completeness_correct:
-                    self.log_test("Stage Master Data Completeness", True, "All stages have required fields (id, code, name, stage_order)")
+                    self.log_test("Stage Master Data Completeness", True, "All stages have required fields (id, stage_code, stage_name, stage_order)")
                     
                 # Verify stage order sequence
                 stage_orders = [s.get("stage_order") for s in stages if s.get("stage_order")]
