@@ -618,11 +618,16 @@ const QuotationBuilder = () => {
                       <SelectValue placeholder="Select rate card" />
                     </SelectTrigger>
                     <SelectContent>
-                      {rateCards.map((card) => (
-                        <SelectItem key={card.id} value={card.id}>
-                          {card.rate_card_name} ({card.rate_card_code})
-                        </SelectItem>
-                      ))}
+                      {console.log('🔍 Rendering rate cards dropdown:', rateCards.length, rateCards)}
+                      {rateCards.length === 0 ? (
+                        <SelectItem value="" disabled>No rate cards available</SelectItem>
+                      ) : (
+                        rateCards.map((card) => (
+                          <SelectItem key={card.id} value={card.id}>
+                            {card.rate_card_name} ({card.rate_card_code})
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
