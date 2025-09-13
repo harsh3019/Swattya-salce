@@ -38,7 +38,9 @@ def analyze_company_inheritance():
         companies = companies_response.json()
         print(f"   Found {len(companies)} companies")
         for company in companies:
-            print(f"   • {company.get('company_name')} (ID: {company.get('id')})")
+            name = company.get('company_name', company.get('name', 'Unknown'))
+            print(f"   • {name} (ID: {company.get('id')})")
+            print(f"     Structure: {list(company.keys())}")
     else:
         print(f"   ❌ Failed to get companies: {companies_response.status_code}")
         return
