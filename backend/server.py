@@ -5975,7 +5975,7 @@ async def upload_order_analysis_attachment(
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user)
 ):
-    """Upload attachment for Order Acknowledgement"""
+    """Upload attachment for Order Analysis"""
     
     # Check if order exists
     existing_order = await db.order_acknowledgements.find_one({"id": order_id, "is_active": True})
