@@ -9,7 +9,7 @@ import json
 import sys
 
 # Configuration
-BACKEND_URL = "https://sawayatta-erp-2.preview.emergentagent.com"
+BACKEND_URL = "https://quotation-mgmt.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Test credentials

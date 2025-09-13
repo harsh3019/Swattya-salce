@@ -7,7 +7,7 @@ import requests
 import json
 
 # Configuration
-BASE_URL = "https://sawayatta-erp-2.preview.emergentagent.com/api"
+BASE_URL = "https://quotation-mgmt.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {
     "username": "admin", 
     "password": "admin123"

@@ -9,7 +9,7 @@ from pymongo import MongoClient
 import os
 
 # Configuration
-BASE_URL = "https://d2400459-c338-4a45-a734-97b20778d811.preview.emergentagent.com/api"
+BASE_URL = "https://quotation-mgmt.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {
     "username": "admin", 
     "password": "admin123"
