@@ -14,7 +14,8 @@ import {
   Phone,
   Target,
   TrendingUp,
-  Home
+  Home,
+  Database
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
