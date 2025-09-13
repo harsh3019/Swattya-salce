@@ -153,6 +153,30 @@ backend:
           agent: "testing + main"
           comment: "✅ ISSUE #3 FULLY RESOLVED: Fixed backend company name resolution (company.get('company_name', company.get('name', 'Unknown Company'))). All opportunities now display proper company names instead of 'Unknown Company'. Company data inheritance from leads to opportunities working perfectly (7/7 opportunities with resolved company names)."
 
+  - task: "Issue #4: Quotation Approval Workflow"
+    implemented: true
+    working: true
+    file: "backend/server.py - quotation approval endpoints"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ ISSUE #4 FULLY IMPLEMENTED: Added Manager/Admin approval workflow for quotations. API endpoints: POST /quotations/{id}/approve, POST /quotations/{id}/reject, GET /quotations/pending-approval, GET /quotations/approved. Updated L4 stage validation to only allow approved quotations. Admin user bypasses role check. Route ordering fixed for proper endpoint resolution."
+
+  - task: "Issue #6: Document Upload in OA"
+    implemented: true
+    working: true
+    file: "backend/server.py - OA attachment endpoints"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ ISSUE #6 FULLY IMPLEMENTED: Enhanced OA document upload system. API endpoints: POST /order-analysis/{id}/upload-attachment (file upload), GET /order-analysis/{id}/attachments (list files), GET /order-analysis/{id}/attachments/{id}/download (download), DELETE /order-analysis/{id}/attachments/{id} (delete). File validation, audit trail, and proper error handling implemented."
+
   - task: "Master Data Creation - Products, Rate Cards, Purchase Costs"
     implemented: true
     working: true
@@ -163,7 +187,7 @@ backend:
     status_history:
         - working: true
           agent: "main"
-          comment: "✅ MASTER DATA CREATED: Products (22 with SQU codes), Rate Cards (6), Sales Prices (77), Purchase Costs (22). All products now have SQU codes like 'SQU-CRM-001', 'SQU-WEB-001'. Pricing structure with 35% margins established. Ready for quotation creation and pricing workflows."
+          comment: "✅ COMPREHENSIVE MASTER DATA CREATED: Primary Categories (5), Products (10 with SQU codes), Rate Cards (3), Sales Prices (30), Purchase Costs (10). All products have SQU codes like 'SQU-SD-WEB-001', 'SQU-IT-NET-001'. Multi-tier pricing (Standard/Premium/Bulk) with 35% margins established. Ready for complete quotation workflow."
 
   - task: "Admin Authentication"
     implemented: true
