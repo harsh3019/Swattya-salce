@@ -4632,6 +4632,15 @@ class OrderAcknowledgementUpdate(BaseModel):
     profit_margin: Optional[float] = Field(None, ge=0, le=100)
     remarks: Optional[str] = Field(None, max_length=500)
 
+class OrderAnalysisUpdate(BaseModel):
+    customer_name: Optional[str] = Field(None, min_length=2, max_length=200)
+    order_date: Optional[date] = None
+    items: Optional[List[OAItem]] = None
+    total_amount: Optional[float] = Field(None, ge=0)
+    currency_id: Optional[str] = None
+    profit_margin: Optional[float] = Field(None, ge=0, le=100)
+    remarks: Optional[str] = Field(None, max_length=500)
+
 class OrderAcknowledgement(OrderAcknowledgementBase, BaseAuditModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     order_id: str = Field(..., pattern=r'^ORD-[A-Z0-9]{7}$')
