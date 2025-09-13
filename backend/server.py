@@ -4464,6 +4464,7 @@ class OpportunityBase(BaseModel):
     po_number: Optional[str] = None
     po_date: Optional[date] = None
     po_file: Optional[str] = None
+    commercial_decision: Optional[str] = None  # "won", "lost", or None
     
     # Stage L6 - Won Fields
     final_value: Optional[float] = None
