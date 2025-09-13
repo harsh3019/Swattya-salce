@@ -5933,8 +5933,8 @@ async def delete_order_analysis(order_id: str, current_user: User = Depends(get_
     
     return {"message": "Order deleted successfully"}
 
-@api_router.patch("/order-acknowledgements/{order_id}/status")
-async def update_order_status(order_id: str, status_data: dict, current_user: User = Depends(get_current_user)):
+@api_router.patch("/order-analysis/{order_id}/status")
+async def update_order_analysis_status(order_id: str, status_data: dict, current_user: User = Depends(get_current_user)):
     """Update order status (for approvals)"""
     
     # Check if order exists
