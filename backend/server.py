@@ -6878,5 +6878,91 @@ async def get_sales_prices(current_user: User = Depends(get_current_user)):
         logger.error(f"Error fetching sales prices: {e}")
         raise HTTPException(status_code=500, detail="Error fetching sales prices")
 
+@api_router.post("/mst/sales-prices")
+async def create_sales_price(
+    price_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Create a new sales price"""
+    try:
+        price_id = str(uuid.uuid4())
+        price_record = {
+            "id": price_id,
+            "rate_card_id": price_data.get("rate_card_id"),
+            "product_id": price_data.get("product_id"),
+            "sales_price": float(price_data.get("sales_price", 0)),
+            "pricing_type": price_data.get("pricing_type", "one_time"),
+            "effective_date": datetime.fromisoformat(price_data.get("effective_date")) if price_data.get("effective_date") else datetime.now(timezone.utc),
+            "is_active": price_data.get("is_active", True),
+            "created_by": current_user.id,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        await db.mst_sales_prices.insert_one(prepare_for_mongo(price_record))
+        
+        return {
+            "message": "Sales price created successfully",
+            "id": price_id,
+            "price": prepare_for_json(price_record)
+        }
+    except Exception as e:
+        logger.error(f"Error creating sales price: {e}")
+        raise HTTPException(status_code=500, detail="Error creating sales price")
+
+@api_router.put("/mst/sales-prices/{price_id}")
+async def update_sales_price(
+    price_id: str,
+    price_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Update a sales price"""
+    try:
+        existing = await db.mst_sales_prices.find_one({"id": price_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Sales price not found")
+        
+        update_data = {
+            "rate_card_id": price_data.get("rate_card_id"),
+            "product_id": price_data.get("product_id"),
+            "sales_price": float(price_data.get("sales_price", 0)),
+            "pricing_type": price_data.get("pricing_type", "one_time"),
+            "effective_date": datetime.fromisoformat(price_data.get("effective_date")) if price_data.get("effective_date") else None,
+            "is_active": price_data.get("is_active", True),
+            "updated_by": current_user.id,
+            "updated_at": datetime.now(timezone.utc)
+        }
+        
+        await db.mst_sales_prices.update_one(
+            {"id": price_id},
+            {"$set": prepare_for_mongo(update_data)}
+        )
+        
+        return {"message": "Sales price updated successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating sales price: {e}")
+        raise HTTPException(status_code=500, detail="Error updating sales price")
+
+@api_router.delete("/mst/sales-prices/{price_id}")
+async def delete_sales_price(
+    price_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a sales price"""
+    try:
+        existing = await db.mst_sales_prices.find_one({"id": price_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Sales price not found")
+        
+        await db.mst_sales_prices.delete_one({"id": price_id})
+        return {"message": "Sales price deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting sales price: {e}")
+        raise HTTPException(status_code=500, detail="Error deleting sales price")
+
 # Include router after all endpoints are defined
 app.include_router(api_router)
