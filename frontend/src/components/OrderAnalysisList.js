@@ -483,4 +483,4 @@ const OrderAnalysisList = () => {
   );
 };
 
-export default OrderAcknowledgementList;
+export default OrderAnalysisList;
