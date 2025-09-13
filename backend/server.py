@@ -6356,5 +6356,121 @@ async def upload_order_analysis_attachment(
     
     return {"message": "Attachment uploaded successfully", "attachment": attachment_data}
 
+@api_router.get("/order-analysis/{order_id}/attachments/{attachment_id}/download")
+async def download_order_analysis_attachment(
+    order_id: str,
+    attachment_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Download attachment for Order Analysis"""
+    from fastapi.responses import FileResponse
+    
+    # Check if order exists
+    existing_order = await db.order_acknowledgements.find_one({"id": order_id, "is_active": True})
+    if not existing_order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Find attachment
+    attachments = existing_order.get("attachments", [])
+    attachment = next((att for att in attachments if att["id"] == attachment_id), None)
+    
+    if not attachment:
+        raise HTTPException(status_code=404, detail="Attachment not found")
+    
+    file_path = Path(attachment["file_path"])
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found on server")
+    
+    # Log audit trail for download
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="DOWNLOAD",
+        resource_type="OrderAttachment",
+        resource_id=attachment_id,
+        details=f"Downloaded attachment {attachment['original_filename']} from order {existing_order.get('order_id')}"
+    )
+    
+    return FileResponse(
+        path=file_path,
+        filename=attachment["original_filename"],
+        media_type=attachment["mime_type"]
+    )
+
+@api_router.get("/order-analysis/{order_id}/attachments")
+async def get_order_analysis_attachments(
+    order_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Get all attachments for Order Analysis"""
+    
+    # Check if order exists
+    existing_order = await db.order_acknowledgements.find_one({"id": order_id, "is_active": True})
+    if not existing_order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    attachments = existing_order.get("attachments", [])
+    
+    # Enhance with user information
+    enhanced_attachments = []
+    for attachment in attachments:
+        uploaded_by_user = await db.users.find_one({"id": attachment.get("uploaded_by")})
+        enhanced_attachment = {
+            **attachment,
+            "uploaded_by_name": uploaded_by_user.get("username", "Unknown") if uploaded_by_user else "Unknown",
+            "download_url": f"/api/order-analysis/{order_id}/attachments/{attachment['id']}/download"
+        }
+        enhanced_attachments.append(enhanced_attachment)
+    
+    return {
+        "order_id": existing_order.get("order_id"),
+        "attachments_count": len(enhanced_attachments),
+        "attachments": enhanced_attachments
+    }
+
+@api_router.delete("/order-analysis/{order_id}/attachments/{attachment_id}")
+async def delete_order_analysis_attachment(
+    order_id: str,
+    attachment_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Delete attachment from Order Analysis"""
+    
+    # Check if order exists
+    existing_order = await db.order_acknowledgements.find_one({"id": order_id, "is_active": True})
+    if not existing_order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Find attachment
+    attachments = existing_order.get("attachments", [])
+    attachment = next((att for att in attachments if att["id"] == attachment_id), None)
+    
+    if not attachment:
+        raise HTTPException(status_code=404, detail="Attachment not found")
+    
+    # Remove file from filesystem
+    file_path = Path(attachment["file_path"])
+    if file_path.exists():
+        try:
+            file_path.unlink()
+        except Exception as e:
+            logger.warning(f"Could not delete file {file_path}: {e}")
+    
+    # Remove attachment from database
+    await db.order_acknowledgements.update_one(
+        {"id": order_id},
+        {"$pull": {"attachments": {"id": attachment_id}}}
+    )
+    
+    # Log audit trail
+    await log_audit_trail(
+        user_id=current_user.id,
+        action="DELETE",
+        resource_type="OrderAttachment",
+        resource_id=attachment_id,
+        details=f"Deleted attachment {attachment['original_filename']} from order {existing_order.get('order_id')}"
+    )
+    
+    return {"message": "Attachment deleted successfully"}
+
 # Include router after all endpoints are defined
 app.include_router(api_router)
