@@ -291,8 +291,16 @@ class CompanyInheritanceTest:
         try:
             response = self.session.get(f"{BACKEND_URL}/opportunities")
             if response.status_code == 200:
-                opportunities = response.json()
-                if isinstance(opportunities, list) and len(opportunities) > 0:
+                data = response.json()
+                # Handle different response formats
+                if isinstance(data, dict) and 'opportunities' in data:
+                    opportunities = data['opportunities']
+                elif isinstance(data, list):
+                    opportunities = data
+                else:
+                    opportunities = data if isinstance(data, list) else []
+                
+                if len(opportunities) > 0:
                     # Check how many opportunities have company information
                     opps_with_company_id = [opp for opp in opportunities if opp.get('company_id')]
                     opps_with_company_name = [opp for opp in opportunities if opp.get('company_name')]
