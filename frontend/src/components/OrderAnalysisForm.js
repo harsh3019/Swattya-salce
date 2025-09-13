@@ -166,15 +166,32 @@ const OrderAnalysisForm = () => {
       setSaving(true);
       const token = localStorage.getItem('token');
 
-      const response = await axios.post(`${baseURL}/api/order-analysis`, formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      if (isEditMode) {
+        // Update existing order
+        const response = await axios.put(`${baseURL}/api/order-analysis/${orderId}`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
-      alert('Order Analysis created successfully!');
+        // Check if order was moved to "Under Review" status due to approval requirement
+        const updatedOrder = response.data;
+        if (originalOrder?.status === 'Approved' && updatedOrder.status === 'Under Review') {
+          alert('Order Analysis updated successfully! Since the order was previously approved, it has been moved to "Under Review" status and requires re-approval.');
+        } else {
+          alert('Order Analysis updated successfully!');
+        }
+      } else {
+        // Create new order
+        const response = await axios.post(`${baseURL}/api/order-analysis`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        alert('Order Analysis created successfully!');
+      }
+      
       navigate('/order-analysis');
     } catch (error) {
       console.error('Error saving OA:', error);
-      alert(error.response?.data?.detail || 'Error saving Order Analysis');
+      const errorMessage = error.response?.data?.detail || `Error ${isEditMode ? 'updating' : 'creating'} Order Analysis`;
+      alert(errorMessage);
     } finally {
       setSaving(false);
     }
