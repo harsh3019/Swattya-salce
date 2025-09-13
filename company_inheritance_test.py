@@ -80,26 +80,31 @@ class CompanyInheritanceTest:
         try:
             response = self.session.get(f"{BACKEND_URL}/leads")
             if response.status_code == 200:
-                leads = response.json()
-                if isinstance(leads, list):
+                data = response.json()
+                # Handle paginated response format
+                if isinstance(data, dict) and 'leads' in data:
+                    leads = data['leads']
+                elif isinstance(data, list):
+                    leads = data
+                else:
+                    self.log_result("Leads Company Data", False, "Invalid leads response format", {"response": data})
+                    return []
+                
+                if leads:
                     leads_with_company = [lead for lead in leads if lead.get('company_id')]
                     total_leads = len(leads)
                     company_leads = len(leads_with_company)
                     
-                    if total_leads > 0:
-                        self.log_result("Leads Company Data", company_leads > 0, 
-                                      f"Found {company_leads}/{total_leads} leads with company_id",
-                                      {
-                                          "total_leads": total_leads,
-                                          "leads_with_company": company_leads,
-                                          "sample_lead": leads_with_company[0] if leads_with_company else leads[0] if leads else None
-                                      })
-                        return leads
-                    else:
-                        self.log_result("Leads Company Data", False, "No leads found in system")
-                        return []
+                    self.log_result("Leads Company Data", company_leads > 0, 
+                                  f"Found {company_leads}/{total_leads} leads with company_id",
+                                  {
+                                      "total_leads": total_leads,
+                                      "leads_with_company": company_leads,
+                                      "sample_lead": leads_with_company[0] if leads_with_company else leads[0] if leads else None
+                                  })
+                    return leads
                 else:
-                    self.log_result("Leads Company Data", False, "Invalid leads response format", {"response": leads})
+                    self.log_result("Leads Company Data", False, "No leads found in system")
                     return []
             else:
                 self.log_result("Leads Company Data", False, 
