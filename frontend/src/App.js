@@ -600,6 +600,33 @@ function App() {
                 </ProtectedRoute>
               } />
               
+              {/* Master Data Management Routes */}
+              <Route path="/master-data" element={
+                <ProtectedRoute>
+                  <MasterDataDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/master-data/primary-categories" element={
+                <ProtectedRoute>
+                  <PrimaryCategoriesManager />
+                </ProtectedRoute>
+              } />
+              <Route path="/master-data/products" element={
+                <ProtectedRoute>
+                  <ProductsManager />
+                </ProtectedRoute>
+              } />
+              <Route path="/master-data/rate-cards" element={
+                <ProtectedRoute>
+                  <RateCardsManager />
+                </ProtectedRoute>
+              } />
+              <Route path="/master-data/purchase-costs" element={
+                <ProtectedRoute>
+                  <PurchaseCostsManager />
+                </ProtectedRoute>
+              } />
+              
               <Route path="/" element={<HomeRoute />} />
             </Routes>
           </BrowserRouter>
