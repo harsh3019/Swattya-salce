@@ -23,13 +23,15 @@ import { usePermissions } from '../contexts/PermissionContext';
 import axios from 'axios';
 
 const OrderAnalysisForm = () => {
-  const { opportunityId } = useParams();
+  const { opportunityId, orderId } = useParams();
   const navigate = useNavigate();
   const { permissions } = usePermissions();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [anomalies, setAnomalies] = useState([]);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [originalOrder, setOriginalOrder] = useState(null);
 
   // Form data
   const [formData, setFormData] = useState({
