@@ -242,17 +242,30 @@ const OrderAnalysisForm = () => {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => navigate('/opportunities')}
+            onClick={() => navigate(isEditMode ? '/order-analysis' : '/opportunities')}
             className="text-gray-600"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Opportunities
+            Back to {isEditMode ? 'Orders' : 'Opportunities'}
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create Order Analysis</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {isEditMode ? 'Edit Order Analysis' : 'Create Order Analysis'}
+            </h1>
             <p className="text-gray-600 mt-1">
-              Generate order analysis from won opportunity
+              {isEditMode 
+                ? `Modify order ${originalOrder?.order_id || ''} details` 
+                : 'Generate order analysis from won opportunity'
+              }
             </p>
+            {isEditMode && originalOrder?.status === 'Approved' && (
+              <div className="flex items-center gap-2 mt-2">
+                <AlertTriangle className="w-4 h-4 text-yellow-600" />
+                <span className="text-sm text-yellow-800 font-medium">
+                  This order is approved. Changes will require re-approval.
+                </span>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -262,7 +275,7 @@ const OrderAnalysisForm = () => {
             className="bg-blue-600 hover:bg-blue-700"
           >
             <Save className="w-4 h-4 mr-2" />
-            {saving ? 'Saving...' : 'Create Order'}
+            {saving ? 'Saving...' : (isEditMode ? 'Update Order' : 'Create Order')}
           </Button>
         </div>
       </div>
