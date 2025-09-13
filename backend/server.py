@@ -4610,6 +4610,19 @@ class OrderAcknowledgementBase(BaseModel):
 class OrderAcknowledgementCreate(OrderAcknowledgementBase):
     pass
 
+class OrderAnalysisBase(BaseModel):
+    opportunity_id: str = Field(..., description="Reference to won opportunity")
+    customer_name: str = Field(..., min_length=2, max_length=200)
+    order_date: date = Field(default_factory=lambda: datetime.now().date())
+    items: List[OAItem] = Field(default_factory=list)
+    total_amount: float = Field(..., ge=0)
+    currency_id: str = Field(..., description="Reference to currency")
+    profit_margin: float = Field(default=0, ge=0, le=100)
+    remarks: Optional[str] = Field(None, max_length=500)
+
+class OrderAnalysisCreate(OrderAnalysisBase):
+    pass
+
 class OrderAcknowledgementUpdate(BaseModel):
     customer_name: Optional[str] = Field(None, min_length=2, max_length=200)
     order_date: Optional[date] = None
