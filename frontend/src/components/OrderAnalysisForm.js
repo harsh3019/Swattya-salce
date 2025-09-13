@@ -120,7 +120,7 @@ const OrderAnalysisForm = () => {
       navigate('/order-analysis');
     } catch (error) {
       console.error('Error saving OA:', error);
-      alert(error.response?.data?.detail || 'Error saving Order Acknowledgement');
+      alert(error.response?.data?.detail || 'Error saving Order Analysis');
     } finally {
       setSaving(false);
     }
