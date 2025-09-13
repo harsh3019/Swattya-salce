@@ -203,7 +203,7 @@ class StageManagementTester:
                 return False
             
             stages = stages_response.json()
-            stage_map = {s.get("stage_order", s.get("id")): f"{s.get('code')} - {s.get('name')}" for s in stages}
+            stage_map = {s.get("stage_order", s.get("id")): f"{s.get('stage_code')} - {s.get('stage_name')}" for s in stages}
             
             # Get opportunities to test stage resolution
             opp_response = self.session.get(f"{API_BASE}/opportunities")
