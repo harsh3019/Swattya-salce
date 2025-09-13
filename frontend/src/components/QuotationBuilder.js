@@ -618,7 +618,6 @@ const QuotationBuilder = () => {
                       <SelectValue placeholder="Select rate card" />
                     </SelectTrigger>
                     <SelectContent>
-                      {console.log('🔍 Rendering rate cards dropdown:', rateCards.length, rateCards)}
                       {rateCards.length === 0 ? (
                         <SelectItem value="_no_cards_available" disabled>No rate cards available</SelectItem>
                       ) : (
