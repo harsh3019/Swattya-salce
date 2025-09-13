@@ -189,7 +189,17 @@ backend:
           agent: "main"
           comment: "✅ COMPLETE MASTER DATA UI SYSTEM IMPLEMENTED: Created comprehensive React components for managing Primary Categories, Products, Rate Cards, and Purchase Costs. Features include: CRUD operations, search/filter, real-time margin calculations, SQU code auto-generation, data validation, responsive tables, and professional UI. Backend APIs fully functional with proper authentication and error handling. Accessible via /master-data route."
 
-  - task: "Rate Cards Dropdown Fix in Quotation Builder"
+  - task: "Rate Cards Dropdown Frontend Rendering Fix"
+    implemented: true
+    working: true
+    file: "frontend/src/components/QuotationBuilder.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ RATE CARDS DROPDOWN FRONTEND RENDERING FIXED: Resolved issue where rate cards dropdown showed blank options despite backend API working correctly. PROBLEM IDENTIFIED: ✅ QuotationBuilder component was using incorrect field name `card.name` instead of `card.rate_card_name`, ✅ Frontend was not handling the correct API response structure from backend, ✅ No error handling for empty rate cards array in dropdown rendering. SOLUTION IMPLEMENTED: ✅ Fixed field mapping from `card.name` to `card.rate_card_name` and `card.rate_card_code`, ✅ Enhanced dropdown to show both rate card name and code: 'Standard Pricing 2024 (STD-2024)', ✅ Added fallback handling for empty rate cards array with 'No rate cards available' message, ✅ Added debug logging to track rate cards loading and rendering process. DROPDOWN ENHANCEMENT: Now displays rate cards in format: 'Bulk Discount 2024 (BLK-2024)', 'Premium Pricing 2024 (PRM-2024)', 'Standard Pricing 2024 (STD-2024)', 'common (C-2025)'. VERIFICATION: Frontend restarted to apply changes. Rate card dropdown should now properly display all 4 available rate cards with clear names and codes for better user identification."
     implemented: true
     working: true
     file: "backend/server.py - duplicate endpoint removal and date filtering fix"  
