@@ -997,7 +997,7 @@ const OpportunityStageForm = () => {
                 <SelectValue placeholder="Select outcome after negotiation" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Not decided yet</SelectItem>
+                <SelectItem value="pending">Not decided yet</SelectItem>
                 <SelectItem value="won">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-green-600" />
