@@ -459,23 +459,66 @@ const OrderAnalysisForm = () => {
           {/* Status Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Order Status</CardTitle>
+              <CardTitle className="text-sm">
+                {isEditMode ? 'Current Status' : 'Order Status'}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span className="text-sm">Opportunity: Won</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-blue-500" />
-                  <span className="text-sm">Status: Draft (after creation)</span>
-                </div>
-                {formData.total_amount > 500000 && (
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-yellow-500" />
-                    <span className="text-sm">High-value: GC approval required</span>
-                  </div>
+                {isEditMode ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-blue-500" />
+                      <span className="text-sm">
+                        Status: {originalOrder?.status || 'Draft'}
+                      </span>
+                      {originalOrder?.status === 'Approved' && (
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                          Approved
+                        </Badge>
+                      )}
+                    </div>
+                    {originalOrder?.gc_approval_flag && (
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                        <span className="text-sm">GC approval required</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm text-gray-600">
+                        Order ID: {originalOrder?.order_id || 'N/A'}
+                      </span>
+                    </div>
+                    {originalOrder?.status === 'Approved' && (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5" />
+                          <div className="text-xs text-yellow-800">
+                            <p className="font-medium">Re-approval Required</p>
+                            <p>Changes to approved orders require re-approval and will reset status to "Under Review".</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span className="text-sm">Opportunity: Won</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-blue-500" />
+                      <span className="text-sm">Status: Draft (after creation)</span>
+                    </div>
+                    {formData.total_amount > 500000 && (
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                        <span className="text-sm">High-value: GC approval required</span>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </CardContent>
