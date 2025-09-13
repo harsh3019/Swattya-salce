@@ -318,9 +318,11 @@ const OrderAnalysisForm = () => {
                     value={formData.customer_name}
                     onChange={(e) => handleInputChange('customer_name', e.target.value)}
                     placeholder="Customer company name"
-                    disabled // Auto-fetched from opportunity
+                    disabled={!isEditMode} // Editable in edit mode, disabled in create mode
                   />
-                  <p className="text-xs text-gray-500 mt-1">Auto-fetched from opportunity</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {isEditMode ? 'Customer name can be modified' : 'Auto-fetched from opportunity'}
+                  </p>
                 </div>
                 
                 <div>
