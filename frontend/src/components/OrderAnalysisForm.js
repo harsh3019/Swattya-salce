@@ -22,7 +22,7 @@ import {
 import { usePermissions } from '../contexts/PermissionContext';
 import axios from 'axios';
 
-const OrderAcknowledgementForm = () => {
+const OrderAnalysisForm = () => {
   const { opportunityId } = useParams();
   const navigate = useNavigate();
   const { permissions } = usePermissions();
