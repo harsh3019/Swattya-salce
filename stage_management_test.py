@@ -237,7 +237,7 @@ class StageManagementTester:
                         # Find the corresponding stage name
                         stage_info = next((s for s in stages if s.get("stage_order") == stage_num), None)
                         if stage_info:
-                            full_format = f"L{stage_num} - {stage_info.get('name')}"
+                            full_format = f"L{stage_num} - {stage_info.get('stage_name')}"
                             resolution_examples.append(f"Opportunity {opp_id}: {full_format}")
                         else:
                             self.log_test("Stage Resolution", False, f"Could not resolve stage {stage_num} for opportunity {opp_id}")
