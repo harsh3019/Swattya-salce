@@ -73,7 +73,7 @@ const OrderAnalysisList = () => {
         ...(dateToFilter && { date_to: dateToFilter })
       });
 
-      const response = await axios.get(`${baseURL}/api/order-acknowledgements?${params}`, {
+      const response = await axios.get(`${baseURL}/api/order-analysis?${params}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
