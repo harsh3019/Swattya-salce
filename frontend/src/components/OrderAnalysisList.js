@@ -122,7 +122,7 @@ const OrderAnalysisList = () => {
   };
 
   const handleEditOrder = (order) => {
-    navigate(`/order-acknowledgements/edit/${order.id}`);
+    navigate(`/order-analysis/edit/${order.id}`);
   };
 
   const handleDeleteOrder = async (order) => {
