@@ -131,15 +131,15 @@ class CompanyInheritanceTest:
                 self.log_result("Create Test Lead", False, "Missing required master data for lead creation")
                 return None
             
-            # Create test lead with company_id
+            # Create test lead with company_id (using correct validation patterns)
             test_lead = {
                 "tender_type": "Tender",
-                "billing_type": "Fixed Price",
+                "billing_type": "prepaid",  # Must be prepaid or postpaid
                 "sub_tender_type_id": sub_tender_types[0]["id"],
                 "project_title": f"Company Inheritance Test Lead - {datetime.now().strftime('%Y%m%d_%H%M%S')}",
                 "company_id": companies[0]["id"],  # Use first company
                 "state": "Maharashtra",
-                "lead_subtype": "New Business",
+                "lead_subtype": "Direct",  # Must be Direct or Referral
                 "source": "Website",
                 "product_service_id": product_services[0]["id"],
                 "expected_orc": 500000.0,
