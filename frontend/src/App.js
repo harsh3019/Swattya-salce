@@ -576,20 +576,20 @@ function App() {
                 </ProtectedRoute>
               } />
 
-              {/* Order Acknowledgement Routes */}
-              <Route path="/order-acknowledgements" element={
+              {/* Order Analysis Routes */}
+              <Route path="/order-analysis" element={
                 <ProtectedRoute>
-                  <OrderAcknowledgementList />
+                  <OrderAnalysisList />
                 </ProtectedRoute>
               } />
-              <Route path="/order-acknowledgements/create/:opportunityId" element={
+              <Route path="/order-analysis/create/:opportunityId" element={
                 <ProtectedRoute>
-                  <OrderAcknowledgementForm />
+                  <OrderAnalysisForm />
                 </ProtectedRoute>
               } />
-              <Route path="/order-acknowledgements/edit/:orderId" element={
+              <Route path="/order-analysis/edit/:orderId" element={
                 <ProtectedRoute>
-                  <OrderAcknowledgementForm />
+                  <OrderAnalysisForm />
                 </ProtectedRoute>
               } />
               
