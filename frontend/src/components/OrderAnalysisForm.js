@@ -112,7 +112,7 @@ const OrderAnalysisForm = () => {
       setSaving(true);
       const token = localStorage.getItem('token');
 
-      const response = await axios.post(`${baseURL}/api/order-acknowledgements`, formData, {
+      const response = await axios.post(`${baseURL}/api/order-analysis`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
