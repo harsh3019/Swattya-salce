@@ -165,10 +165,15 @@ class OpportunityStageTestRunner:
             return False
         
         # Test first few opportunities
-        if isinstance(self.opportunities_data, list):
-            test_opportunities = self.opportunities_data[:3]
+        # Handle both list and dict response formats
+        if isinstance(self.opportunities_data, dict):
+            opportunities_list = self.opportunities_data.get('opportunities', [])
+        elif isinstance(self.opportunities_data, list):
+            opportunities_list = self.opportunities_data
         else:
-            test_opportunities = []
+            opportunities_list = []
+            
+        test_opportunities = opportunities_list[:3]
         
         for opp in test_opportunities:
             opp_id = opp.get('opportunity_id') or opp.get('id')
