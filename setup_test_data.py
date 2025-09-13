@@ -163,12 +163,12 @@ def setup_complete_test_data():
         
         lead_data = {
             "tender_type": "Tender",
-            "billing_type": "Fixed Price",
+            "billing_type": "prepaid",
             "sub_tender_type_id": master_data['sub_tender_types'],
             "project_title": lead_info['project_title'],
             "company_id": master_data['company_id'],
             "state": "Maharashtra",
-            "lead_subtype": "New Business",
+            "lead_subtype": "Direct",
             "source": "Website",
             "product_service_id": master_data['product_services'],
             "expected_orc": lead_info['expected_orc'],
