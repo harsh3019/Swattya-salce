@@ -5969,8 +5969,8 @@ async def update_order_analysis_status(order_id: str, status_data: dict, current
     
     return {"message": f"Order status updated to {new_status}"}
 
-@api_router.post("/order-acknowledgements/{order_id}/upload-attachment")
-async def upload_order_attachment(
+@api_router.post("/order-analysis/{order_id}/upload-attachment")
+async def upload_order_analysis_attachment(
     order_id: str,
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user)
