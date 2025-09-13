@@ -129,7 +129,7 @@ const OrderAnalysisList = () => {
     if (window.confirm(`Are you sure you want to delete order "${order.order_id}"?`)) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete(`${baseURL}/api/order-acknowledgements/${order.id}`, {
+        await axios.delete(`${baseURL}/api/order-analysis/${order.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         alert('Order deleted successfully');
