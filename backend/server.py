@@ -5837,9 +5837,9 @@ async def get_order_analysis_list(
         "limit": limit
     }
 
-@api_router.get("/order-acknowledgements/{order_id}")
-async def get_order_acknowledgement_by_id(order_id: str, current_user: User = Depends(get_current_user)):
-    """Get specific Order Acknowledgement by ID"""
+@api_router.get("/order-analysis/{order_id}")
+async def get_order_analysis_by_id(order_id: str, current_user: User = Depends(get_current_user)):
+    """Get specific Order Analysis by ID"""
     order = await db.order_acknowledgements.find_one({"id": order_id, "is_active": True})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
