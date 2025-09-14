@@ -374,12 +374,15 @@ class IntegrationFunctionTester:
                     # Look for our created project
                     test_opportunity = self.won_opportunities[0] if self.won_opportunities else None
                     if test_opportunity:
-                        opp_id = test_opportunity.get('opportunity_id')
+                        # Try both opportunity_id formats
+                        opp_id = test_opportunity.get('opportunity_id')  # This is the OPP-XXXXXX format
+                        opp_uuid = test_opportunity.get('id')  # This is the UUID format
                         
-                        # Find project with matching opportunity ID
+                        # Find project with matching opportunity ID (try both formats)
                         matching_project = None
                         for project in projects:
-                            if project.get('opp_id') == opp_id:
+                            project_opp_id = project.get('opp_id')
+                            if project_opp_id == opp_id or project_opp_id == opp_uuid:
                                 matching_project = project
                                 break
                         
