@@ -407,11 +407,16 @@ class OpportunityToProjectWorkflowTester:
             opp_response = self.session.get(f"{BACKEND_URL}/opportunities")
             if opp_response.status_code == 200:
                 opportunities = opp_response.json()
-                won_opportunities = [o for o in opportunities if o.get("current_stage") == 6 or o.get("status") == "Won"]
+                won_opportunities = []
+                
+                for opp in opportunities:
+                    if isinstance(opp, dict):  # Ensure it's a dictionary
+                        if opp.get("current_stage") == 6 or opp.get("status") == "Won":
+                            won_opportunities.append(opp)
                 
                 self.log_test("Won Opportunities Check", True, 
                             f"Found {len(won_opportunities)} won opportunities out of {len(opportunities)} total",
-                            {"won_opps": [o.get("opportunity_id") for o in won_opportunities]})
+                            {"won_opps": [o.get("opportunity_id", "unknown") for o in won_opportunities]})
             
             # Check upcoming projects
             proj_response = self.session.get(f"{BACKEND_URL}/sd/upcoming-projects/")
@@ -419,10 +424,14 @@ class OpportunityToProjectWorkflowTester:
                 projects = proj_response.json()
                 self.log_test("Upcoming Projects Check", True, 
                             f"Found {len(projects)} upcoming projects",
-                            {"project_ids": [p.get("id") for p in projects]})
+                            {"project_ids": [p.get("id", "unknown") for p in projects if isinstance(p, dict)]})
                 
                 # Check for orphaned data
-                projects_with_opp_id = [p for p in projects if p.get("opportunity_id")]
+                projects_with_opp_id = []
+                for p in projects:
+                    if isinstance(p, dict) and p.get("opportunity_id"):
+                        projects_with_opp_id.append(p)
+                        
                 self.log_test("Projects with Opportunity Link", True, 
                             f"Found {len(projects_with_opp_id)} projects linked to opportunities")
             
