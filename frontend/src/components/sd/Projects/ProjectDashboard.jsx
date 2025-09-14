@@ -345,7 +345,7 @@ const ProjectDashboard = () => {
                 <div>
                   <label className="text-sm font-medium text-gray-600">Priority</label>
                   <Badge variant="outline" className="ml-2">
-                    {project?.priority || 'Medium')
+                    {project?.priority || 'Medium'}
                   </Badge>
                 </div>
                 {project?.tags && project.tags.length > 0 && (
