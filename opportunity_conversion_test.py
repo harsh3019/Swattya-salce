@@ -558,8 +558,8 @@ class OpportunityToProjectWorkflowTester:
         # Step 3: Test upcoming projects endpoints
         manual_project_id = self.test_upcoming_projects_endpoints()
         
-        # Step 4: Test integration function evidence
-        self.test_integration_function_exists()
+        # Step 4: Test existing won opportunities
+        self.test_existing_won_opportunities()
         
         # Step 5: Debug current database state
         self.debug_database_state()
