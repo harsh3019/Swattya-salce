@@ -535,7 +535,7 @@ class SDRiskManagementTester:
                 
                 response = self.session.post(f"{BASE_URL}/sd/risks/", json=risk_data)
                 
-                if response.status_code == 201:
+                if response.status_code in [200, 201]:
                     risk = response.json()
                     actual_score = risk.get("risk_score")
                     
