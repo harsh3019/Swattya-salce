@@ -3742,8 +3742,8 @@ async def change_lead_status(
                 "status": "Active",
                 "expected_revenue": float(lead.get("expected_orc", 0)),
                 "currency_id": currency_id,
-                "win_probability": 25.0,
-                "weighted_revenue": float(lead.get("expected_orc", 0)) * 0.25,
+                "win_probability": 10.0,  # L1 - Prospect
+                "weighted_revenue": float(lead.get("expected_orc", 0)) * 0.10,
                 "lead_owner_id": lead.get("lead_owner"),
                 "created_by": current_user.id,
                 "created_at": datetime.now(timezone.utc),
