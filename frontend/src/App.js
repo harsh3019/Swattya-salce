@@ -667,6 +667,11 @@ function App() {
                   <ResourceManager />
                 </ProtectedRoute>
               } />
+              <Route path="/sd/risks" element={
+                <ProtectedRoute>
+                  <RiskManager />
+                </ProtectedRoute>
+              } />
               
               <Route path="/" element={<HomeRoute />} />
             </Routes>
