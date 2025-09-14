@@ -451,7 +451,7 @@ class OpportunityToProjectWorkflowTester:
         self.debug_database_state()
         
         # Step 6: Test the complete workflow
-        test_opportunity = self.create_test_opportunity()
+        test_opportunity = self.get_or_create_test_opportunity()
         if test_opportunity:
             conversion_success = self.progress_opportunity_to_l6(test_opportunity)
         else:
