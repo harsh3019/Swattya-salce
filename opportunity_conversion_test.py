@@ -424,7 +424,16 @@ class OpportunityToProjectWorkflowTester:
             # Check opportunities
             opp_response = self.session.get(f"{BACKEND_URL}/opportunities")
             if opp_response.status_code == 200:
-                opportunities = opp_response.json()
+                data = opp_response.json()
+                
+                # Handle both direct list and nested structure
+                if isinstance(data, dict) and "opportunities" in data:
+                    opportunities = data["opportunities"]
+                elif isinstance(data, list):
+                    opportunities = data
+                else:
+                    opportunities = []
+                
                 won_opportunities = []
                 
                 for opp in opportunities:
