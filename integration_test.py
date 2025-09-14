@@ -108,7 +108,7 @@ class IntegrationFunctionTester:
                     
                     # Log details of found opportunities
                     for opp in won_opps[:3]:  # Show first 3
-                        print(f"   - {opp.get('opportunity_id', 'N/A')}: {opp.get('project_title', 'N/A')} (Stage: L{opp.get('current_stage', 'N/A')})")
+                        print(f"   - {opp.get('id', 'N/A')}: {opp.get('project_title', 'N/A')} (Stage: L{opp.get('current_stage', 'N/A')})")
                     
                     return True
                 else:
