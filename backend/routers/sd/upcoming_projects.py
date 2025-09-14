@@ -30,7 +30,7 @@ UPLOAD_DIRS = {
 for dir_path in UPLOAD_DIRS.values():
     os.makedirs(dir_path, exist_ok=True)
 
-@router.get("/", response_model=List[UpcomingProject])
+@router.get("/")
 async def get_upcoming_projects(
     status: Optional[str] = None,
     limit: int = 50,
