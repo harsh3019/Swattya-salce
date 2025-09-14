@@ -108,7 +108,7 @@ class SDIntegrationTester:
             # Get currencies
             currencies_response = await self.session.get(f"{API_BASE}/mst/currencies", headers=self.get_headers())
             currencies = await currencies_response.json()
-            inr_currency = next((c for c in currencies if c["currency_code"] == "INR"), None)
+            inr_currency = next((c for c in currencies if c["code"] == "INR"), None)
             if not inr_currency:
                 self.log_result("Create Test Opportunity", False, "INR currency not found")
                 return False
