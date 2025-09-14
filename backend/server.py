@@ -424,6 +424,26 @@ def parse_from_mongo(item: dict) -> dict:
             item['order_date'] = datetime.fromisoformat(item['order_date']).date()
         except:
             pass
+    
+    # SD Resource Management date fields
+    date_fields = ['procurement_date', 'warranty_expiry', 'start_date', 'end_date', 
+                   'required_by', 'expected_delivery', 'actual_delivery']
+    for field in date_fields:
+        if isinstance(item.get(field), str):
+            try:
+                item[field] = datetime.fromisoformat(item[field]).date()
+            except:
+                pass
+    
+    # SD Resource Management datetime fields
+    datetime_fields = ['allocation_date', 'approval_date']
+    for field in datetime_fields:
+        if isinstance(item.get(field), str):
+            try:
+                item[field] = datetime.fromisoformat(item[field])
+            except:
+                pass
+    
     return item
 
 def prepare_for_json(data: dict) -> dict:
