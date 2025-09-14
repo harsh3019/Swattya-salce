@@ -406,6 +406,26 @@ def prepare_for_mongo(data: dict) -> dict:
     if isinstance(data.get('approval_date'), datetime):
         data['approval_date'] = data['approval_date'].isoformat()
     
+    # SD Risk Management date fields
+    if isinstance(data.get('next_review'), date):
+        data['next_review'] = data['next_review'].isoformat()
+    if isinstance(data.get('due_date'), date):
+        data['due_date'] = data['due_date'].isoformat()
+    if isinstance(data.get('completion_date'), date):
+        data['completion_date'] = data['completion_date'].isoformat()
+    if isinstance(data.get('next_review_date'), date):
+        data['next_review_date'] = data['next_review_date'].isoformat()
+    
+    # SD Risk Management datetime fields
+    if isinstance(data.get('identified_date'), datetime):
+        data['identified_date'] = data['identified_date'].isoformat()
+    if isinstance(data.get('last_reviewed'), datetime):
+        data['last_reviewed'] = data['last_reviewed'].isoformat()
+    if isinstance(data.get('review_date'), datetime):
+        data['review_date'] = data['review_date'].isoformat()
+    if isinstance(data.get('assessment_date'), datetime):
+        data['assessment_date'] = data['assessment_date'].isoformat()
+    
     return data
 
 def parse_from_mongo(item: dict) -> dict:
