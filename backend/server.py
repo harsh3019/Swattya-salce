@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 from routers.sd.upcoming_projects import router as sd_upcoming_projects_router
 from routers.sd.projects import router as sd_projects_router
 from routers.sd.resources import router as sd_resources_router
+from routers.sd.risks import router as sd_risks_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
