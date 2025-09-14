@@ -41,6 +41,7 @@ import ValidationInterface from './components/sd/UpcomingProjects/ValidationInte
 import ProjectsList from './components/sd/Projects/ProjectsList';
 import ProjectDashboard from './components/sd/Projects/ProjectDashboard';
 import ResourceManager from './components/sd/Resources/ResourceManager';
+import RiskManager from './components/sd/Risks/RiskManager';
 
 // Import new RBAC components
 import DynamicSidebar from './components/DynamicSidebar';
