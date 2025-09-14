@@ -135,61 +135,124 @@ class OpportunityToProjectWorkflowTester:
             self.log_test("POST Upcoming Projects", False, f"Error: {str(e)}")
             return None
     
-    def create_test_opportunity(self):
-        """Create a test opportunity for conversion testing"""
-        print("\n=== CREATING TEST OPPORTUNITY ===")
+    def get_or_create_test_opportunity(self):
+        """Get existing opportunity or create one via lead conversion"""
+        print("\n=== GETTING OR CREATING TEST OPPORTUNITY ===")
         
         try:
-            # Get required master data first
+            # First, check if there are existing opportunities we can use
+            response = self.session.get(f"{BACKEND_URL}/opportunities")
+            if response.status_code == 200:
+                opportunities = response.json()
+                
+                # Look for an opportunity in L1 stage that we can progress
+                for opp in opportunities:
+                    if opp.get("current_stage", 1) == 1:  # L1 stage
+                        self.log_test("Use Existing Opportunity", True, 
+                                    f"Using existing L1 opportunity: {opp.get('opportunity_id')}",
+                                    {"opportunity_id": opp.get("id")})
+                        return opp
+                
+                # If no L1 opportunities, use any opportunity and note its current stage
+                if opportunities:
+                    test_opp = opportunities[0]
+                    self.log_test("Use Existing Opportunity", True, 
+                                f"Using existing opportunity at stage L{test_opp.get('current_stage', 1)}: {test_opp.get('opportunity_id')}",
+                                {"opportunity_id": test_opp.get("id")})
+                    return test_opp
+            
+            # If no opportunities exist, try to create one via lead conversion
+            return self.create_opportunity_via_lead_conversion()
+                
+        except Exception as e:
+            self.log_test("Get Test Opportunity", False, f"Error: {str(e)}")
+            return None
+    
+    def create_opportunity_via_lead_conversion(self):
+        """Create opportunity by first creating and converting a lead"""
+        print("\n=== CREATING OPPORTUNITY VIA LEAD CONVERSION ===")
+        
+        try:
+            # Get required master data
             companies_response = self.session.get(f"{BACKEND_URL}/companies")
             if companies_response.status_code != 200:
-                self.log_test("Get Companies", False, "Failed to get companies for test")
+                self.log_test("Get Companies for Lead", False, "Failed to get companies")
                 return None
             
             companies = companies_response.json()
             if not companies:
-                self.log_test("Get Companies", False, "No companies found for test")
+                self.log_test("Get Companies for Lead", False, "No companies found")
                 return None
             
             test_company = companies[0]
             
-            # Get currencies
-            currencies_response = self.session.get(f"{BACKEND_URL}/mst/currencies")
-            currencies = currencies_response.json() if currencies_response.status_code == 200 else []
-            currency_id = currencies[0]["id"] if currencies else str(uuid.uuid4())
+            # Get product services
+            services_response = self.session.get(f"{BACKEND_URL}/product-services")
+            services = services_response.json() if services_response.status_code == 200 else []
+            service_id = services[0]["id"] if services else str(uuid.uuid4())
             
-            # Get stages
-            stages_response = self.session.get(f"{BACKEND_URL}/mst/stages")
-            stages = stages_response.json() if stages_response.status_code == 200 else []
-            l1_stage = next((s for s in stages if s.get("stage_code") == "L1"), None)
-            stage_id = l1_stage["id"] if l1_stage else str(uuid.uuid4())
-            
-            # Create test opportunity
-            opportunity_data = {
-                "stage_id": stage_id,
-                "project_title": f"Test Opportunity for Conversion - {datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            # Create a test lead first
+            lead_data = {
+                "tender_type": "Tender",
+                "billing_type": "Project Based",
+                "project_title": f"Test Lead for Conversion - {datetime.now().strftime('%Y%m%d_%H%M%S')}",
                 "company_id": test_company["id"],
-                "expected_revenue": 100000.0,
-                "currency_id": currency_id,
-                "lead_owner_id": "admin",  # Using admin as lead owner
-                "win_probability": 10.0
+                "state": "Maharashtra",
+                "lead_subtype": "New Business",
+                "source": "Website",
+                "product_service_id": service_id,
+                "expected_orc": 100000.0,
+                "revenue": 100000.0,
+                "lead_owner": "admin"
             }
             
-            response = self.session.post(f"{BACKEND_URL}/opportunities", json=opportunity_data)
+            # Create lead
+            lead_response = self.session.post(f"{BACKEND_URL}/leads", json=lead_data)
             
-            if response.status_code == 200:
-                opportunity = response.json()
-                self.log_test("Create Test Opportunity", True, 
-                            f"Created opportunity: {opportunity.get('opportunity_id')}",
-                            {"opportunity_id": opportunity.get("id")})
-                return opportunity
+            if lead_response.status_code != 200:
+                self.log_test("Create Lead", False, f"Failed to create lead: {lead_response.status_code}")
+                return None
+            
+            lead = lead_response.json()
+            lead_id = lead.get("id")
+            
+            self.log_test("Create Lead", True, f"Created lead: {lead.get('lead_id')}")
+            
+            # Approve the lead first
+            approve_response = self.session.post(f"{BACKEND_URL}/leads/{lead_id}/status", 
+                                               json={"status": "approved"})
+            
+            if approve_response.status_code == 200:
+                self.log_test("Approve Lead", True, "Lead approved successfully")
             else:
-                self.log_test("Create Test Opportunity", False, 
-                            f"Failed: {response.status_code}", {"response": response.text})
+                self.log_test("Approve Lead", False, f"Failed to approve lead: {approve_response.status_code}")
+            
+            # Convert lead to opportunity
+            convert_response = self.session.post(f"{BACKEND_URL}/leads/{lead_id}/convert?opportunity_date={datetime.now().date()}")
+            
+            if convert_response.status_code == 200:
+                conversion_result = convert_response.json()
+                opportunity_id = conversion_result.get("opportunity_id")
+                
+                # Get the created opportunity
+                opp_response = self.session.get(f"{BACKEND_URL}/opportunities/{opportunity_id}")
+                if opp_response.status_code == 200:
+                    opportunity = opp_response.json()
+                    self.log_test("Convert Lead to Opportunity", True, 
+                                f"Successfully converted lead to opportunity: {opportunity.get('opportunity_id')}")
+                    return opportunity
+                else:
+                    self.log_test("Get Converted Opportunity", False, 
+                                f"Failed to get converted opportunity: {opp_response.status_code}")
+                    return None
+            else:
+                self.log_test("Convert Lead to Opportunity", False, 
+                            f"Failed to convert lead: {convert_response.status_code}",
+                            {"response": convert_response.text})
                 return None
                 
         except Exception as e:
-            self.log_test("Create Test Opportunity", False, f"Error: {str(e)}")
+            self.log_test("Create Opportunity via Lead", False, f"Error: {str(e)}")
             return None
     
     def progress_opportunity_to_l6(self, opportunity):
