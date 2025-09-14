@@ -7095,3 +7095,4 @@ async def delete_sales_price(
 app.include_router(api_router)
 app.include_router(sd_upcoming_projects_router)
 app.include_router(sd_projects_router)
+app.include_router(sd_resources_router)
