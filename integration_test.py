@@ -88,7 +88,8 @@ class IntegrationFunctionTester:
             )
             
             if response.status_code == 200:
-                opportunities = response.json()
+                data = response.json()
+                opportunities = data.get("opportunities", []) if isinstance(data, dict) else data
                 
                 # Filter for L6 (Won) opportunities
                 won_opps = []
