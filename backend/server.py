@@ -6081,9 +6081,12 @@ async def validate_oa_creation(opportunity_id: str) -> dict:
 async def create_upcoming_project_from_opportunity(opportunity_id: str, opportunity: dict, user_id: str):
     """Create an upcoming project entry when opportunity is won (SD Module Integration)"""
     try:
+        logger.info(f"Starting upcoming project creation for opportunity {opportunity_id}")
+        
         # Get company details
         company = await db.companies.find_one({"id": opportunity.get("company_id")})
         company_name = company.get("company_name", "Unknown Company") if company else "Unknown Company"
+        logger.info(f"Company found: {company_name} (ID: {opportunity.get('company_id')})")
         
         # Get selected quotation for project value (setup cost)
         selected_quotation = await db.quotations.find_one({
@@ -6095,9 +6098,11 @@ async def create_upcoming_project_from_opportunity(opportunity_id: str, opportun
         setup_cost = 0.0
         if selected_quotation:
             setup_cost = float(selected_quotation.get("total_amount", 0))
+            logger.info(f"Setup cost from selected quotation: {setup_cost}")
         else:
             # Fallback to opportunity expected revenue
             setup_cost = float(opportunity.get("expected_revenue", 0))
+            logger.info(f"Setup cost from opportunity expected revenue: {setup_cost}")
         
         # Get or create Order Analysis ID (fallback to generating one)
         order_analysis = await db.order_analyses.find_one({
@@ -6107,12 +6112,15 @@ async def create_upcoming_project_from_opportunity(opportunity_id: str, opportun
         
         if order_analysis:
             order_id = order_analysis.get("oa_id", f"OA-{str(uuid.uuid4())[:8].upper()}")
+            logger.info(f"Using existing order analysis ID: {order_id}")
         else:
             # Create a placeholder order analysis ID if none exists
             order_id = f"OA-{str(uuid.uuid4())[:8].upper()}"
+            logger.info(f"Generated new order analysis ID: {order_id}")
         
         # Generate POT ID (Project Operations Tracking ID)
         pot_id = f"POT-{str(uuid.uuid4())[:8].upper()}"
+        logger.info(f"Generated POT ID: {pot_id}")
         
         # Create upcoming project entry with SD-compatible schema
         upcoming_project = {
@@ -6141,11 +6149,24 @@ async def create_upcoming_project_from_opportunity(opportunity_id: str, opportun
             "updated_by": user_id
         }
         
+        logger.info(f"Created upcoming project data structure: {upcoming_project['id']}")
+        
         # Convert datetime objects to ISO strings for MongoDB storage
         upcoming_project = prepare_for_mongo(upcoming_project)
+        logger.info("Converted project data for MongoDB storage")
+        
+        # Check if project already exists for this opportunity
+        existing_project = await db.upcoming_projects.find_one({
+            "opp_id": opportunity.get("opportunity_id", opportunity_id)
+        })
+        
+        if existing_project:
+            logger.warning(f"Upcoming project already exists for opportunity {opportunity_id}: {existing_project.get('id')}")
+            return existing_project.get('id')
         
         # Insert into upcoming_projects collection (use correct SD collection name)
-        await db.upcoming_projects.insert_one(upcoming_project)
+        result = await db.upcoming_projects.insert_one(upcoming_project)
+        logger.info(f"Successfully inserted upcoming project into database: {result.inserted_id}")
         
         # Log the activity
         await log_activity(
@@ -6164,10 +6185,15 @@ async def create_upcoming_project_from_opportunity(opportunity_id: str, opportun
             }
         )
         
-        logger.info(f"Created SD upcoming project {upcoming_project['id']} from won opportunity {opportunity_id} with order_id: {order_id}")
+        logger.info(f"✅ Successfully created SD upcoming project {upcoming_project['id']} from won opportunity {opportunity_id} with order_id: {order_id}")
+        return upcoming_project["id"]
         
     except Exception as e:
-        logger.error(f"Failed to create upcoming project from opportunity {opportunity_id}: {str(e)}")
+        logger.error(f"❌ CRITICAL ERROR: Failed to create upcoming project from opportunity {opportunity_id}: {str(e)}")
+        logger.error(f"Exception type: {type(e).__name__}")
+        logger.error(f"Opportunity data: {opportunity}")
+        import traceback
+        logger.error(f"Stack trace: {traceback.format_exc()}")
         raise e
 
 async def auto_fetch_oa_data(opportunity_id: str) -> dict:
