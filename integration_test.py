@@ -400,7 +400,7 @@ class IntegrationFunctionTester:
                             self.log_test(
                                 "Verify Upcoming Project Creation", 
                                 False, 
-                                f"Project not found for opportunity {opp_id} (UUID: {opp_uuid}). Found {len(projects)} total projects"
+                                f"Project not found for opportunity {opp_id}. Found {len(projects)} total projects"
                             )
                             return False
                     else:
