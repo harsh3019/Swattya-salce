@@ -6,6 +6,13 @@ from .project import (
     WBSTask, WBSTaskCreate, WBSTaskUpdate,
     ProjectPhase, ProjectStatus, MilestoneStatus, TaskStatus
 )
+from .resource import (
+    Resource, ResourceCreate, ResourceUpdate,
+    ResourceAllocation, ResourceAllocationCreate, ResourceAllocationUpdate,
+    PurchaseRequest, PurchaseRequestCreate, PurchaseRequestUpdate,
+    ResourceType, ResourceStatus, AllocationStatus, PurchaseRequestStatus,
+    ResourceUtilizationAlert, ResourceSummary
+)
 
 __all__ = [
     "UpcomingProject",
@@ -24,5 +31,20 @@ __all__ = [
     "ProjectPhase",
     "ProjectStatus",
     "MilestoneStatus",
-    "TaskStatus"
+    "TaskStatus",
+    "Resource",
+    "ResourceCreate",
+    "ResourceUpdate",
+    "ResourceAllocation",
+    "ResourceAllocationCreate",
+    "ResourceAllocationUpdate",
+    "PurchaseRequest",
+    "PurchaseRequestCreate",
+    "PurchaseRequestUpdate",
+    "ResourceType",
+    "ResourceStatus",
+    "AllocationStatus",
+    "PurchaseRequestStatus",
+    "ResourceUtilizationAlert",
+    "ResourceSummary"
 ]
