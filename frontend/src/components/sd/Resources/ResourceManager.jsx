@@ -116,8 +116,8 @@ const ResourceManager = () => {
 
       // Fetch resources with filters
       const resourceParams = new URLSearchParams();
-      if (filterType) resourceParams.append('type', filterType);
-      if (filterStatus) resourceParams.append('status', filterStatus);
+      if (filterType && filterType !== 'all_types') resourceParams.append('type', filterType);
+      if (filterStatus && filterStatus !== 'all_statuses') resourceParams.append('status', filterStatus);
       
       const [resourcesRes, summaryRes, prRes] = await Promise.all([
         axios.get(`${BACKEND_URL}/api/sd/resources?${resourceParams.toString()}`, { headers }),
