@@ -417,25 +417,16 @@ class SDRiskManagementTester:
         self.total_tests += 1
         
         try:
-            review_data = {
+            review_params = {
                 "current_probability": "High",
                 "current_impact": "Major",
                 "status_change": "Mitigated",
                 "mitigation_effectiveness": "Effective",
-                "recommendations": [
-                    "Continue monitoring security metrics",
-                    "Schedule quarterly security assessments"
-                ],
-                "action_items": [
-                    "Update incident response procedures",
-                    "Train staff on new security protocols"
-                ],
                 "next_review_date": (date.today() + timedelta(days=30)).isoformat(),
-                "review_notes": "Risk mitigation measures showing positive results",
-                "attendees": ["security-lead", "project-manager", "compliance-officer"]
+                "review_notes": "Risk mitigation measures showing positive results"
             }
             
-            response = self.session.post(f"{BASE_URL}/sd/risks/{self.test_risk_id}/review", json=review_data)
+            response = self.session.post(f"{BASE_URL}/sd/risks/{self.test_risk_id}/review", params=review_params)
             
             if response.status_code in [200, 201]:
                 review = response.json()
