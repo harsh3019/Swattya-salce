@@ -222,13 +222,13 @@ class SDIntegrationTester:
             stage_progression = ["L2", "L3", "L4", "L5", "L6"]
             
             for stage_code in stage_progression:
-                stage = next((s for s in stages if s["code"] == stage_code), None)
+                stage = next((s for s in stages if s["stage_code"] == stage_code), None)
                 if not stage:
                     self.log_result("Progress to L6", False, f"Stage {stage_code} not found")
                     return False
                     
                 # Prepare stage change data
-                stage_data = {"target_stage": stage["stage_number"]}
+                stage_data = {"target_stage": stage["stage_order"]}
                 
                 # Add commercial decision for L5 stage
                 if stage_code == "L5":
