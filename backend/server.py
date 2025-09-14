@@ -7091,3 +7091,4 @@ async def delete_sales_price(
 
 # Include router after all endpoints are defined
 app.include_router(api_router)
+app.include_router(sd_upcoming_projects_router)
