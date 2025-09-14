@@ -380,6 +380,31 @@ def prepare_for_mongo(data: dict) -> dict:
         data['close_date'] = data['close_date'].isoformat()
     if isinstance(data.get('order_date'), date):
         data['order_date'] = data['order_date'].isoformat()
+    
+    # SD Resource Management date fields
+    if isinstance(data.get('procurement_date'), date):
+        data['procurement_date'] = data['procurement_date'].isoformat()
+    if isinstance(data.get('warranty_expiry'), date):
+        data['warranty_expiry'] = data['warranty_expiry'].isoformat()
+    if isinstance(data.get('start_date'), date):
+        data['start_date'] = data['start_date'].isoformat()
+    if isinstance(data.get('end_date'), date):
+        data['end_date'] = data['end_date'].isoformat()
+    if isinstance(data.get('required_by'), date):
+        data['required_by'] = data['required_by'].isoformat()
+    if isinstance(data.get('order_date'), date):
+        data['order_date'] = data['order_date'].isoformat()
+    if isinstance(data.get('expected_delivery'), date):
+        data['expected_delivery'] = data['expected_delivery'].isoformat()
+    if isinstance(data.get('actual_delivery'), date):
+        data['actual_delivery'] = data['actual_delivery'].isoformat()
+    
+    # SD Resource Management datetime fields
+    if isinstance(data.get('allocation_date'), datetime):
+        data['allocation_date'] = data['allocation_date'].isoformat()
+    if isinstance(data.get('approval_date'), datetime):
+        data['approval_date'] = data['approval_date'].isoformat()
+    
     return data
 
 def parse_from_mongo(item: dict) -> dict:
