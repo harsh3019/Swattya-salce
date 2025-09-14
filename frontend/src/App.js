@@ -661,6 +661,11 @@ function App() {
                   <ProjectDashboard />
                 </ProtectedRoute>
               } />
+              <Route path="/sd/resources" element={
+                <ProtectedRoute>
+                  <ResourceManager />
+                </ProtectedRoute>
+              } />
               
               <Route path="/" element={<HomeRoute />} />
             </Routes>
