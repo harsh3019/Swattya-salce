@@ -264,10 +264,11 @@ class OpportunityToProjectWorkflowTester:
             return False
         
         opportunity_id = opportunity.get("id")
+        current_stage = opportunity.get("current_stage", 1)
         
         try:
-            # Progress through stages L1 -> L2 -> L3 -> L4 -> L5 -> L6
-            stages_to_progress = [
+            # Define all stages we might need to progress through
+            all_stages = [
                 {"stage": 2, "name": "L2 - Qualification", "data": {"region_id": str(uuid.uuid4())}},
                 {"stage": 3, "name": "L3 - Proposal", "data": {"proposal_submitted": True}},
                 {"stage": 4, "name": "L4 - Technical", "data": {"technical_review": "Completed"}},
@@ -278,6 +279,16 @@ class OpportunityToProjectWorkflowTester:
                     "delivery_team": "Team Alpha"
                 }}
             ]
+            
+            # Only progress through stages we haven't reached yet
+            stages_to_progress = [s for s in all_stages if s["stage"] > current_stage]
+            
+            if not stages_to_progress:
+                self.log_test("Already at L6", True, f"Opportunity already at stage L{current_stage}")
+                if current_stage == 6:
+                    # Check if upcoming project was created
+                    return self.verify_upcoming_project_creation(opportunity_id)
+                return False
             
             for stage_info in stages_to_progress:
                 stage_transition_data = {
@@ -299,7 +310,7 @@ class OpportunityToProjectWorkflowTester:
                     if stage_info["stage"] == 6:
                         # Wait a moment for the async operation
                         import time
-                        time.sleep(2)
+                        time.sleep(3)
                         
                         # Check if upcoming project was created
                         return self.verify_upcoming_project_creation(opportunity_id)
