@@ -1,43 +1,32 @@
 <analysis>
-The trajectory details the progression of an AI engineer working on the Sawayatta ERP project, focusing on resolving critical issues and adding new features. The work started with understanding the existing codebase, installing dependencies, and bringing the services online. The AI systematically addressed user requirements, prioritizing stage management, company data inheritance, quotation approval, OA document upload, and master data creation.
-
-Key challenges included:
-1.  **Frontend-Backend Sync**: Initial issues arose from the frontend not correctly interpreting backend stage data and missing environment variables for API connectivity.
-2.  **Data Consistency**: Ensuring master data (stages, products, rate cards) was correctly formatted and seeded for seamless application flow.
-3.  **Route Ordering**: Fastapi route precedence caused 404 errors until specific routes were defined before general parametric ones.
-4.  **Role-Based Access**: Initial RBAC checks incorrectly blocked admin access to new endpoints, requiring a bypass fix.
-
-The AI engineer's approach involved iterative testing (using ), making small, targeted code changes, and confirming with the user after each significant fix or feature addition. The primary focus was on backend API and data logic, followed by frontend UI implementation. The work concluded with the development of UI components for master data management and a partial implementation of sales price management.
+The AI engineer successfully addressed several critical issues within the Sawayatta ERP system and initiated a major new Services Delivery (SD) module. Key tasks included completing the Sales Price Management UI integration, enhancing OA form editing by building on existing backend logic, and resolving complex bugs related to duplicate backend API routes, datetime comparisons for rate cards, and frontend validation errors in the L5 stage. Subsequently, the focus shifted to building the SD module, starting with Upcoming Projects and Project Management sub-modules. This involved extensive backend and frontend development, integration with existing opportunity workflows, and immediate bug fixes for circular imports and date serialization during testing, demonstrating an iterative and problem-solving approach.
 </analysis>
 
 <product_requirements>
-The Sawayatta ERP project is a comprehensive CRM/ERP system with a FastAPI backend, React 18 + Tailwind CSS frontend, and MongoDB. The primary goal is to resolve 7 critical issues to enhance functionality and user experience.
+The Sawayatta ERP project requires resolving critical issues in its CRM/ERP system and developing a new Services Delivery (SD) module. Previously, the system needed:
+1.  **Opportunity Stage Management**: Accurate stage reflection and sequential flow (L1-L7, L8 auto-dropout at 45 days) with Won/Lost options at L5.
+2.  **Company Data Inheritance**: Automatic inheritance from Leads to Opportunities.
+3.  **Quotation Approval**: Manager/Admin approval workflow before L4 stage selection.
+4.  **Order Analysis (OA) Form Editing**: Editable forms with audit trails and re-approval.
+5.  **Master Data Creation**: Backend and frontend CRUD for Primary Categories, Products (with ), Rate Cards (with sales price, purchase cost), and Pricing Management.
+6.  **Document Upload in OA**: Fix file upload, storage, retrieval, and download.
 
-**Problem Summary:**
-Users face issues with opportunity stage progression, data inheritance from leads, missing approval workflows, and an incomplete master data management system.
-
-**Detailed Requirements:**
-1.  **Opportunity Stage Management**: Opportunities list must reflect the current stage (e.g., L2 - Qualification). Manage Stages form must open directly to the current stage. The stage dropdown should be removed from the opportunities edit form.
-2.  **Stage Flow Logic**: Implement a sequential flow (L1 → L2 → L3 → L4 → L5). From L5, provide Won/Lost options leading to L6/L7, respectively. Also, implement a 45-day automatic dropout to L8 if no selection is made.
-3.  **Company Data Inheritance**: Company information must be automatically inherited from the parent Lead during conversion to Opportunity.
-4.  **Quotation Approval Workflow**: Quotations require Manager/Admin approval before being available for selection in the L4 stage.
-5.  **Order Analysis (OA) Form Editing**: OA forms should be editable with audit trails and re-approval if necessary.
-6.  **Master Data Creation**: Create backend and frontend CRUD operations for:
-    *   **Primary Categories**
-    *   **Products**: Include  field.
-    *   **Rate Cards**: Include sales price, purchase cost.
-    *   **Pricing Management**: Sales price, purchase cost per product.
-    *   Also, create UI for Primary Categories, Products, Rate Cards, and Purchase Costs.
-7.  **Document Upload in OA**: Fix file upload, validation, storage, retrieval, and download functionality in the OA module.
+The new, urgent **Services Delivery (SD) Module** integrates with Won Opportunities (L6) and encompasses six sub-modules:
+1.  **Upcoming Projects**: Order intake & validation (BOQ/BOM matching, GC sign-off).
+2.  **Project Creation & Management**: Project lifecycle, milestones, Work Breakdown Structure (WBS).
+3.  **Resource Allocation & Purchase Tracking**: Resource pools, utilization, purchase requests.
+4.  **Risk Management**: Risk identification, scoring, mitigation.
+5.  **Change Management**: Change request approvals.
+6.  **Billing Integration**: Sync with external billing systems.
 </product_requirements>
 
 <key_technical_concepts>
-- **Full-stack Application**: React frontend, FastAPI backend, MongoDB database.
-- **RESTful APIs**: Backend API routes prefixed with .
-- **Environment Variables**:  for frontend,  for backend.
-- **Tailwind CSS & Shadcn UI**: For modern, responsive frontend design.
-- **RBAC (Role-Based Access Control)**: For user permissions and workflow approvals.
-- **Real-time Checks**: For automatic stage progression (e.g., 45-day dropout).
+-   **Full-stack Application**: React 18 (TypeScript, Tailwind CSS, Shadcn UI) frontend, FastAPI (Python 3.8+, MongoDB, AsyncIO Motor) backend.
+-   **RESTful APIs**: Backend routes prefixed with .
+-   **Environment Variables**: , .
+-   **RBAC (Role-Based Access Control)**: For permissions and workflows.
+-   **MongoDB**: Document-oriented database with UUIDs for IDs.
+-   **Data Serialization**: ISO strings for dates in MongoDB.
 </key_technical_concepts>
 
 <code_architecture>
@@ -45,61 +34,75 @@ The application follows a standard full-stack architecture with a React frontend
 
 
 
-- ****:
-    - **Importance**: This is the core of the backend, containing all FastAPI endpoints, data models (Quotation, OpportunityBase), and business logic. It handles stage transitions, opportunity creation, master data management, and file operations.
-    - **Changes Made**:
-        - Added  function and integrated into  for 45-day auto-dropout logic.
-        - Added  field to  model.
-        - Implemented quotation approval endpoints (, , , ).
-        - Modified L4 stage validation to require approved quotations.
-        - Implemented OA document download endpoint ().
-        - Fixed route ordering for specific quotation endpoints to avoid 404s.
-        - Added CRUD API endpoints for Primary Categories, Products, Rate Cards, Purchase Costs, and Sales Prices (partially).
-        - Added admin role bypass for RBAC on new endpoints.
-- ****:
-    - **Importance**: Defines the main routing structure and component imports for the React application.
-    - **Changes Made**: Added imports and routes for , , , , , and .
-- ****:
-    - **Importance**: Displays the list of opportunities and provides navigation to stage management.
-    - **Changes Made**: Modified to display  rather than  (implicitly, through backend data consistency efforts and frontend's  relying on ).
-- ****:
-    - **Importance**: Manages the multi-step form for opportunity stage progression.
-    - **Changes Made**:
-        - Updated to correctly open at .
-        - Added Commercial Decision dropdown for L5 stage.
-        - Modified  to route to L6 (Won) or L7 (Lost) based on L5 decision.
-        - Added  to the  state.
-- ****:
-    - **Importance**: Stores environment variables for the frontend, crucially .
-    - **Changes Made**: Created this file and populated  to fix frontend-backend connectivity issues.
-- ****:
-    - **Importance**: Renders the application's navigation sidebar.
-    - **Changes Made**: Added a Master Data menu item with a database icon.
-- **New Frontend Manager Components (, , , , , )**:
-    - **Importance**: Provide user interfaces for managing various master data entities.
-    - **Changes Made**: These files were created to implement CRUD UIs for their respective data types.
+-   ****:
+    -   **Importance**: Centralizes FastAPI endpoints, models, and business logic.
+    -   **Changes Made**:
+        -   Integrated SD module by adding  in the L6 stage transition logic.
+        -   Included  and .
+        -   Fixed duplicate  API endpoint definitions and date filtering issues.
+        -   Modified  endpoint to include , , and .
+        -   Implemented win probability updates based on stage progression (L1=10%, L2=25%, etc.) and fixed initial win probability for L1.
+-   ****:
+    -   **Importance**: Main React routing.
+    -   **Changes Made**: Added routes for , , , , , , and new SD module routes (, , ).
+-   ****:
+    -   **Importance**: Manages opportunity stage progression.
+    -   **Changes Made**: Fixed L5 Commercial Decision dropdown   from empty string to pending to prevent UI error.
+-   ****:
+    -   **Importance**: Renders application navigation.
+    -   **Changes Made**: Updated icon mapping for new master data items.
+-   ****:
+    -   **Importance**: Provides UI for managing sales prices.
+    -   **Changes Made**: Created and integrated into Master Data Dashboard.
+-   ****:
+    -   **Importance**: Handles creating and editing Order Analysis forms.
+    -   **Changes Made**: Enhanced to support editing existing OA forms, including loading data, handling create/update modes, updating header, making customer name editable, adding edit history, and improving error handling.
+-   ****:
+    -   **Importance**: Manages quotation creation/editing.
+    -   **Changes Made**:
+        -   Fixed rate card dropdown by changing  to .
+        -   Added  for debugging rate card population (later removed).
+-   ****:
+    -   **Importance**: Defines Pydantic model for Upcoming Project data.
+    -   **Changes Made**: New file created.
+-   ****:
+    -   **Importance**: FastAPI routes for Upcoming Projects module.
+    -   **Changes Made**: New file created with CRUD operations and BOQ/BOM validation.
+-   ****:
+    -   **Importance**: Defines Pydantic model for Project data.
+    -   **Changes Made**: New file created.
+-   ****:
+    -   **Importance**: FastAPI routes for Project Management module.
+    -   **Changes Made**: New file created with CRUD operations.
+-   ****:
+    -   **Importance**: UI for listing upcoming projects.
+    -   **Changes Made**: New file created.
+-   ****:
+    -   **Importance**: UI for project details, milestones, WBS.
+    -   **Changes Made**: New file created.
 </code_architecture>
 
 <pending_tasks>
-- **Issue #5: OA Form Editing**: Enable editing of Order Analysis forms with proper validation, audit trails, and re-approval workflow for significant changes. This is the only remaining critical issue.
-- **Sales Price Management UI Completion**: Fully integrate the  into the Master Data Dashboard and routing.
+-   **SD Module Development**:
+    -   Complete **Phase 3: Resource Allocation & Purchase Tracking** (currently in progress).
+    -   Implement **Phase 4: Risk Management**.
+    -   Implement **Phase 5: Change Management**.
+    -   Implement **Phase 6: Billing Integration**.
+    -   Develop corresponding frontend UI components for remaining SD sub-modules.
+    -   Implement comprehensive testing for the SD module (unit, integration, frontend).
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was working on completing the **Master Data Management UI system**. This involved creating frontend components and corresponding backend API endpoints for ,  (with SQU codes), , and .
+Immediately before this summary request, the AI engineer was actively working on **Phase 3: Resource Allocation & Purchase Tracking** as part of the new Services Delivery (SD) Module development.
 
-The work had progressed to the point where:
-1.  Frontend components for , , , , and  were created.
-2.  Backend API endpoints for CRUD operations on these master data types were added to .
-3.  The frontend's main routing () and sidebar () were updated to include these new master data management pages.
-4.  Initial testing confirmed the APIs were working and data was available for the UI.
-5.  The user then specifically asked, how i can add the selling price in rate card.
-6.  The AI responded by stating that selling prices are currently separate and committed to creating a comprehensive **Sales Price management system** integrated with Rate Cards.
-7.  The last action was the creation of a new frontend component, , and the addition of its backend API endpoint for CRUD operations in .
+The work completed so far in Phase 3 includes:
+1.  **Database Models for Resource Management**: Created  defining schemas for , , and .
+2.  **Backend API Router - Resource Management**: Created  to house the FastAPI endpoints for resource-related operations.
 
-The current state is that the Master Data UI system is largely functional, with dedicated pages for categories, products, rate cards, and purchase costs. The  component and its backend API are newly introduced, and the next step is to integrate this into the frontend's routing and dashboard.
+The very last action in the trajectory was the AI engineer stating they were about to add the newly created  to the main FastAPI application in , which is the next logical step to make the resource management APIs accessible. This indicates Phase 3 is in its early stages of backend implementation.
 </current_work>
 
 <optional_next_step>
-Integrate the  component into the Master Data Dashboard and update the  routes.
+Add the  to the main FastAPI application in .
 </optional_next_step>
+

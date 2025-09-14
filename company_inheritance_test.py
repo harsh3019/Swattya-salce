@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://quotation-mgmt.preview.emergentagent.com/api"
+BACKEND_URL = "https://service-delivery.preview.emergentagent.com/api"
 ADMIN_CREDENTIALS = {"username": "admin", "password": "admin123"}
 
 class CompanyInheritanceTest:

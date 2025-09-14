@@ -5,7 +5,7 @@ import json
 
 def test_proper_company_creation():
     """Test company creation with proper CompanyCreate model"""
-    base_url = "https://quotation-mgmt.preview.emergentagent.com/api"
+    base_url = "https://service-delivery.preview.emergentagent.com/api"
     
     # Login
     login_response = requests.post(f'{base_url}/auth/login', 
