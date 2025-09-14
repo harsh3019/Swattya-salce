@@ -38,6 +38,8 @@ import SalesPricesManager from './components/SalesPricesManager';
 // SD Module Components
 import UpcomingProjectsList from './components/sd/UpcomingProjects/UpcomingProjectsList';
 import ValidationInterface from './components/sd/UpcomingProjects/ValidationInterface';
+import ProjectsList from './components/sd/Projects/ProjectsList';
+import ProjectDashboard from './components/sd/Projects/ProjectDashboard';
 
 // Import new RBAC components
 import DynamicSidebar from './components/DynamicSidebar';
