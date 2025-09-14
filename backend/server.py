@@ -1538,6 +1538,42 @@ async def delete_role_permission(rp_id: str, current_user: User = Depends(get_cu
     await log_activity("user_management", "role_permissions", "delete", "success", current_user.id, {"mapping_id": rp_id})
     return {"message": "Role-Permission mapping deleted successfully"}
 
+@api_router.post("/test/trigger-upcoming-project/{opportunity_id}")
+async def test_trigger_upcoming_project(opportunity_id: str, current_user: User = Depends(get_current_user)):
+    """Test endpoint to manually trigger upcoming project creation for debugging"""
+    try:
+        # Get the opportunity
+        opportunity = await db.opportunities.find_one({"id": opportunity_id, "is_active": True})
+        if not opportunity:
+            raise HTTPException(status_code=404, detail="Opportunity not found")
+        
+        # Check if it's already won
+        if opportunity.get("current_stage") != 6:
+            return {
+                "message": f"Opportunity is at stage {opportunity.get('current_stage')}, not L6 (Won). Cannot create upcoming project.",
+                "opportunity_id": opportunity_id,
+                "current_stage": opportunity.get("current_stage"),
+                "status": opportunity.get("status")
+            }
+        
+        # Manually trigger the integration function
+        project_id = await create_upcoming_project_from_opportunity(
+            opportunity_id, 
+            opportunity, 
+            current_user.id
+        )
+        
+        return {
+            "message": "Successfully created upcoming project",
+            "opportunity_id": opportunity_id,
+            "project_id": project_id,
+            "triggered_by": current_user.username
+        }
+        
+    except Exception as e:
+        logger.error(f"Test trigger failed for opportunity {opportunity_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create upcoming project: {str(e)}")
+
 # Activity Logs (Read-only)
 @api_router.get("/activity-logs", response_model=List[ActivityLog])
 async def get_activity_logs(current_user: User = Depends(get_current_user)):
