@@ -321,8 +321,14 @@ class IntegrationFunctionTester:
                 data = response.json()
                 message = data.get('message', '').lower()
                 
+                # Check if response contains detailed information indicating logging
+                has_detailed_info = all(key in data for key in ['message', 'opportunity_id', 'triggered_by'])
+                
                 # Check if it indicates duplicate/existing project
-                if 'already exists' in message or 'existing' in message:
+                message = data.get('message', '').lower()
+                is_duplicate = data.get('duplicate', False) or 'already exists' in message or 'existing' in message
+                
+                if is_duplicate:
                     self.log_test(
                         "Duplicate Prevention Logic", 
                         True, 
