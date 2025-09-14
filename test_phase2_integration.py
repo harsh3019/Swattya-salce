@@ -85,7 +85,7 @@ async def test_phase2_integration():
             "project_id": project_uuid,
             "milestone_name": "Project Planning Complete",
             "description": "Complete initial project planning and resource allocation",
-            "due_date": (datetime.now() + timedelta(days=14)).date(),
+            "due_date": (datetime.now() + timedelta(days=14)).isoformat(),
             "status": "Not Started",
             "priority": "High",
             "progress_percentage": 0.0,
