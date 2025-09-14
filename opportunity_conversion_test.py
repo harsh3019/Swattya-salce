@@ -287,16 +287,64 @@ class OpportunityToProjectWorkflowTester:
         try:
             # Define all stages we might need to progress through
             all_stages = [
-                {"stage": 2, "name": "L2 - Qualification", "data": {"region_id": str(uuid.uuid4())}},
-                {"stage": 3, "name": "L3 - Proposal", "data": {"proposal_submitted": True}},
-                {"stage": 4, "name": "L4 - Technical", "data": {"technical_review": "Completed"}},
-                {"stage": 5, "name": "L5 - Commercial", "data": {"commercial_decision": "won"}},
+                {"stage": 1, "name": "L1 - Prospect", "data": {
+                    "product_interest": "CRM Software",
+                    "assigned_representatives": ["admin"],
+                    "lead_owner": "admin"
+                }},
+                {"stage": 2, "name": "L2 - Qualification", "data": {
+                    "region_id": str(uuid.uuid4()),
+                    "budget_range": "100000-500000",
+                    "authority_level": "Decision Maker",
+                    "need_urgency": "High",
+                    "timeline": "Q1 2024"
+                }},
+                {"stage": 3, "name": "L3 - Proposal", "data": {
+                    "proposal_submitted": True,
+                    "submission_date": datetime.now().isoformat(),
+                    "internal_stakeholder": "admin",
+                    "client_response": "Positive"
+                }},
+                {"stage": 4, "name": "L4 - Technical", "data": {
+                    "technical_review": "Completed",
+                    "selected_quotation_id": None  # Will be set if quotation exists
+                }},
+                {"stage": 5, "name": "L5 - Commercial", "data": {
+                    "commercial_decision": "won",
+                    "updated_price": 95000.0,
+                    "margin_percentage": 25.0,
+                    "po_number": "PO-TEST-2024"
+                }},
                 {"stage": 6, "name": "L6 - Won", "data": {
                     "final_value": 95000.0,
                     "client_poc": "John Doe",
-                    "delivery_team": "Team Alpha"
+                    "delivery_team": "Team Alpha",
+                    "kickoff_tasks": ["Project Charter", "Resource Allocation"]
                 }}
             ]
+            
+            # If we're at L1, first complete L1 data, then progress
+            if current_stage == 1:
+                # First, save L1 data
+                l1_data = all_stages[0]["data"]
+                stage_transition_data = {
+                    "target_stage": 1,
+                    "stage_data": l1_data,
+                    "notes": "Completing L1 data before progression"
+                }
+                
+                response = self.session.post(
+                    f"{BACKEND_URL}/opportunities/{opportunity_id}/change-stage",
+                    json=stage_transition_data
+                )
+                
+                if response.status_code == 200:
+                    self.log_test("Complete L1 Data", True, "L1 data completed successfully")
+                else:
+                    self.log_test("Complete L1 Data", False, 
+                                f"Failed to complete L1 data: {response.status_code}", 
+                                {"response": response.text})
+                    return False
             
             # Only progress through stages we haven't reached yet
             stages_to_progress = [s for s in all_stages if s["stage"] > current_stage]
