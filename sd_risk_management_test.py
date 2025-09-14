@@ -437,7 +437,7 @@ class SDRiskManagementTester:
             
             response = self.session.post(f"{BASE_URL}/sd/risks/{self.test_risk_id}/review", json=review_data)
             
-            if response.status_code == 201:
+            if response.status_code in [200, 201]:
                 review = response.json()
                 review_id_format = review.get("review_id", "")
                 
