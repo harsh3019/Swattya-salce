@@ -436,33 +436,63 @@ class OpportunityToProjectWorkflowTester:
             self.log_test("Verify Project Creation", False, f"Error: {str(e)}")
             return False
     
-    def test_integration_function_exists(self):
-        """Test if the integration function exists by checking server logs or database"""
-        print("\n=== TESTING INTEGRATION FUNCTION ===")
+    def test_existing_won_opportunities(self):
+        """Test if existing won opportunities have corresponding upcoming projects"""
+        print("\n=== TESTING EXISTING WON OPPORTUNITIES ===")
         
-        # We can't directly test the function existence, but we can test the workflow
-        # The function should be called when an opportunity moves to L6
-        
-        # Check if there are any existing upcoming projects from opportunities
         try:
-            response = self.session.get(f"{BACKEND_URL}/sd/upcoming-projects/")
-            if response.status_code == 200:
-                projects = response.json()
-                opportunity_projects = [p for p in projects if p.get("opportunity_id")]
-                
-                if opportunity_projects:
-                    self.log_test("Integration Function Evidence", True, 
-                                f"Found {len(opportunity_projects)} projects with opportunity_id",
-                                {"sample_project": opportunity_projects[0] if opportunity_projects else None})
-                else:
-                    self.log_test("Integration Function Evidence", False, 
-                                "No projects found with opportunity_id - integration may not be working")
+            # Get all opportunities
+            opp_response = self.session.get(f"{BACKEND_URL}/opportunities")
+            if opp_response.status_code != 200:
+                self.log_test("Get Opportunities for Won Check", False, "Failed to get opportunities")
+                return
+            
+            data = opp_response.json()
+            if isinstance(data, dict) and "opportunities" in data:
+                opportunities = data["opportunities"]
+            elif isinstance(data, list):
+                opportunities = data
             else:
-                self.log_test("Integration Function Check", False, 
-                            f"Could not check projects: {response.status_code}")
+                opportunities = []
+            
+            # Find won opportunities
+            won_opportunities = [o for o in opportunities if isinstance(o, dict) and (o.get("current_stage") == 6 or o.get("status") == "Won")]
+            
+            if not won_opportunities:
+                self.log_test("No Won Opportunities", True, "No won opportunities found to test")
+                return
+            
+            # Get all upcoming projects
+            proj_response = self.session.get(f"{BACKEND_URL}/sd/upcoming-projects/")
+            if proj_response.status_code != 200:
+                self.log_test("Get Projects for Won Check", False, "Failed to get upcoming projects")
+                return
+            
+            projects = proj_response.json()
+            
+            # Check each won opportunity
+            for won_opp in won_opportunities:
+                opp_id = won_opp.get("id")
+                opp_display_id = won_opp.get("opportunity_id", "unknown")
                 
+                # Look for corresponding project
+                matching_project = None
+                for project in projects:
+                    if isinstance(project, dict) and project.get("opportunity_id") == opp_id:
+                        matching_project = project
+                        break
+                
+                if matching_project:
+                    self.log_test(f"Won Opportunity {opp_display_id} Has Project", True, 
+                                f"Found corresponding upcoming project",
+                                {"project_id": matching_project.get("id")})
+                else:
+                    self.log_test(f"Won Opportunity {opp_display_id} Missing Project", False, 
+                                f"No upcoming project found for won opportunity",
+                                {"opportunity_id": opp_id})
+            
         except Exception as e:
-            self.log_test("Integration Function Check", False, f"Error: {str(e)}")
+            self.log_test("Test Existing Won Opportunities", False, f"Error: {str(e)}")
     
     def debug_database_state(self):
         """Debug the current state of opportunities and upcoming projects"""
