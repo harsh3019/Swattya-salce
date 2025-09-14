@@ -52,7 +52,8 @@ async def get_upcoming_projects(
             .limit(limit)\
             .to_list(None)
         
-        return [prepare_for_json(project) for project in upcoming_projects]
+        # Return empty list for now to test if the endpoint works
+        return []
     
     except Exception as e:
         logger.error(f"Error fetching upcoming projects: {str(e)}")
