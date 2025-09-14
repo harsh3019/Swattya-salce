@@ -6,7 +6,11 @@ import os
 import shutil
 import logging
 
-from server import db, get_current_user, User, prepare_for_mongo, prepare_for_json, log_audit_trail
+# Import from main server components without circular dependency
+from motor.motor_asyncio import AsyncIOMotorClient
+from auth import get_current_user, User
+from database import db
+from utils import prepare_for_mongo, prepare_for_json, log_audit_trail
 from models.sd.upcoming_project import (
     UpcomingProject, UpcomingProjectCreate, UpcomingProjectUpdate,
     ValidationResult, OrderStatus, ValidationStatus, GCSignoffStatus
