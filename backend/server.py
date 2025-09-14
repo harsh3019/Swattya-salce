@@ -14,6 +14,7 @@ import logging
 import random
 from pathlib import Path
 from dotenv import load_dotenv
+from routers.sd.upcoming_projects import router as sd_upcoming_projects_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
