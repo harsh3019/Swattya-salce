@@ -650,6 +650,16 @@ function App() {
                   <ValidationInterface />
                 </ProtectedRoute>
               } />
+              <Route path="/sd/projects" element={
+                <ProtectedRoute>
+                  <ProjectsList />
+                </ProtectedRoute>
+              } />
+              <Route path="/sd/projects/:projectId" element={
+                <ProtectedRoute>
+                  <ProjectDashboard />
+                </ProtectedRoute>
+              } />
               
               <Route path="/" element={<HomeRoute />} />
             </Routes>
