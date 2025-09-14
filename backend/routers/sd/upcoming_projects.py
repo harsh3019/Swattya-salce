@@ -37,8 +37,29 @@ async def get_upcoming_projects(
     skip: int = 0
 ):
     """Get list of upcoming projects with optional filtering"""
-    # Return empty list for testing
-    return []
+    try:
+        # Import here to avoid circular dependency
+        from server import db, prepare_for_json
+        
+        # Build query
+        query = {}
+        if status:
+            query["order_status"] = status
+            
+        # Get projects from database
+        cursor = db.upcoming_projects.find(query).limit(limit).skip(skip)
+        projects = await cursor.to_list(length=None)
+        
+        # Prepare for JSON response
+        result = []
+        for project in projects:
+            result.append(prepare_for_json(project))
+            
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error fetching upcoming projects: {str(e)}")
+        return []
 
 @router.get("/{project_id}", response_model=UpcomingProject)
 async def get_upcoming_project(
