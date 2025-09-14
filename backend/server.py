@@ -5252,8 +5252,8 @@ async def change_opportunity_stage(
     
     # Stage-specific validation
     if target_stage > current_stage:
-        # Progressing to next stage - validate target stage data (the stage we're moving TO)
-        validation_errors = await validate_stage_data(target_stage, stage_data, opportunity_id)
+        # Progressing to next stage - validate current stage data (the stage we're completing)
+        validation_errors = await validate_stage_data(current_stage, stage_data, opportunity_id)
         if validation_errors:
             raise HTTPException(status_code=400, detail={"validation_errors": validation_errors})
     elif target_stage == current_stage:
