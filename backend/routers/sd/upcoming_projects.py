@@ -11,9 +11,6 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 # Import these from server.py to avoid circular dependency issues
 # We'll import them inside functions to avoid circular import at module level
-from auth import get_current_user, User
-from database import db
-from utils import prepare_for_mongo, prepare_for_json, log_audit_trail
 from models.sd.upcoming_project import (
     UpcomingProject, UpcomingProjectCreate, UpcomingProjectUpdate,
     ValidationResult, OrderStatus, ValidationStatus, GCSignoffStatus
