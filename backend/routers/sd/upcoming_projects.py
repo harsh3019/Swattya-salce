@@ -37,27 +37,8 @@ async def get_upcoming_projects(
     skip: int = 0
 ):
     """Get list of upcoming projects with optional filtering"""
-    try:
-        # Import here to avoid circular dependency
-        from server import db, prepare_for_json
-        
-        query = {"is_active": {"$ne": False}}  # Exclude soft-deleted records
-        
-        if status:
-            query["order_status"] = status
-        
-        upcoming_projects = await db.upcoming_projects.find(query)\
-            .sort("created_at", -1)\
-            .skip(skip)\
-            .limit(limit)\
-            .to_list(None)
-        
-        # Return empty list for now to test if the endpoint works
-        return []
-    
-    except Exception as e:
-        logger.error(f"Error fetching upcoming projects: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error fetching upcoming projects")
+    # Return empty list for testing
+    return []
 
 @router.get("/{project_id}", response_model=UpcomingProject)
 async def get_upcoming_project(
