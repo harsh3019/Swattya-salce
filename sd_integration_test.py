@@ -100,7 +100,7 @@ class SDIntegrationTester:
                 return False
                 
             stages = await stages_response.json()
-            l1_stage = next((s for s in stages if s["code"] == "L1"), None)
+            l1_stage = next((s for s in stages if s["stage_code"] == "L1"), None)
             if not l1_stage:
                 self.log_result("Create Test Opportunity", False, "L1 stage not found")
                 return False
