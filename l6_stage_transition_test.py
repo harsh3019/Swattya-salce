@@ -76,7 +76,7 @@ class L6StageTransitionTester:
             return False
 
     def find_l5_opportunity(self):
-        """Find an existing opportunity in L5 stage or create one"""
+        """Find an existing opportunity in L5 stage or create one from L4"""
         print("\n🔍 FINDING L5 OPPORTUNITY")
         print("=" * 50)
         
@@ -104,14 +104,73 @@ class L6StageTransitionTester:
                     )
                     return True
                 else:
-                    # Create L5 opportunity if none exists
-                    return self.create_l5_opportunity()
+                    # Look for L4 opportunity to move to L5
+                    l4_opportunities = [opp for opp in opportunities if opp.get("current_stage") == 4]
+                    if l4_opportunities:
+                        self.l5_opportunity_id = l4_opportunities[0]["id"]
+                        self.log_test(
+                            "Find L4 Opportunity", 
+                            True, 
+                            f"Found L4 opportunity to move to L5: {self.l5_opportunity_id}"
+                        )
+                        # Move to L5
+                        return self.move_l4_to_l5()
+                    else:
+                        # Look for any opportunity to move through stages
+                        if opportunities:
+                            self.l5_opportunity_id = opportunities[0]["id"]
+                            current_stage = opportunities[0].get("current_stage", 1)
+                            self.log_test(
+                                "Find Any Opportunity", 
+                                True, 
+                                f"Found L{current_stage} opportunity to move to L5: {self.l5_opportunity_id}"
+                            )
+                            return self.move_opportunity_to_l5()
+                        else:
+                            self.log_test("Find L5 Opportunity", False, "No opportunities found in system")
+                            return False
             else:
                 self.log_test("Find L5 Opportunity", False, f"Status: {response.status_code}")
                 return False
                 
         except Exception as e:
             self.log_test("Find L5 Opportunity", False, f"Exception: {str(e)}")
+            return False
+
+    def move_l4_to_l5(self):
+        """Move L4 opportunity to L5 stage"""
+        try:
+            # L5 stage data
+            l5_stage_data = {
+                "updated_price": 750000,
+                "margin_percentage": 35.0,
+                "po_number": "PO-TEST-L6-001",
+                "po_date": date.today().isoformat(),
+                "commercial_decision": "won"
+            }
+            
+            transition_data = {
+                "target_stage": 5,
+                "stage_data": l5_stage_data,
+                "notes": "Moving L4 to L5 for L6 transition testing"
+            }
+            
+            response = requests.post(
+                f"{self.base_url}/opportunities/{self.l5_opportunity_id}/change-stage",
+                headers=self.headers,
+                json=transition_data,
+                timeout=10
+            )
+            
+            if response.status_code in [200, 201]:
+                self.log_test("Move L4 to L5", True, "Successfully moved L4 opportunity to L5")
+                return True
+            else:
+                self.log_test("Move L4 to L5", False, f"Status: {response.status_code}, Response: {response.text[:200]}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Move L4 to L5", False, f"Exception: {str(e)}")
             return False
 
     def create_l5_opportunity(self):
