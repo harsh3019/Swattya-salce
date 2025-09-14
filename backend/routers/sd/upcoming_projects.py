@@ -9,19 +9,8 @@ import logging
 # Import from main server components without circular dependency
 from motor.motor_asyncio import AsyncIOMotorClient
 
-# Import these at module level to avoid circular dependency issues
-try:
-    from auth import get_current_user, User
-    from database import db
-    from utils import prepare_for_mongo, prepare_for_json, log_audit_trail
-except ImportError:
-    # Fallback imports if circular dependency occurs
-    get_current_user = None
-    User = None
-    db = None
-    prepare_for_mongo = None
-    prepare_for_json = None
-    log_audit_trail = None
+# Import these from server.py to avoid circular dependency issues
+# We'll import them inside functions to avoid circular import at module level
 from auth import get_current_user, User
 from database import db
 from utils import prepare_for_mongo, prepare_for_json, log_audit_trail
