@@ -1542,8 +1542,8 @@ async def delete_role_permission(rp_id: str, current_user: User = Depends(get_cu
 async def test_trigger_upcoming_project(opportunity_id: str, current_user: User = Depends(get_current_user)):
     """Test endpoint to manually trigger upcoming project creation for debugging"""
     try:
-        # Get the opportunity
-        opportunity = await db.opportunities.find_one({"id": opportunity_id, "is_active": True})
+        # Get the opportunity (check both with and without is_active filter)
+        opportunity = await db.opportunities.find_one({"id": opportunity_id})
         if not opportunity:
             raise HTTPException(status_code=404, detail="Opportunity not found")
         
