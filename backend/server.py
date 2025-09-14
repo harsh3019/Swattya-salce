@@ -6085,43 +6085,67 @@ async def create_upcoming_project_from_opportunity(opportunity_id: str, opportun
         company = await db.companies.find_one({"id": opportunity.get("company_id")})
         company_name = company.get("company_name", "Unknown Company") if company else "Unknown Company"
         
-        # Get selected quotation for project value
+        # Get selected quotation for project value (setup cost)
         selected_quotation = await db.quotations.find_one({
             "opportunity_id": opportunity_id,
             "is_selected": True,
             "is_active": True
         })
         
-        project_value = 0
+        setup_cost = 0.0
         if selected_quotation:
-            project_value = selected_quotation.get("total_amount", 0)
+            setup_cost = float(selected_quotation.get("total_amount", 0))
         else:
             # Fallback to opportunity expected revenue
-            project_value = opportunity.get("expected_revenue", 0)
+            setup_cost = float(opportunity.get("expected_revenue", 0))
         
-        # Create upcoming project entry
+        # Get or create Order Analysis ID (fallback to generating one)
+        order_analysis = await db.order_analyses.find_one({
+            "opportunity_id": opportunity_id,
+            "is_active": True
+        })
+        
+        if order_analysis:
+            order_id = order_analysis.get("oa_id", f"OA-{str(uuid.uuid4())[:8].upper()}")
+        else:
+            # Create a placeholder order analysis ID if none exists
+            order_id = f"OA-{str(uuid.uuid4())[:8].upper()}"
+        
+        # Generate POT ID (Project Operations Tracking ID)
+        pot_id = f"POT-{str(uuid.uuid4())[:8].upper()}"
+        
+        # Create upcoming project entry with SD-compatible schema
         upcoming_project = {
             "id": str(uuid.uuid4()),
-            "project_name": f"{opportunity.get('name', 'Untitled Project')} - {company_name}",
-            "opportunity_id": opportunity_id,
-            "company_id": opportunity.get("company_id"),
-            "company_name": company_name,
-            "project_value": project_value,
-            "currency": opportunity.get("currency", "USD"),
-            "expected_start_date": None,  # To be filled by SD team
-            "expected_end_date": None,    # To be filled by SD team
-            "project_manager_id": None,   # To be assigned by SD team
-            "status": "Upcoming",
-            "source": "Won Opportunity",
-            "notes": f"Auto-created from won opportunity: {opportunity.get('name')}",
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "order_id": order_id,
+            "opp_id": opportunity.get("opportunity_id", opportunity_id),
+            "pot_id": pot_id,
+            "customer_id": opportunity.get("company_id"),
+            "customer_name": company_name,
+            "po_boq_file": None,  # To be uploaded by SD team
+            "bom_file": None,     # To be uploaded by SD team
+            "setup_cost": setup_cost,
+            "loi_status": "Pending",
+            "opp_status": "Won",
+            "order_status": "Pending",
+            "validation_status": "Pending GC Sign-off",
+            "discrepancy_notes": None,
+            "loi_approved_on": None,
+            "validation_date": None,
+            "gc_signoff_required": False,
+            "gc_signoff_status": "Pending",
+            "gc_signoff_timestamp": None,
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
             "created_by": user_id,
-            "updated_at": datetime.now(timezone.utc).isoformat(),
-            "is_active": True
+            "updated_by": user_id
         }
         
-        # Insert into upcoming_projects collection
-        await db.upcoming_projects.insert_one(upcoming_project)
+        # Convert datetime objects to ISO strings for MongoDB storage
+        upcoming_project = prepare_for_mongo(upcoming_project)
+        
+        # Insert into sd_upcoming_projects collection (use SD collection name)
+        await db.sd_upcoming_projects.insert_one(upcoming_project)
         
         # Log the activity
         await log_activity(
@@ -6133,12 +6157,14 @@ async def create_upcoming_project_from_opportunity(opportunity_id: str, opportun
             {
                 "project_id": upcoming_project["id"],
                 "opportunity_id": opportunity_id,
-                "project_name": upcoming_project["project_name"],
-                "project_value": project_value
+                "order_id": order_id,
+                "pot_id": pot_id,
+                "customer_name": company_name,
+                "setup_cost": setup_cost
             }
         )
         
-        logger.info(f"Created upcoming project {upcoming_project['id']} from won opportunity {opportunity_id}")
+        logger.info(f"Created SD upcoming project {upcoming_project['id']} from won opportunity {opportunity_id} with order_id: {order_id}")
         
     except Exception as e:
         logger.error(f"Failed to create upcoming project from opportunity {opportunity_id}: {str(e)}")
