@@ -5153,6 +5153,26 @@ async def change_opportunity_stage(
     # Add stage-specific data
     update_data.update(stage_data)
     
+    # Update win probability based on stage
+    stage_win_probabilities = {
+        1: 10.0,   # L1 - Prospect
+        2: 25.0,   # L2 - Qualification  
+        3: 40.0,   # L3 - Proposal
+        4: 60.0,   # L4 - Technical
+        5: 75.0,   # L5 - Commercial
+        6: 100.0,  # L6 - Won
+        7: 0.0,    # L7 - Lost
+        8: 0.0     # L8 - Dropped
+    }
+    
+    # Set win probability based on target stage
+    if target_stage in stage_win_probabilities:
+        update_data["win_probability"] = stage_win_probabilities[target_stage]
+        
+        # Recalculate weighted revenue
+        expected_revenue = update_data.get("expected_revenue", opportunity.get("expected_revenue", 0))
+        update_data["weighted_revenue"] = (expected_revenue * update_data["win_probability"]) / 100
+    
     # Handle special stage transitions
     if target_stage == 6:  # Won
         update_data["status"] = "Won"
