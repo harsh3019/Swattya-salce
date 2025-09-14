@@ -448,7 +448,8 @@ def parse_from_mongo(item: dict) -> dict:
     
     # SD Resource Management date fields
     date_fields = ['procurement_date', 'warranty_expiry', 'start_date', 'end_date', 
-                   'required_by', 'expected_delivery', 'actual_delivery']
+                   'required_by', 'expected_delivery', 'actual_delivery',
+                   'next_review', 'due_date', 'completion_date', 'next_review_date']
     for field in date_fields:
         if isinstance(item.get(field), str):
             try:
@@ -457,7 +458,8 @@ def parse_from_mongo(item: dict) -> dict:
                 pass
     
     # SD Resource Management datetime fields
-    datetime_fields = ['allocation_date', 'approval_date']
+    datetime_fields = ['allocation_date', 'approval_date', 'identified_date', 
+                      'last_reviewed', 'review_date', 'assessment_date']
     for field in datetime_fields:
         if isinstance(item.get(field), str):
             try:
