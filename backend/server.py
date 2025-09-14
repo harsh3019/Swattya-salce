@@ -6144,8 +6144,8 @@ async def create_upcoming_project_from_opportunity(opportunity_id: str, opportun
         # Convert datetime objects to ISO strings for MongoDB storage
         upcoming_project = prepare_for_mongo(upcoming_project)
         
-        # Insert into sd_upcoming_projects collection (use SD collection name)
-        await db.sd_upcoming_projects.insert_one(upcoming_project)
+        # Insert into upcoming_projects collection (use correct SD collection name)
+        await db.upcoming_projects.insert_one(upcoming_project)
         
         # Log the activity
         await log_activity(
