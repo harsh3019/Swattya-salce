@@ -4786,12 +4786,55 @@ async def get_rate_cards(current_user: User = Depends(get_current_user)):
 
 @api_router.get("/mst/sales-prices/{rate_card_id}")
 async def get_sales_prices_by_rate_card(rate_card_id: str, current_user: User = Depends(get_current_user)):
-    """Get sales prices for a specific rate card"""
-    prices = await db.mst_sales_prices.find({
-        "rate_card_id": rate_card_id,
-        "is_active": True
-    }).to_list(None)
-    return [prepare_for_json(price) for price in prices]
+    """Get sales prices for a specific rate card with purchase costs"""
+    try:
+        # Get sales prices for the rate card
+        sales_prices = await db.mst_sales_prices.find({
+            "rate_card_id": rate_card_id,
+            "is_active": True
+        }).to_list(None)
+        
+        # Enrich with purchase costs and format for frontend
+        enriched_prices = []
+        
+        for sp in sales_prices:
+            # Get purchase cost for this product
+            purchase_cost_doc = await db.mst_purchase_costs.find_one({
+                "product_id": sp["product_id"],
+                "is_active": True
+            })
+            
+            # Format according to what frontend expects
+            enriched_price = {
+                "id": sp["id"],
+                "rate_card_id": sp["rate_card_id"], 
+                "product_id": sp["product_id"],
+                "pricing_type": sp["pricing_type"],
+                "is_active": sp["is_active"],
+                "created_at": sp["created_at"]
+            }
+            
+            # Add the correct price field based on pricing_type
+            if sp["pricing_type"] == "recurring":
+                enriched_price["recurring_sale_price"] = sp["sales_price"]
+                enriched_price["one_time_sale_price"] = 0
+            elif sp["pricing_type"] == "one_time":
+                enriched_price["recurring_sale_price"] = 0
+                enriched_price["one_time_sale_price"] = sp["sales_price"]
+            else:
+                enriched_price["recurring_sale_price"] = 0
+                enriched_price["one_time_sale_price"] = 0
+            
+            # Add purchase cost if available
+            enriched_price["purchase_cost"] = purchase_cost_doc["purchase_cost"] if purchase_cost_doc else 0
+            
+            enriched_prices.append(enriched_price)
+        
+        return [prepare_for_json(price) for price in enriched_prices]
+    
+    except Exception as e:
+        logger.error(f"Error fetching sales prices for rate card {rate_card_id}: {e}")
+        raise HTTPException(status_code=500, detail="Error fetching sales prices")
 
 @api_router.get("/mst/purchase-costs")
 async def get_purchase_costs(current_user: User = Depends(get_current_user)):
