@@ -189,7 +189,29 @@ backend:
           agent: "main"
           comment: "✅ COMPLETE MASTER DATA UI SYSTEM IMPLEMENTED: Created comprehensive React components for managing Primary Categories, Products, Rate Cards, and Purchase Costs. Features include: CRUD operations, search/filter, real-time margin calculations, SQU code auto-generation, data validation, responsive tables, and professional UI. Backend APIs fully functional with proper authentication and error handling. Accessible via /master-data route."
 
-  - task: "L5 Stage Select.Item Empty Value Error Fix"
+  - task: "CRITICAL ISSUE #1: Rate Card Pricing Auto-Population Fix"
+    implemented: true
+    working: true
+    file: "backend/server.py - sales-prices API enhancement"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ CRITICAL ISSUE #1 RESOLVED: Fixed rate card pricing not loading in quotations. PROBLEM IDENTIFIED: ✅ Sales prices API returned raw data with 'sales_price' field but frontend expected 'recurring_sale_price' and 'one_time_sale_price', ✅ Purchase costs were not joined/included in sales prices response, ✅ Field mapping mismatch between backend response and frontend expectations. SOLUTION IMPLEMENTED: ✅ Enhanced /api/mst/sales-prices/{rate_card_id} endpoint to join purchase costs data, ✅ Added field mapping: pricing_type='recurring' → recurring_sale_price=sales_price, one_time_sale_price=0, ✅ Added field mapping: pricing_type='one_time' → recurring_sale_price=0, one_time_sale_price=sales_price, ✅ Joined purchase_cost from mst_purchase_costs table for each product, ✅ Enhanced error handling and logging for API failures. EXPECTED WORKFLOW NOW FUNCTIONAL: ✅ User selects Rate Card → system fetches sales prices, ✅ User adds Product → system auto-populates sales price and purchase cost from rate card, ✅ Prices displayed in disabled fields showing 'Auto-filled from rate card', ✅ Proper margin calculation with sales price - purchase cost. API VERIFICATION: Enhanced API now returns proper format: recurring_sale_price, one_time_sale_price, purchase_cost for all products in selected rate card."
+
+  - task: "CRITICAL ISSUE #2: Stage-Based Win Probability Implementation"
+    implemented: true
+    working: true  
+    file: "backend/server.py - stage change logic enhancement"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ CRITICAL ISSUE #2 RESOLVED: Implemented dynamic stage-based win probability updates for accurate pipeline forecasting. PROBLEM IDENTIFIED: ✅ Win probability was hardcoded to 25% for all stages including Won opportunities, ✅ No automatic probability updates during stage progression, ✅ Weighted revenue calculations were incorrect due to static probability. SOLUTION IMPLEMENTED: ✅ Added stage_win_probabilities mapping: L1=10%, L2=25%, L3=40%, L4=60%, L5=75%, L6=100%, L7=0%, L8=0%, ✅ Enhanced change_opportunity_stage function to automatically update win_probability based on target_stage, ✅ Added automatic weighted_revenue recalculation: (expected_revenue × win_probability) / 100, ✅ Fixed initial opportunity creation to use L1=10% instead of hardcoded 25%. STAGE PROGRESSION NOW FUNCTIONAL: ✅ L1 (Prospect) → 10% probability, ✅ L2 (Qualification) → 25% probability, ✅ L3 (Proposal) → 40% probability, ✅ L4 (Technical) → 60% probability, ✅ L5 (Commercial) → 75% probability, ✅ L6 (Won) → 100% probability, ✅ L7 (Lost) → 0% probability, ✅ L8 (Dropped) → 0% probability. PIPELINE ANALYTICS IMPACT: Revenue forecasting now accurate with proper stage-based probabilities, weighted revenue automatically updates during stage transitions."
     implemented: true
     working: true
     file: "frontend/src/components/OpportunityStageForm.js, QuotationBuilder.js"
