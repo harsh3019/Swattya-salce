@@ -5303,9 +5303,13 @@ async def change_opportunity_stage(
         
         # SD Module Integration: Auto-create upcoming project entry
         try:
-            await create_upcoming_project_from_opportunity(opportunity_id, opportunity, current_user.id)
+            project_id = await create_upcoming_project_from_opportunity(opportunity_id, opportunity, current_user.id)
+            logger.info(f"✅ Successfully created upcoming project {project_id} for won opportunity {opportunity_id}")
         except Exception as e:
-            logger.warning(f"Failed to create upcoming project for opportunity {opportunity_id}: {str(e)}")
+            logger.error(f"❌ CRITICAL: Failed to create upcoming project for opportunity {opportunity_id}: {str(e)}")
+            # Don't fail the stage transition, but log the error for investigation
+            import traceback
+            logger.error(f"Integration error stack trace: {traceback.format_exc()}")
     elif target_stage == 7:  # Lost
         update_data["status"] = "Lost"
         update_data["is_locked"] = True
