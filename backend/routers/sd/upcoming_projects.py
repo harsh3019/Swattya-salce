@@ -37,11 +37,13 @@ for dir_path in UPLOAD_DIRS.values():
 async def get_upcoming_projects(
     status: Optional[str] = None,
     limit: int = 50,
-    skip: int = 0,
-    current_user: User = Depends(get_current_user)
+    skip: int = 0
 ):
     """Get list of upcoming projects with optional filtering"""
     try:
+        # Import here to avoid circular dependency
+        from server import db, prepare_for_json
+        
         query = {"is_active": {"$ne": False}}  # Exclude soft-deleted records
         
         if status:
