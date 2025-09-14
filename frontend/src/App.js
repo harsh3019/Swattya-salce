@@ -35,6 +35,10 @@ import RateCardsManager from './components/RateCardsManager';
 import PurchaseCostsManager from './components/PurchaseCostsManager';
 import SalesPricesManager from './components/SalesPricesManager';
 
+// SD Module Components
+import UpcomingProjectsList from './components/sd/UpcomingProjects/UpcomingProjectsList';
+import ValidationInterface from './components/sd/UpcomingProjects/ValidationInterface';
+
 // Import new RBAC components
 import DynamicSidebar from './components/DynamicSidebar';
 import ForbiddenPage from './components/ForbiddenPage';
