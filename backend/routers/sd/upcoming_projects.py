@@ -63,10 +63,12 @@ async def get_upcoming_projects(
 
 @router.get("/{project_id}", response_model=UpcomingProject)
 async def get_upcoming_project(
-    project_id: str,
-    current_user: User = Depends(get_current_user)
+    project_id: str
 ):
     """Get specific upcoming project by ID"""
+    # Import here to avoid circular dependency
+    from server import db, prepare_for_json
+    
     project = await db.upcoming_projects.find_one({"id": project_id})
     if not project:
         raise HTTPException(status_code=404, detail="Upcoming project not found")
