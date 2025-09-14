@@ -253,7 +253,7 @@ class IntegrationFunctionTester:
         opportunity_id = test_opportunity.get('id')
         
         try:
-            print(f"Testing with opportunity: {test_opportunity.get('opportunity_id')} (ID: {opportunity_id})")
+            print(f"Testing with opportunity: {test_opportunity.get('id')} (ID: {opportunity_id})")
             
             response = requests.post(
                 f"{self.base_url}/test/trigger-upcoming-project/{opportunity_id}",
