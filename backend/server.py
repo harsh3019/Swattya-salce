@@ -3881,7 +3881,7 @@ async def convert_lead_to_opportunity(
             "status": "Active",
             "expected_revenue": float(lead.get("expected_orc", 0) or lead.get("revenue", 0) or 0),
             "currency_id": currency_id,
-            "win_probability": 25.0,  # Default for L1 stage
+            "win_probability": 10.0,  # L1 - Prospect
             "weighted_revenue": 0.0,
             
             # L1 - Prospect fields from lead data
