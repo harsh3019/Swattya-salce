@@ -262,31 +262,67 @@ async def convert_to_project(
         if upcoming_project.get('gc_signoff_required') and upcoming_project.get('gc_signoff_status') != GCSignoffStatus.APPROVED:
             raise HTTPException(status_code=400, detail="GC signoff required before conversion")
         
-        # Generate project ID
+        # Generate project IDs
+        project_uuid = str(uuid.uuid4())
         project_id_new = f"PRJ-{str(uuid.uuid4())[:8].upper()}"
         
-        # Create project record (we'll implement this in Phase 2)
+        # Create active project record
         project_data = {
+            "id": project_uuid,
             "project_id": project_id_new,
             "name": f"Project for {upcoming_project['customer_name']}",
+            "description": f"Converted from upcoming project {upcoming_project.get('pot_id', '')}",
             "order_id": upcoming_project['order_id'],
+            "upcoming_project_id": project_id,
+            "customer_id": upcoming_project.get('customer_id'),
             "customer_name": upcoming_project['customer_name'],
-            "setup_cost": upcoming_project.get('setup_cost', 0),
+            "budget": upcoming_project.get('setup_cost', 0),
+            "currency": "USD",
             "phase": "Planning",
             "status": "Active",
+            "priority": "Medium",
+            "overall_progress": 0.0,
+            "completion_percentage": 0.0,
+            "actual_cost": 0.0,
             "created_at": datetime.now(timezone.utc),
-            "created_by": "system"  # Placeholder until auth is fixed
+            "updated_at": datetime.now(timezone.utc),
+            "created_by": "system",
+            "updated_by": "system",
+            "is_active": True
         }
         
-        # For now, we'll just mark the upcoming project as converted
+        # Insert active project
+        await db.projects.insert_one(prepare_for_mongo(project_data))
+        
+        # Update upcoming project status
         await db.upcoming_projects.update_one(
             {"id": project_id},
             {"$set": prepare_for_mongo({
                 "order_status": OrderStatus.CONVERTED,
                 "updated_at": datetime.now(timezone.utc),
-                "updated_by": "system"  # Placeholder until auth is fixed
+                "updated_by": "system"
             })}
         )
+        
+        # Create initial milestone for project planning
+        planning_milestone = {
+            "id": str(uuid.uuid4()),
+            "project_id": project_uuid,
+            "milestone_name": "Project Planning Complete",
+            "description": "Complete initial project planning and resource allocation",
+            "due_date": (datetime.now() + timedelta(days=14)).date(),
+            "status": "Not Started",
+            "priority": "High",
+            "progress_percentage": 0.0,
+            "deliverables": ["Project Charter", "Resource Plan", "Timeline"],
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
+            "created_by": "system",
+            "updated_by": "system",
+            "is_active": True
+        }
+        
+        await db.milestones.insert_one(prepare_for_mongo(planning_milestone))
         
         # Log audit trail
         await log_audit_trail(
@@ -300,7 +336,9 @@ async def convert_to_project(
         return {
             "message": "Project converted successfully",
             "project_id": project_id_new,
-            "status": "Active"
+            "project_uuid": project_uuid,
+            "status": "Active",
+            "phase": "Planning"
         }
     
     except HTTPException:
