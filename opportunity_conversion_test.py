@@ -143,12 +143,20 @@ class OpportunityToProjectWorkflowTester:
             # First, check if there are existing opportunities we can use
             response = self.session.get(f"{BACKEND_URL}/opportunities")
             if response.status_code == 200:
-                opportunities = response.json()
+                data = response.json()
+                
+                # Handle both direct list and nested structure
+                if isinstance(data, dict) and "opportunities" in data:
+                    opportunities = data["opportunities"]
+                elif isinstance(data, list):
+                    opportunities = data
+                else:
+                    opportunities = []
                 
                 # Look for an opportunity in L1 stage that we can progress
                 for opp in opportunities:
-                    if opp.get("current_stage", 1) == 1:  # L1 stage
-                        self.log_test("Use Existing Opportunity", True, 
+                    if isinstance(opp, dict) and opp.get("current_stage", 1) == 1:  # L1 stage
+                        self.log_test("Use Existing L1 Opportunity", True, 
                                     f"Using existing L1 opportunity: {opp.get('opportunity_id')}",
                                     {"opportunity_id": opp.get("id")})
                         return opp
@@ -156,10 +164,11 @@ class OpportunityToProjectWorkflowTester:
                 # If no L1 opportunities, use any opportunity and note its current stage
                 if opportunities:
                     test_opp = opportunities[0]
-                    self.log_test("Use Existing Opportunity", True, 
-                                f"Using existing opportunity at stage L{test_opp.get('current_stage', 1)}: {test_opp.get('opportunity_id')}",
-                                {"opportunity_id": test_opp.get("id")})
-                    return test_opp
+                    if isinstance(test_opp, dict):
+                        self.log_test("Use Existing Opportunity", True, 
+                                    f"Using existing opportunity at stage L{test_opp.get('current_stage', 1)}: {test_opp.get('opportunity_id')}",
+                                    {"opportunity_id": test_opp.get("id")})
+                        return test_opp
             
             # If no opportunities exist, try to create one via lead conversion
             return self.create_opportunity_via_lead_conversion()
