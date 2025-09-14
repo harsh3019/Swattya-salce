@@ -359,21 +359,21 @@ const UpcomingProjectsList = () => {
                       <TableCell>
                         <div>
                           <div className="font-medium text-gray-900">
-                            {project.customer_name}
+                            {project.customer_name || 'Unknown Customer'}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {project.opp_id}
+                            {project.opp_id || 'N/A'}
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <code className="text-sm bg-gray-100 px-2 py-1 rounded">
-                          {project.order_id}
+                          {project.order_id || 'N/A'}
                         </code>
                       </TableCell>
                       <TableCell>
                         <code className="text-sm bg-blue-100 px-2 py-1 rounded">
-                          {project.pot_id}
+                          {project.pot_id || 'N/A'}
                         </code>
                       </TableCell>
                       <TableCell>
