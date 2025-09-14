@@ -108,9 +108,9 @@ const UpcomingProjectsList = () => {
   };
 
   const filteredProjects = projects.filter(project =>
-    project.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.order_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.pot_id.toLowerCase().includes(searchTerm.toLowerCase())
+    (project.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+    (project.order_id?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+    (project.pot_id?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
   );
 
   const getStatusBadge = (status) => {
