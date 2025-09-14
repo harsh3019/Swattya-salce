@@ -374,15 +374,26 @@ class IntegrationFunctionTester:
                     # Look for our created project
                     test_opportunity = self.won_opportunities[0] if self.won_opportunities else None
                     if test_opportunity:
-                        # Try both opportunity_id formats
-                        opp_id = test_opportunity.get('opportunity_id')  # This is the OPP-XXXXXX format
-                        opp_uuid = test_opportunity.get('id')  # This is the UUID format
+                        # Get the actual opportunity_id from the single opportunity endpoint
+                        opp_uuid = test_opportunity.get('id')
                         
-                        # Find project with matching opportunity ID (try both formats)
+                        # Fetch the full opportunity details to get the correct opportunity_id
+                        opp_response = requests.get(
+                            f"{self.base_url}/opportunities/{opp_uuid}",
+                            headers=self.headers,
+                            timeout=10
+                        )
+                        
+                        if opp_response.status_code == 200:
+                            full_opp = opp_response.json()
+                            opp_id = full_opp.get('opportunity_id')  # This should be OPP-XXXXXX format
+                        else:
+                            opp_id = test_opportunity.get('opportunity_id')  # Fallback
+                        
+                        # Find project with matching opportunity ID
                         matching_project = None
                         for project in projects:
-                            project_opp_id = project.get('opp_id')
-                            if project_opp_id == opp_id or project_opp_id == opp_uuid:
+                            if project.get('opp_id') == opp_id:
                                 matching_project = project
                                 break
                         
