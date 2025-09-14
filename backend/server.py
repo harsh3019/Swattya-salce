@@ -5178,6 +5178,12 @@ async def change_opportunity_stage(
         update_data["status"] = "Won"
         update_data["is_locked"] = True
         update_data["close_date"] = datetime.now(timezone.utc)
+        
+        # SD Module Integration: Auto-create upcoming project entry
+        try:
+            await create_upcoming_project_from_opportunity(opportunity_id, opportunity, current_user.id)
+        except Exception as e:
+            logger.warning(f"Failed to create upcoming project for opportunity {opportunity_id}: {str(e)}")
     elif target_stage == 7:  # Lost
         update_data["status"] = "Lost"
         update_data["is_locked"] = True
