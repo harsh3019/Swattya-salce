@@ -325,7 +325,7 @@ const ResourceManager = () => {
                   <SelectValue placeholder="Filter by type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Types</SelectItem>
+                  <SelectItem value="all_types">All Types</SelectItem>
                   <SelectItem value="cloud">Cloud</SelectItem>
                   <SelectItem value="server">Server</SelectItem>
                   <SelectItem value="license">License</SelectItem>
