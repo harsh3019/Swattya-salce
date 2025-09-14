@@ -1563,12 +1563,27 @@ async def test_trigger_upcoming_project(opportunity_id: str, current_user: User 
             current_user.id
         )
         
-        return {
-            "message": "Successfully created upcoming project",
-            "opportunity_id": opportunity_id,
-            "project_id": project_id,
-            "triggered_by": current_user.username
-        }
+        # Check if this was a duplicate (existing project)
+        existing_project = await db.upcoming_projects.find_one({
+            "opp_id": opportunity.get("opportunity_id", opportunity_id)
+        })
+        
+        if existing_project and existing_project.get('id') == project_id:
+            return {
+                "message": f"Upcoming project already exists for opportunity {opportunity_id}",
+                "opportunity_id": opportunity_id,
+                "project_id": project_id,
+                "triggered_by": current_user.username,
+                "duplicate": True
+            }
+        else:
+            return {
+                "message": "Successfully created upcoming project",
+                "opportunity_id": opportunity_id,
+                "project_id": project_id,
+                "triggered_by": current_user.username,
+                "duplicate": False
+            }
         
     except Exception as e:
         logger.error(f"Test trigger failed for opportunity {opportunity_id}: {str(e)}")
