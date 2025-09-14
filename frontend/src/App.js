@@ -637,6 +637,18 @@ function App() {
                 </ProtectedRoute>
               } />
               
+              {/* Services Delivery Module Routes */}
+              <Route path="/sd/upcoming-projects" element={
+                <ProtectedRoute>
+                  <UpcomingProjectsList />
+                </ProtectedRoute>
+              } />
+              <Route path="/sd/upcoming-projects/:projectId" element={
+                <ProtectedRoute>
+                  <ValidationInterface />
+                </ProtectedRoute>
+              } />
+              
               <Route path="/" element={<HomeRoute />} />
             </Routes>
           </BrowserRouter>
