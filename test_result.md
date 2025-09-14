@@ -105,6 +105,18 @@
 user_problem_statement: "Resolve SAWAYATTA ERP Critical Issues: 1) OPPORTUNITY STAGE MANAGEMENT - Fix stage progression and form navigation so current stage reflects in list and 'Manage Stages' opens correct form. 2) STAGE FLOW LOGIC CORRECTION - Implement L1→L2→L3→L4→L5→(L6 Won/L7 Lost/L8 Auto-Dropped) flow with Won/Lost decision in L5 and 45-day auto-dropout logic. 3) COMPANY DATA INHERITANCE - Ensure company info flows from Leads to Opportunities. 4) QUOTATION APPROVAL WORKFLOW - Add Manager/Admin approval process. 5) MASTER DATA CREATION - Create Primary Categories, Products with SQU codes, Rate Cards, Pricing Management. 6) OA FORM EDITING - Enable editing of Order Analysis forms. 7) DOCUMENT UPLOAD IN OA - Fix file upload functionality."
 
 backend:
+  - task: "FIXED Stage Validation Logic for L1→L2 and L5→L6 Transitions"
+    implemented: true
+    working: true
+    file: "backend/server.py - change_opportunity_stage and validate_stage_data functions"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "🎉 STAGE VALIDATION LOGIC COMPREHENSIVE TESTING COMPLETED - 100% SUCCESS: Verified the FIXED stage validation logic is working correctly as requested in review. L1→L2 TRANSITION VALIDATION: ✅ L1→L2 with empty data correctly fails with all 4 L1 validation errors (Region, Product Interest, Assigned Representatives, Lead Owner), ✅ L1→L2 with valid L1 data succeeds and moves opportunity to L2 stage, ✅ L1→L2 with only L2 data correctly fails with L1 validation errors (not L2 errors), ✅ L1→L2 with partial L1 data correctly fails with missing L1 field errors. VALIDATION LOGIC VERIFICATION: ✅ Normal stage progression (L1→L2) validates current stage (L1) completion data, not target stage (L2) data, ✅ Special case L5→L6 transition validates target stage (L6) completion data as required, ✅ Backend logic correctly implements: if target_stage > current_stage and target_stage != 6: validate current_stage data, else if target_stage == 6: validate target_stage (L6) data. CRITICAL TEST RESULTS: ✅ L1→L2 transition asks for L1 requirements (region_id, product_interest, assigned_representatives, lead_owner_id), ✅ L1→L2 does NOT ask for L2 requirements (scorecard, budget, authority, need, timeline), ✅ L5→L6 transition asks for L6 requirements (final_value, client_poc, delivery_team), ✅ Both normal progression and L6 special case work correctly with appropriate validation. PRODUCTION READY: The stage validation fix is confirmed working correctly. L1→L2 validates L1 data completion, L5→L6 validates L6 data for Won transition, and upcoming project integration works for L6 transitions."
+
   - task: "Issue #1: Opportunity Stage Management Fix"
     implemented: true
     working: true
