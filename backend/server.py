@@ -6339,7 +6339,7 @@ async def create_upcoming_project_from_opportunity(opportunity_id: str, opportun
         
         # Check if project already exists for this opportunity
         existing_project = await db.upcoming_projects.find_one({
-            "opp_id": opportunity.get("opportunity_id", opportunity_id)
+            "opp_id": opportunity.get("opportunity_id", f"OPP-{str(uuid.uuid4())[:8].upper()}")
         })
         
         if existing_project:
