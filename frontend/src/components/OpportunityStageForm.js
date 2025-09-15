@@ -402,6 +402,13 @@ const OpportunityStageForm = () => {
         if (!stageData.updated_price) errors.push('Updated Price is required');
         if (!stageData.po_number) errors.push('PO Number is required');
         if (!stageData.po_date) errors.push('PO Date is required');
+        
+        // If "won" is selected, validate L6 fields as well
+        if (stageData.commercial_decision === 'won') {
+          if (!stageData.final_value) errors.push('Final Value is required when deal is won');
+          if (!stageData.client_poc) errors.push('Client POC is required when deal is won');
+          if (!stageData.delivery_team || !stageData.delivery_team.length) errors.push('Delivery Team is required when deal is won');
+        }
         break;
       
       case 6: // L6 - Won
