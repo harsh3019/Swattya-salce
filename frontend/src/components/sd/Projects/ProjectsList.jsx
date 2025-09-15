@@ -484,6 +484,15 @@ const ProjectsList = () => {
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
+                          
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigate(`/sd/projects/${project.id}/edit`)}
+                          >
+                            <Edit className="w-4 h-4 mr-1" />
+                            Edit
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
