@@ -41,6 +41,7 @@ import ValidationInterface from './components/sd/UpcomingProjects/ValidationInte
 import ProjectsList from './components/sd/Projects/ProjectsList';
 import ProjectDashboard from './components/sd/Projects/ProjectDashboard';
 import ProjectForm from './components/sd/Projects/ProjectForm';
+import ProjectApprovalForm from './components/sd/Projects/ProjectApprovalForm';
 import ResourceManager from './components/sd/Resources/ResourceManager';
 import RiskManager from './components/sd/Risks/RiskManager';
 
