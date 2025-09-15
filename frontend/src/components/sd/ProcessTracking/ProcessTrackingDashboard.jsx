@@ -7,7 +7,6 @@ import { Input } from '../../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../ui/table';
 import { Progress } from '../../ui/progress';
-import { Timeline } from '../../ui/timeline';
 import { 
   CheckCircle, 
   Clock, 
