@@ -493,6 +493,16 @@ const ProjectsList = () => {
                             <Edit className="w-4 h-4 mr-1" />
                             Edit
                           </Button>
+
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="bg-purple-600 hover:bg-purple-700"
+                            onClick={() => navigate(`/sd/projects/${project.id}/approval`)}
+                          >
+                            <Settings className="w-4 h-4 mr-1" />
+                            Approval
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
