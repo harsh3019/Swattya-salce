@@ -40,6 +40,7 @@ import UpcomingProjectsList from './components/sd/UpcomingProjects/UpcomingProje
 import ValidationInterface from './components/sd/UpcomingProjects/ValidationInterface';
 import ProjectsList from './components/sd/Projects/ProjectsList';
 import ProjectDashboard from './components/sd/Projects/ProjectDashboard';
+import ProjectForm from './components/sd/Projects/ProjectForm';
 import ResourceManager from './components/sd/Resources/ResourceManager';
 import RiskManager from './components/sd/Risks/RiskManager';
 
