@@ -35,6 +35,13 @@ const UpcomingProjectsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
+  
+  // Action states
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showConvertModal, setShowConvertModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
   // Stats state
   const [stats, setStats] = useState({
