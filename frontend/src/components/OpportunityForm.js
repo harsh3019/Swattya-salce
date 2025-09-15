@@ -14,11 +14,10 @@ import { ArrowLeft, Save, Target, Building, User, DollarSign } from 'lucide-reac
 import { usePermissions } from '../contexts/PermissionContext';
 import axios from 'axios';
 
-// Form validation schema
+// Form validation schema - Stage ID removed from validation
 const opportunitySchema = z.object({
   project_title: z.string().min(1, 'Project title is required'),
   company_id: z.string().min(1, 'Company is required'),
-  stage_id: z.string().min(1, 'Stage is required'),
   status: z.enum(['Open', 'Won', 'Lost', 'On Hold']),
   expected_revenue: z.number().min(0, 'Expected revenue must be positive'),
   currency_id: z.string().min(1, 'Currency is required'),
