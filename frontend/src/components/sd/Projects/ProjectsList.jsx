@@ -22,8 +22,11 @@ import {
   Users,
   DollarSign,
   Calendar,
-  TrendingUp
+  TrendingUp,
+  Edit,
+  Settings
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const baseURL = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
 
