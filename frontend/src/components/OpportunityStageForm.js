@@ -1018,6 +1018,88 @@ const OpportunityStageForm = () => {
           </div>
         </div>
 
+        {/* L6 Won Completion Fields - Show when "won" is selected */}
+        {stageData.commercial_decision === 'won' && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+            <h4 className="font-medium text-green-900 mb-4 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              Won Deal Completion Details (L6 - Required)
+            </h4>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="final_value">Final Value *</Label>
+                <Input
+                  id="final_value"
+                  type="number"
+                  step="0.01"
+                  value={stageData.final_value}
+                  onChange={(e) => handleInputChange('final_value', e.target.value)}
+                  placeholder="Final deal value"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="client_poc">Client POC *</Label>
+                <Input
+                  id="client_poc"
+                  value={stageData.client_poc}
+                  onChange={(e) => handleInputChange('client_poc', e.target.value)}
+                  placeholder="Client Point of Contact"
+                />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <Label htmlFor="delivery_team">Delivery Team *</Label>
+              <Select
+                value=""
+                onValueChange={(value) => {
+                  const currentTeam = stageData.delivery_team || [];
+                  if (!currentTeam.includes(value)) {
+                    handleInputChange('delivery_team', [...currentTeam, value]);
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Add team members for delivery" />
+                </SelectTrigger>
+                <SelectContent>
+                  {users.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.username}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {/* Selected delivery team members */}
+              {stageData.delivery_team && stageData.delivery_team.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {stageData.delivery_team.map((userId) => {
+                    const user = users.find(u => u.id === userId);
+                    return user ? (
+                      <Badge key={userId} variant="outline" className="flex items-center gap-1">
+                        {user.username}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newTeam = stageData.delivery_team.filter(id => id !== userId);
+                            handleInputChange('delivery_team', newTeam);
+                          }}
+                          className="ml-1 text-red-500 hover:text-red-700"
+                        >
+                          ×
+                        </button>
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="updated_price">Updated Price *</Label>
