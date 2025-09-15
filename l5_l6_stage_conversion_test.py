@@ -75,7 +75,7 @@ class L5L6StageConversionTester:
             return False
     
     def find_or_create_l5_opportunity(self):
-        """Find existing L5 opportunity or create one for testing"""
+        """Find existing L4/L5 opportunity or use existing one for testing"""
         print("\n🎯 L5 OPPORTUNITY SETUP")
         print("=" * 50)
         
@@ -103,9 +103,25 @@ class L5L6StageConversionTester:
                     )
                     return True
                 else:
-                    self.log_test("Find L5 Opportunity", False, "No existing L5 opportunities found")
-                    # Try to create one
-                    return self.create_l5_opportunity()
+                    # Look for L4 opportunity to advance to L5
+                    l4_opportunities = [opp for opp in opportunities if opp.get('current_stage') == 4]
+                    
+                    if l4_opportunities:
+                        self.l5_opportunity_id = l4_opportunities[0]['id']
+                        self.log_test(
+                            "Find L4 Opportunity", 
+                            True, 
+                            f"Found L4 opportunity to advance: {self.l5_opportunity_id}"
+                        )
+                        
+                        # Advance L4 to L5
+                        if self.advance_l4_to_l5():
+                            return True
+                        else:
+                            return False
+                    else:
+                        self.log_test("Find L4/L5 Opportunity", False, "No L4 or L5 opportunities found")
+                        return False
             else:
                 self.log_test("Find L5 Opportunity", False, f"Status: {response.status_code}")
                 return False
