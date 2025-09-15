@@ -523,108 +523,273 @@ const UpcomingProjectsList = () => {
 
       {/* Project Details Modal */}
       <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Project Details</DialogTitle>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Project Details - {selectedProject?.customer_name || 'Selected Project'}</span>
+              <div className="flex items-center gap-2">
+                {selectedProject?.order_status === 'Pending' && (
+                  <>
+                    <Button
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700"
+                      onClick={() => {
+                        setShowDetailsModal(false);
+                        setShowConvertModal(true);
+                      }}
+                      disabled={actionLoading}
+                    >
+                      <Check className="w-4 h-4 mr-1" />
+                      Convert to Project
+                    </Button>
+                    
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => {
+                        setShowDetailsModal(false);
+                        setShowRejectModal(true);
+                      }}
+                      disabled={actionLoading}
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      Reject
+                    </Button>
+                  </>
+                )}
+              </div>
+            </DialogTitle>
             <DialogDescription>
-              Complete information for {selectedProject?.customer_name || 'Selected Project'}
+              Complete information for project including opportunity and quotation details
             </DialogDescription>
           </DialogHeader>
           
           {selectedProject && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Basic Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Basic Information</h3>
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Customer</label>
-                    <p className="text-sm text-gray-900">{selectedProject.customer_name || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Order ID</label>
-                    <p className="text-sm text-gray-900 font-mono">{selectedProject.order_id || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">POT ID</label>
-                    <p className="text-sm text-gray-900 font-mono">{selectedProject.pot_id || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Opportunity ID</label>
-                    <p className="text-sm text-gray-900 font-mono">{selectedProject.opp_id || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Setup Cost</label>
-                    <p className="text-sm text-gray-900 font-semibold">{formatCurrency(selectedProject.setup_cost)}</p>
-                  </div>
-                </div>
+            <div className="space-y-6">
+              {/* Project Summary Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="border-blue-200 bg-blue-50">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-blue-600">Setup Cost</p>
+                        <p className="text-2xl font-bold text-blue-800">{formatCurrency(selectedProject.setup_cost)}</p>
+                      </div>
+                      <DollarSign className="w-8 h-8 text-blue-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-green-200 bg-green-50">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-green-600">Order Status</p>
+                        <div className="mt-1">{getStatusBadge(selectedProject.order_status)}</div>
+                      </div>
+                      <Shield className="w-8 h-8 text-green-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-purple-200 bg-purple-50">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-purple-600">Validation</p>
+                        <div className="mt-1">{getValidationBadge(selectedProject.validation_status)}</div>
+                      </div>
+                      <CheckCircle className="w-8 h-8 text-purple-600" />
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
+
+              {/* Project Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Project Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Customer</label>
+                      <p className="text-lg font-semibold text-gray-900">{selectedProject.customer_name || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Order ID</label>
+                      <p className="text-lg font-mono text-gray-900">{selectedProject.order_id || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">POT ID</label>
+                      <p className="text-lg font-mono text-gray-900">{selectedProject.pot_id || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Opportunity ID</label>
+                      <p className="text-lg font-mono text-gray-900">{selectedProject.opp_id || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Created</label>
+                      <p className="text-lg text-gray-900">{formatDate(selectedProject.created_at)}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Last Updated</label>
+                      <p className="text-lg text-gray-900">{formatDate(selectedProject.updated_at)}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Opportunity Details */}
+              {selectedProject.opportunity_details && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Opportunity Details</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Opportunity Name</label>
+                        <p className="text-lg font-semibold text-gray-900">
+                          {selectedProject.opportunity_details.name || selectedProject.opportunity_details.project_title || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Expected Revenue</label>
+                        <p className="text-lg font-semibold text-green-600">
+                          {selectedProject.opportunity_details.currency_symbol || '$'} 
+                          {selectedProject.opportunity_details.expected_revenue?.toLocaleString() || '0'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Win Probability</label>
+                        <p className="text-lg font-semibold text-blue-600">
+                          {selectedProject.opportunity_details.win_probability || 0}%
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Current Stage</label>
+                        <Badge variant="outline">L{selectedProject.opportunity_details.current_stage || 'N/A'}</Badge>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Status</label>
+                        <Badge className={
+                          selectedProject.opportunity_details.status === 'Won' ? 'bg-green-100 text-green-800' :
+                          selectedProject.opportunity_details.status === 'Lost' ? 'bg-red-100 text-red-800' :
+                          selectedProject.opportunity_details.status === 'Open' ? 'bg-blue-100 text-blue-800' :
+                          'bg-gray-100 text-gray-800'
+                        }>
+                          {selectedProject.opportunity_details.status || 'N/A'}
+                        </Badge>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Close Date</label>
+                        <p className="text-lg text-gray-900">
+                          {selectedProject.opportunity_details.close_date ? 
+                            formatDate(selectedProject.opportunity_details.close_date) : 'N/A'
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Quotations */}
+              {selectedProject.quotations && selectedProject.quotations.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Quotations ({selectedProject.quotations.length})</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {selectedProject.quotations.map((quotation, index) => (
+                        <div key={quotation.id || index} className="border rounded-lg p-4 bg-gray-50">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                              <label className="text-sm font-medium text-gray-600">Quotation ID</label>
+                              <p className="text-sm font-mono text-gray-900">{quotation.quotation_id || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-gray-600">Total Amount</label>
+                              <p className="text-sm font-semibold text-green-600">
+                                {quotation.currency_symbol || '$'} {quotation.total_amount?.toLocaleString() || '0'}
+                              </p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-gray-600">Status</label>
+                              <Badge className={quotation.is_selected ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                                {quotation.is_selected ? 'Selected' : 'Draft'}
+                              </Badge>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-gray-600">Created</label>
+                              <p className="text-sm text-gray-900">{formatDate(quotation.created_at)}</p>
+                            </div>
+                          </div>
+                          
+                          {quotation.notes && (
+                            <div className="mt-3">
+                              <label className="text-sm font-medium text-gray-600">Notes</label>
+                              <p className="text-sm text-gray-700 mt-1">{quotation.notes}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Status Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Status Information</h3>
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Order Status</label>
-                    <div className="mt-1">{getStatusBadge(selectedProject.order_status)}</div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Validation Status</label>
-                    <div className="mt-1">{getValidationBadge(selectedProject.validation_status)}</div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">LOI Status</label>
-                    <div className="mt-1">{getStatusBadge(selectedProject.loi_status)}</div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">GC Signoff Required</label>
-                    <p className="text-sm text-gray-900">{selectedProject.gc_signoff_required ? 'Yes' : 'No'}</p>
-                  </div>
-                  {selectedProject.gc_signoff_required && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Status Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div>
-                      <label className="text-sm font-medium text-gray-600">GC Signoff Status</label>
-                      <div className="mt-1">{getStatusBadge(selectedProject.gc_signoff_status)}</div>
+                      <label className="text-sm font-medium text-gray-600">LOI Status</label>
+                      <div className="mt-1">{getStatusBadge(selectedProject.loi_status)}</div>
                     </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Dates */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Timeline</h3>
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Created</label>
-                    <p className="text-sm text-gray-900">{formatDate(selectedProject.created_at)}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Last Updated</label>
-                    <p className="text-sm text-gray-900">{formatDate(selectedProject.updated_at)}</p>
-                  </div>
-                  {selectedProject.validation_date && (
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Validation Date</label>
-                      <p className="text-sm text-gray-900">{formatDate(selectedProject.validation_date)}</p>
+                      <label className="text-sm font-medium text-gray-600">GC Signoff Required</label>
+                      <p className="text-lg text-gray-900">{selectedProject.gc_signoff_required ? 'Yes' : 'No'}</p>
                     </div>
-                  )}
-                  {selectedProject.loi_approved_on && (
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">LOI Approved</label>
-                      <p className="text-sm text-gray-900">{formatDate(selectedProject.loi_approved_on)}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+                    {selectedProject.gc_signoff_required && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">GC Signoff Status</label>
+                        <div className="mt-1">{getStatusBadge(selectedProject.gc_signoff_status)}</div>
+                      </div>
+                    )}
+                    {selectedProject.validation_date && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Validation Date</label>
+                        <p className="text-lg text-gray-900">{formatDate(selectedProject.validation_date)}</p>
+                      </div>
+                    )}
+                    {selectedProject.loi_approved_on && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">LOI Approved</label>
+                        <p className="text-lg text-gray-900">{formatDate(selectedProject.loi_approved_on)}</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* Notes */}
               {selectedProject.discrepancy_notes && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Notes</h3>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Discrepancy Notes</label>
-                    <p className="text-sm text-gray-900 mt-1 p-2 bg-gray-50 rounded">{selectedProject.discrepancy_notes}</p>
-                  </div>
-                </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Notes</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-gray-700">{selectedProject.discrepancy_notes}</p>
+                    </div>
+                  </CardContent>
+                </Card>
               )}
             </div>
           )}
