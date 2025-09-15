@@ -21,7 +21,9 @@ import {
   RefreshCcw,
   Check,
   X,
-  AlertCircle
+  AlertCircle,
+  Shield,
+  DollarSign
 } from 'lucide-react';
 import { toast } from 'sonner';
 
