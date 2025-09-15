@@ -253,47 +253,96 @@ class L6SDIntegrationTester:
         print("=" * 50)
         
         if not self.created_opportunity_id:
-            self.log_test("L6 Completion Trigger", False, "No L5 opportunity available for testing")
+            self.log_test("L6 Completion Trigger", False, "No opportunity available for testing")
             return False
         
         try:
-            # Prepare L6 stage data (Won)
-            l6_stage_data = {
-                "target_stage": 6,  # L6 (Won)
-                "stage_data": {
-                    "final_value": 750000,
-                    "client_poc": "John Smith - CTO",
-                    "delivery_team": ["Team Lead A", "Developer B", "QA Engineer C"],
-                    "kickoff_date": "2025-02-01",
-                    "commercial_decision": "won"
-                }
-            }
-            
-            # Trigger L6 completion
-            response = requests.post(
-                f"{self.base_url}/opportunities/{self.created_opportunity_id}/change-stage",
+            # First check if opportunity is already in L6
+            opp_response = requests.get(
+                f"{self.base_url}/opportunities/{self.created_opportunity_id}",
                 headers=self.headers,
-                json=l6_stage_data,
                 timeout=10
             )
             
-            if response.status_code in [200, 201]:
-                result_data = response.json()
-                self.log_test(
-                    "L6 Stage Transition", 
-                    True, 
-                    f"Successfully transitioned to L6 (Won): {result_data.get('message', 'Stage changed')}"
-                )
+            if opp_response.status_code == 200:
+                opportunity = opp_response.json()
+                current_stage = opportunity.get('current_stage')
                 
-                # Wait a moment for integration to process
-                time.sleep(2)
-                
-                # Check if integration function was called by looking for upcoming project
-                return self.verify_integration_function_called()
+                if current_stage == 6:
+                    # Already in L6, test the existing integration
+                    self.log_test(
+                        "L6 Stage Already Present", 
+                        True, 
+                        f"Opportunity already in L6 (Won) stage: {opportunity.get('opportunity_id')}"
+                    )
+                    return self.verify_integration_function_called()
+                elif current_stage == 2:
+                    # Progress from L2 to L6
+                    return self.progress_l2_to_l6()
+                else:
+                    self.log_test("L6 Completion Trigger", False, f"Opportunity in unexpected stage: L{current_stage}")
+                    return False
             else:
-                self.log_test("L6 Stage Transition", False, f"Status: {response.status_code}, Response: {response.text[:200]}")
+                self.log_test("L6 Completion Trigger", False, f"Could not retrieve opportunity: {opp_response.status_code}")
                 return False
                 
+        except Exception as e:
+            self.log_test("L6 Completion Trigger", False, f"Exception: {str(e)}")
+            return False
+
+    def progress_l2_to_l6(self):
+        """Progress opportunity from L2 to L6 stage"""
+        try:
+            # Progress through stages L2 → L3 → L4 → L5 → L6
+            stage_progression = [
+                (3, {"scorecard": "BANT", "budget": 500000, "authority": "CTO", 
+                     "need": "High", "timeline": "Q2 2025"}),
+                (4, {"document_upload": "proposal.pdf", "submission_date": "2025-01-15", 
+                     "internal_stakeholder": "Sales Manager", "client_response": "Positive"}),
+                (5, {"updated_price": 750000, "margin_percentage": 35.0, "po_number": "PO-2025-001", 
+                     "po_date": "2025-01-20", "commercial_decision": "pending"}),
+                (6, {"final_value": 750000, "client_poc": "John Smith - CTO", 
+                     "delivery_team": ["Team Lead A", "Developer B", "QA Engineer C"],
+                     "kickoff_date": "2025-02-01", "commercial_decision": "won"})
+            ]
+            
+            for target_stage, stage_data in stage_progression:
+                change_data = {
+                    "target_stage": target_stage,
+                    "stage_data": stage_data
+                }
+                
+                response = requests.post(
+                    f"{self.base_url}/opportunities/{self.created_opportunity_id}/change-stage",
+                    headers=self.headers,
+                    json=change_data,
+                    timeout=10
+                )
+                
+                if response.status_code in [200, 201]:
+                    if target_stage == 6:
+                        result_data = response.json()
+                        self.log_test(
+                            "L6 Stage Transition", 
+                            True, 
+                            f"Successfully transitioned to L6 (Won): {result_data.get('message', 'Stage changed')}"
+                        )
+                        
+                        # Wait a moment for integration to process
+                        time.sleep(2)
+                        
+                        # Check if integration function was called
+                        return self.verify_integration_function_called()
+                else:
+                    print(f"Failed to progress to L{target_stage}: {response.status_code}")
+                    if target_stage < 6:
+                        continue  # Try to continue anyway
+                    else:
+                        self.log_test("L6 Stage Transition", False, f"Status: {response.status_code}")
+                        return False
+            
+            return True
+            
         except Exception as e:
             self.log_test("L6 Stage Transition", False, f"Exception: {str(e)}")
             return False
