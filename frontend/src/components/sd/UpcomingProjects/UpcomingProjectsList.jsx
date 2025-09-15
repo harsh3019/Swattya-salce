@@ -519,6 +519,186 @@ const UpcomingProjectsList = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Project Details Modal */}
+      <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Project Details</DialogTitle>
+            <DialogDescription>
+              Complete information for {selectedProject?.customer_name || 'Selected Project'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedProject && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Basic Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Basic Information</h3>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Customer</label>
+                    <p className="text-sm text-gray-900">{selectedProject.customer_name || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Order ID</label>
+                    <p className="text-sm text-gray-900 font-mono">{selectedProject.order_id || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">POT ID</label>
+                    <p className="text-sm text-gray-900 font-mono">{selectedProject.pot_id || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Opportunity ID</label>
+                    <p className="text-sm text-gray-900 font-mono">{selectedProject.opp_id || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Setup Cost</label>
+                    <p className="text-sm text-gray-900 font-semibold">{formatCurrency(selectedProject.setup_cost)}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Status Information</h3>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Order Status</label>
+                    <div className="mt-1">{getStatusBadge(selectedProject.order_status)}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Validation Status</label>
+                    <div className="mt-1">{getValidationBadge(selectedProject.validation_status)}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">LOI Status</label>
+                    <div className="mt-1">{getStatusBadge(selectedProject.loi_status)}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">GC Signoff Required</label>
+                    <p className="text-sm text-gray-900">{selectedProject.gc_signoff_required ? 'Yes' : 'No'}</p>
+                  </div>
+                  {selectedProject.gc_signoff_required && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">GC Signoff Status</label>
+                      <div className="mt-1">{getStatusBadge(selectedProject.gc_signoff_status)}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Dates */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Timeline</h3>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Created</label>
+                    <p className="text-sm text-gray-900">{formatDate(selectedProject.created_at)}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Last Updated</label>
+                    <p className="text-sm text-gray-900">{formatDate(selectedProject.updated_at)}</p>
+                  </div>
+                  {selectedProject.validation_date && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Validation Date</label>
+                      <p className="text-sm text-gray-900">{formatDate(selectedProject.validation_date)}</p>
+                    </div>
+                  )}
+                  {selectedProject.loi_approved_on && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">LOI Approved</label>
+                      <p className="text-sm text-gray-900">{formatDate(selectedProject.loi_approved_on)}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Notes */}
+              {selectedProject.discrepancy_notes && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Notes</h3>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Discrepancy Notes</label>
+                    <p className="text-sm text-gray-900 mt-1 p-2 bg-gray-50 rounded">{selectedProject.discrepancy_notes}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Convert to Project Modal */}
+      <Dialog open={showConvertModal} onOpenChange={setShowConvertModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Convert to Active Project</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to convert this project to an active project? This action will move it to the active projects list.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedProject && (
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <h4 className="font-medium text-blue-900">{selectedProject.customer_name}</h4>
+                <p className="text-sm text-blue-700">Order ID: {selectedProject.order_id}</p>
+                <p className="text-sm text-blue-700">Setup Cost: {formatCurrency(selectedProject.setup_cost)}</p>
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setShowConvertModal(false)} disabled={actionLoading}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => handleConvertToProject(selectedProject)}
+                  disabled={actionLoading}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {actionLoading ? 'Converting...' : 'Convert to Project'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Reject Project Modal */}
+      <Dialog open={showRejectModal} onOpenChange={setShowRejectModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Project</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to reject this project? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedProject && (
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 rounded-lg">
+                <h4 className="font-medium text-red-900">{selectedProject.customer_name}</h4>
+                <p className="text-sm text-red-700">Order ID: {selectedProject.order_id}</p>
+                <p className="text-sm text-red-700">Setup Cost: {formatCurrency(selectedProject.setup_cost)}</p>
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setShowRejectModal(false)} disabled={actionLoading}>
+                  Cancel
+                </Button>
+                <Button 
+                  variant="destructive"
+                  onClick={() => handleRejectProject(selectedProject)}
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? 'Rejecting...' : 'Reject Project'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
