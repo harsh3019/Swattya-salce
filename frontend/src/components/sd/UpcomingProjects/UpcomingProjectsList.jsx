@@ -7,6 +7,7 @@ import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../../ui/dialog';
 import { 
   CheckCircle, 
   AlertTriangle, 
@@ -17,8 +18,12 @@ import {
   Filter,
   Plus,
   Eye,
-  RefreshCcw
+  RefreshCcw,
+  Check,
+  X,
+  AlertCircle
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const baseURL = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
 
