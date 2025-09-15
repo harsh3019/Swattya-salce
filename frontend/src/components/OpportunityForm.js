@@ -58,7 +58,6 @@ const OpportunityForm = () => {
     defaultValues: {
       project_title: '',
       company_id: '',
-      stage_id: '',
       status: 'Open',
       expected_revenue: 0,
       currency_id: '',
