@@ -583,3 +583,166 @@ async def update_task(project_id: str, task_id: str, task_data: WBSTaskUpdate):
     except Exception as e:
         logger.error(f"Error updating task: {str(e)}")
         raise HTTPException(status_code=500, detail="Error updating task")
+
+# ==================== PROJECT APPROVAL WORKFLOW ENDPOINTS ====================
+
+@router.put("/{project_id}/status")
+async def update_project_status(
+    project_id: str, 
+    status: str, 
+    notes: Optional[str] = ""
+):
+    """Update project approval status with business rules validation"""
+    try:
+        # Import here to avoid circular dependency
+        db, prepare_for_mongo, prepare_for_json, log_audit_trail = get_db_and_utils()
+        
+        # Valid status transitions and business rules
+        STATUS_RULES = {
+            'Pending': ['Approved', 'Rejected', 'Hold'],
+            'Approved': ['Hold'],  # Approved can only be put on hold
+            'Rejected': [],  # Final state - cannot be changed
+            'Hold': ['Approved']  # Hold can only be moved to approved
+        }
+        
+        # Get project
+        project = await db.projects.find_one({"id": project_id, "is_active": True})
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+        
+        current_status = project.get('approval_status', 'Pending')
+        
+        # Validate status transition
+        if status not in STATUS_RULES.get(current_status, []):
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Cannot change status from {current_status} to {status}. Business rules violation."
+            )
+        
+        # Update project with new status
+        update_data = {
+            "approval_status": status,
+            "approval_notes": notes,
+            "approval_timestamp": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
+            "updated_by": "system"
+        }
+        
+        # If approved, unlock BOM/GC section
+        if status == 'Approved':
+            update_data['bom_gc_section_unlocked'] = True
+        
+        await db.projects.update_one(
+            {"id": project_id},
+            {"$set": prepare_for_mongo(update_data)}
+        )
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id="system",
+            action="STATUS_CHANGE",
+            resource_type="Project",
+            resource_id=project_id,
+            details=f"Status changed from {current_status} to {status}. Notes: {notes}"
+        )
+        
+        return {
+            "message": f"Project status updated to {status}",
+            "previous_status": current_status,
+            "new_status": status,
+            "timestamp": datetime.now(timezone.utc)
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating project status: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error updating project status")
+
+from fastapi import File, UploadFile, Form
+import os
+
+@router.post("/{project_id}/bom-gc-approval")
+async def submit_bom_gc_approval(
+    project_id: str,
+    bom_file: UploadFile = File(...),
+    gc_signature: UploadFile = File(...),
+    notes: str = Form("")
+):
+    """Submit BOM file and GC signature for approved projects"""
+    try:
+        # Import here to avoid circular dependency
+        db, prepare_for_mongo, prepare_for_json, log_audit_trail = get_db_and_utils()
+        
+        # Get project
+        project = await db.projects.find_one({"id": project_id, "is_active": True})
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+        
+        # Check if project is approved and BOM/GC section is unlocked
+        if project.get('approval_status') != 'Approved':
+            raise HTTPException(status_code=400, detail="Project must be approved to submit BOM/GC files")
+        
+        if not project.get('bom_gc_section_unlocked'):
+            raise HTTPException(status_code=400, detail="BOM/GC section is not unlocked for this project")
+        
+        # Create upload directories
+        upload_dir = f"uploads/sd/projects/{project_id}"
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        # Save BOM file
+        bom_filename = f"bom_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{bom_file.filename}"
+        bom_path = os.path.join(upload_dir, bom_filename)
+        
+        with open(bom_path, "wb") as buffer:
+            content = await bom_file.read()
+            buffer.write(content)
+        
+        # Save GC signature file
+        gc_filename = f"gc_signature_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{gc_signature.filename}"
+        gc_path = os.path.join(upload_dir, gc_filename)
+        
+        with open(gc_path, "wb") as buffer:
+            content = await gc_signature.read()
+            buffer.write(content)
+        
+        # Update project with file information
+        update_data = {
+            "bom_file_path": bom_path,
+            "bom_filename": bom_filename,
+            "gc_signature_path": gc_path,
+            "gc_signature_filename": gc_filename,
+            "bom_gc_notes": notes,
+            "bom_gc_submitted_at": datetime.now(timezone.utc),
+            "bom_gc_status": "Submitted",
+            "updated_at": datetime.now(timezone.utc),
+            "updated_by": "system"
+        }
+        
+        await db.projects.update_one(
+            {"id": project_id},
+            {"$set": prepare_for_mongo(update_data)}
+        )
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id="system",
+            action="BOM_GC_SUBMIT",
+            resource_type="Project",
+            resource_id=project_id,
+            details=f"BOM/GC files submitted. BOM: {bom_filename}, GC: {gc_filename}"
+        )
+        
+        return {
+            "message": "BOM/GC files submitted successfully",
+            "bom_filename": bom_filename,
+            "gc_signature_filename": gc_filename,
+            "status": "Submitted",
+            "timestamp": datetime.now(timezone.utc)
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error submitting BOM/GC approval: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error submitting BOM/GC approval")
