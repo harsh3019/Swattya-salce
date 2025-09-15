@@ -669,6 +669,11 @@ function App() {
                   <ProjectForm />
                 </ProtectedRoute>
               } />
+              <Route path="/sd/projects/:projectId/approval" element={
+                <ProtectedRoute>
+                  <ProjectApprovalForm />
+                </ProtectedRoute>
+              } />
               <Route path="/sd/resources" element={
                 <ProtectedRoute>
                   <ResourceManager />
