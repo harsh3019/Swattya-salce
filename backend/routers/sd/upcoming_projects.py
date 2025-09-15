@@ -472,3 +472,51 @@ async def gc_digital_signoff(
     except Exception as e:
         logger.error(f"Error processing GC signoff: {str(e)}")
         raise HTTPException(status_code=500, detail="Error processing GC signoff")
+
+# Simplified endpoints for frontend actions
+@router.post("/{project_id}/convert")
+async def simple_convert_project(project_id: str):
+    """Simple convert endpoint for frontend"""
+    return await convert_to_project(project_id)
+
+@router.post("/{project_id}/reject")  
+async def simple_reject_project(project_id: str, reason: Optional[str] = ""):
+    """Simple reject endpoint for frontend"""
+    try:
+        # Import here to avoid circular dependency
+        from server import db, prepare_for_mongo, log_audit_trail
+        
+        # Get project
+        project = await db.upcoming_projects.find_one({"id": project_id})
+        if not project:
+            raise HTTPException(status_code=404, detail="Upcoming project not found")
+        
+        # Update status
+        update_data = {
+            "order_status": OrderStatus.REJECTED,
+            "discrepancy_notes": f"REJECTED: {reason}" if reason else "REJECTED",
+            "updated_at": datetime.now(timezone.utc),
+            "updated_by": "system"
+        }
+        
+        await db.upcoming_projects.update_one(
+            {"id": project_id},
+            {"$set": prepare_for_mongo(update_data)}
+        )
+        
+        # Log audit trail
+        await log_audit_trail(
+            user_id="system",
+            action="REJECT",
+            resource_type="UpcomingProject", 
+            resource_id=project_id,
+            details=f"Rejected project. Reason: {reason}"
+        )
+        
+        return {"message": "Project rejected successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error rejecting project: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error rejecting project")
