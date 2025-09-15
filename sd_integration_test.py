@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 load_dotenv('/app/backend/.env')
 
 # Configuration
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://service-delivery.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://sawayatta-sd.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class SDIntegrationTester:

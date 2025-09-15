@@ -9,7 +9,7 @@ class FinalOpportunityConversionTest:
     def __init__(self):
         self.session = None
         self.auth_token = None
-        self.backend_url = "https://service-delivery.preview.emergentagent.com"
+        self.backend_url = "https://sawayatta-sd.preview.emergentagent.com"
         self.api_base = f"{self.backend_url}/api"
         
     async def setup_session(self):

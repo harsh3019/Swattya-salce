@@ -6,7 +6,7 @@ import sys
 
 def test_detailed_sidebar():
     """Test sidebar with detailed output"""
-    base_url = "https://service-delivery.preview.emergentagent.com"
+    base_url = "https://sawayatta-sd.preview.emergentagent.com"
     api_url = f"{base_url}/api"
     
     print("🔐 Step 1: Admin Login")

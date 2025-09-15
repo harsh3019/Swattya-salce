@@ -11,7 +11,7 @@ import sys
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://service-delivery.preview.emergentagent.com"  # External backend URL
+BACKEND_URL = "https://sawayatta-sd.preview.emergentagent.com"  # External backend URL
 API_BASE = f"{BACKEND_URL}/api"
 
 # Test credentials
