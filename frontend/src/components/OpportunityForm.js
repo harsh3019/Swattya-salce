@@ -84,15 +84,13 @@ const OpportunityForm = () => {
       const token = localStorage.getItem('token');
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [companiesRes, stagesRes, currenciesRes, usersRes] = await Promise.all([
+      const [companiesRes, currenciesRes, usersRes] = await Promise.all([
         axios.get(`${baseURL}/api/companies`, { headers }),
-        axios.get(`${baseURL}/api/mst/stages`, { headers }),
         axios.get(`${baseURL}/api/mst/currencies`, { headers }),
         axios.get(`${baseURL}/api/users`, { headers })
       ]);
 
       setCompanies(companiesRes.data || []);
-      setStages(stagesRes.data || []);
       setCurrencies(currenciesRes.data || []);
       setUsers(usersRes.data || []);
     } catch (error) {
