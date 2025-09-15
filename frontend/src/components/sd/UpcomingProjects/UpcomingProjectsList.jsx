@@ -119,8 +119,40 @@ const UpcomingProjectsList = () => {
     setRefreshing(false);
   };
 
-  const handleViewDetails = (project) => {
+  const handleViewDetails = async (project) => {
     setSelectedProject(project);
+    
+    // Fetch additional opportunity and quotation details
+    try {
+      const token = localStorage.getItem('token');
+      const headers = { Authorization: `Bearer ${token}` };
+      
+      // Fetch opportunity details
+      if (project.opp_id) {
+        const oppResponse = await axios.get(`${baseURL}/api/opportunities?opportunity_id=${project.opp_id}`, { headers });
+        if (oppResponse.data && oppResponse.data.length > 0) {
+          setSelectedProject(prev => ({
+            ...prev,
+            opportunity_details: oppResponse.data[0]
+          }));
+        }
+      }
+      
+      // Fetch quotation details for this opportunity
+      if (project.opp_id) {
+        const quotationResponse = await axios.get(`${baseURL}/api/quotations?opportunity_id=${project.opp_id}`, { headers });
+        if (quotationResponse.data) {
+          setSelectedProject(prev => ({
+            ...prev,
+            quotations: quotationResponse.data
+          }));
+        }
+      }
+      
+    } catch (error) {
+      console.error('Error fetching additional details:', error);
+    }
+    
     setShowDetailsModal(true);
   };
 
