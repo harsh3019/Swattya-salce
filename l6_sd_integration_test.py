@@ -904,9 +904,9 @@ class L6SDIntegrationTester:
             print("\n❌ AUTHENTICATION FAILED - Cannot proceed with other tests")
             return False
         
-        # Step 1: Find or create L5 opportunity
+        # Step 1: Find opportunity for testing
         if not self.find_or_create_l5_opportunity():
-            print("\n❌ COULD NOT SET UP L5 OPPORTUNITY - Cannot proceed")
+            print("\n❌ COULD NOT FIND SUITABLE OPPORTUNITY - Cannot proceed")
             return False
         
         # Step 2: Test L6 completion trigger
