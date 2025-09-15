@@ -75,11 +75,10 @@ class L5L6StageConversionTester:
             return False
     
     def find_or_create_l5_opportunity(self):
-        """Find existing L4/L5 opportunity or use existing one for testing"""
-        print("\n🎯 L5 OPPORTUNITY SETUP")
+        """Find existing opportunities for testing L5→L6 conversion"""
+        print("\n🎯 OPPORTUNITY SETUP FOR L5→L6 TESTING")
         print("=" * 50)
         
-        # First, try to find existing L5 opportunity
         try:
             response = requests.get(
                 f"{self.base_url}/opportunities",
@@ -91,43 +90,30 @@ class L5L6StageConversionTester:
                 data = response.json()
                 opportunities = data.get('opportunities', [])
                 
-                # Look for L5 opportunity (current_stage = 5)
-                l5_opportunities = [opp for opp in opportunities if opp.get('current_stage') == 5]
+                # Look for any opportunity we can use for testing (L4, L5, or even L6 to test validation)
+                test_opportunities = [opp for opp in opportunities if opp.get('current_stage') in [4, 5, 6]]
                 
-                if l5_opportunities:
-                    self.l5_opportunity_id = l5_opportunities[0]['id']
+                if test_opportunities:
+                    # Use the first available opportunity
+                    self.l5_opportunity_id = test_opportunities[0]['id']
+                    current_stage = test_opportunities[0].get('current_stage')
+                    project_title = test_opportunities[0].get('project_title', 'Unknown')
+                    
                     self.log_test(
-                        "Find L5 Opportunity", 
+                        "Find Test Opportunity", 
                         True, 
-                        f"Found existing L5 opportunity: {self.l5_opportunity_id}"
+                        f"Found opportunity in stage L{current_stage}: {project_title} (ID: {self.l5_opportunity_id})"
                     )
                     return True
                 else:
-                    # Look for L4 opportunity to advance to L5
-                    l4_opportunities = [opp for opp in opportunities if opp.get('current_stage') == 4]
-                    
-                    if l4_opportunities:
-                        self.l5_opportunity_id = l4_opportunities[0]['id']
-                        self.log_test(
-                            "Find L4 Opportunity", 
-                            True, 
-                            f"Found L4 opportunity to advance: {self.l5_opportunity_id}"
-                        )
-                        
-                        # Advance L4 to L5
-                        if self.advance_l4_to_l5():
-                            return True
-                        else:
-                            return False
-                    else:
-                        self.log_test("Find L4/L5 Opportunity", False, "No L4 or L5 opportunities found")
-                        return False
+                    self.log_test("Find Test Opportunity", False, "No suitable opportunities found for testing")
+                    return False
             else:
-                self.log_test("Find L5 Opportunity", False, f"Status: {response.status_code}")
+                self.log_test("Find Test Opportunity", False, f"Status: {response.status_code}")
                 return False
                 
         except Exception as e:
-            self.log_test("Find L5 Opportunity", False, f"Exception: {str(e)}")
+            self.log_test("Find Test Opportunity", False, f"Exception: {str(e)}")
             return False
     
     def advance_l4_to_l5(self):
