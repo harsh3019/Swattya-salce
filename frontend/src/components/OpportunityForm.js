@@ -38,9 +38,8 @@ const OpportunityForm = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  // Master data
+  // Master data - stages removed since stage dropdown is removed
   const [companies, setCompanies] = useState([]);
-  const [stages, setStages] = useState([]);
   const [currencies, setCurrencies] = useState([]);
   const [users, setUsers] = useState([]);
 
