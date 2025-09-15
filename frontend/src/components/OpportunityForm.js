@@ -446,15 +446,6 @@ const OpportunityForm = () => {
                   </div>
                 )}
 
-                {watch('stage_id') && (
-                  <div>
-                    <Label className="text-sm text-gray-600">Stage</Label>
-                    <Badge variant="outline" className="mt-1">
-                      {getStageName(watch('stage_id'))}
-                    </Badge>
-                  </div>
-                )}
-
                 {watch('lead_owner_id') && (
                   <div>
                     <Label className="text-sm text-gray-600">Lead Owner</Label>
