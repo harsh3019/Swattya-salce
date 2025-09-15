@@ -284,25 +284,6 @@ const OpportunityForm = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="stage_id">Stage *</Label>
-                    <Select value={watch('stage_id')} onValueChange={(value) => setValue('stage_id', value)}>
-                      <SelectTrigger className={errors.stage_id ? 'border-red-500' : ''}>
-                        <SelectValue placeholder="Select stage" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {stages.map((stage) => (
-                          <SelectItem key={stage.id} value={stage.id}>
-                            {stage.stage_code} - {stage.stage_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.stage_id && (
-                      <p className="text-sm text-red-600 mt-1">{errors.stage_id.message}</p>
-                    )}
-                  </div>
-
-                  <div>
                     <Label htmlFor="status">Status *</Label>
                     <Select value={watch('status')} onValueChange={(value) => setValue('status', value)}>
                       <SelectTrigger className={errors.status ? 'border-red-500' : ''}>
