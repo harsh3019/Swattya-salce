@@ -662,6 +662,11 @@ function App() {
                   <ProjectDashboard />
                 </ProtectedRoute>
               } />
+              <Route path="/sd/projects/:projectId/edit" element={
+                <ProtectedRoute>
+                  <ProjectForm />
+                </ProtectedRoute>
+              } />
               <Route path="/sd/resources" element={
                 <ProtectedRoute>
                   <ResourceManager />
