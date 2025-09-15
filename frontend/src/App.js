@@ -685,6 +685,11 @@ function App() {
                   <RiskManager />
                 </ProtectedRoute>
               } />
+              <Route path="/sd/tracking" element={
+                <ProtectedRoute>
+                  <ProcessTrackingDashboard />
+                </ProtectedRoute>
+              } />
               
               <Route path="/" element={<HomeRoute />} />
             </Routes>
