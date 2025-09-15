@@ -130,110 +130,33 @@ class L5L6StageConversionTester:
             self.log_test("Find L5 Opportunity", False, f"Exception: {str(e)}")
             return False
     
-    def create_l5_opportunity(self):
-        """Create an opportunity and advance it to L5 stage"""
+    def advance_l4_to_l5(self):
+        """Advance L4 opportunity to L5 stage"""
         try:
-            # Get required master data
-            stages_response = requests.get(f"{self.base_url}/mst/stages", headers=self.headers, timeout=10)
-            currencies_response = requests.get(f"{self.base_url}/mst/currencies", headers=self.headers, timeout=10)
-            
-            if stages_response.status_code != 200 or currencies_response.status_code != 200:
-                self.log_test("Create L5 Opportunity", False, "Could not get required master data")
-                return False
-            
-            stages = stages_response.json()
-            currencies = currencies_response.json()
-            
-            # Find L1 stage and INR currency for initial creation
-            l1_stage = next((s for s in stages if s.get('stage_code') == 'L1'), None)
-            inr_currency = next((c for c in currencies if c.get('code') == 'INR'), None)
-            
-            if not l1_stage or not inr_currency:
-                self.log_test("Create L5 Opportunity", False, "L1 stage or INR currency not found")
-                return False
-            
-            # Create opportunity data
-            opportunity_data = {
-                "project_title": "L5→L6 Stage Conversion Test Opportunity",
-                "company_id": "test-company-l5l6",
-                "stage_id": l1_stage['id'],
-                "expected_revenue": 750000,
-                "currency_id": inr_currency['id'],
-                "lead_owner_id": "test-user-l5l6",
-                "win_probability": 75
+            # L4→L5 transition with quotation selection
+            l5_transition_data = {
+                "target_stage": 5,  # L5 (Commercial Negotiation)
+                "stage_data": {
+                    "quotation_id": "test-quotation-id"  # Required for L4→L5
+                }
             }
             
-            # Create opportunity
             response = requests.post(
-                f"{self.base_url}/opportunities",
+                f"{self.base_url}/opportunities/{self.l5_opportunity_id}/change-stage",
                 headers=self.headers,
-                json=opportunity_data,
+                json=l5_transition_data,
                 timeout=10
             )
             
             if response.status_code in [200, 201]:
-                data = response.json()
-                self.l5_opportunity_id = data.get('id')
-                
-                # Now advance to L5 stage
-                if self.advance_opportunity_to_l5():
-                    self.log_test("Create L5 Opportunity", True, f"Created and advanced opportunity to L5: {self.l5_opportunity_id}")
-                    return True
-                else:
-                    self.log_test("Create L5 Opportunity", False, "Could not advance opportunity to L5")
-                    return False
+                self.log_test("Advance L4→L5", True, "Successfully advanced opportunity to L5")
+                return True
             else:
-                self.log_test("Create L5 Opportunity", False, f"Status: {response.status_code}")
+                self.log_test("Advance L4→L5", False, f"Status: {response.status_code}, Response: {response.text[:200]}")
                 return False
                 
         except Exception as e:
-            self.log_test("Create L5 Opportunity", False, f"Exception: {str(e)}")
-            return False
-    
-    def advance_opportunity_to_l5(self):
-        """Advance opportunity through stages to reach L5"""
-        try:
-            # Get stages
-            stages_response = requests.get(f"{self.base_url}/mst/stages", headers=self.headers, timeout=10)
-            if stages_response.status_code != 200:
-                return False
-            
-            stages = stages_response.json()
-            stage_map = {s.get('stage_code'): s for s in stages}
-            
-            # Advance through L1→L2→L3→L4→L5
-            stage_progression = [
-                ('L2', {'region_id': 'test-region', 'product_interest': 'ERP System', 'assigned_representatives': ['test-rep'], 'lead_owner_id': 'test-owner'}),
-                ('L3', {'scorecard': 'BANT', 'budget': 750000, 'authority': 'CTO', 'need': 'High', 'timeline': '6 months'}),
-                ('L4', {'document_path': 'test-proposal.pdf', 'submission_date': '2024-01-15', 'internal_stakeholder': 'Sales Manager', 'client_response': 'Positive'}),
-                ('L5', {'quotation_id': 'test-quotation-id'})
-            ]
-            
-            for target_stage_code, stage_data in stage_progression:
-                target_stage = stage_map.get(target_stage_code)
-                if not target_stage:
-                    continue
-                
-                change_data = {
-                    "target_stage": target_stage['stage_number'],
-                    "stage_data": stage_data
-                }
-                
-                response = requests.post(
-                    f"{self.base_url}/opportunities/{self.l5_opportunity_id}/change-stage",
-                    headers=self.headers,
-                    json=change_data,
-                    timeout=10
-                )
-                
-                if response.status_code not in [200, 201]:
-                    print(f"Failed to advance to {target_stage_code}: {response.status_code}")
-                    # Continue anyway, might already be at L5
-            
-            return True
-            
-        except Exception as e:
-            print(f"Exception advancing to L5: {str(e)}")
+            self.log_test("Advance L4→L5", False, f"Exception: {str(e)}")
             return False
     
     def test_l5_completion_validation(self):
