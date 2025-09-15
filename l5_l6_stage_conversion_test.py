@@ -90,24 +90,38 @@ class L5L6StageConversionTester:
                 data = response.json()
                 opportunities = data.get('opportunities', [])
                 
-                # Look for any opportunity we can use for testing (L4, L5, or even L6 to test validation)
-                test_opportunities = [opp for opp in opportunities if opp.get('current_stage') in [4, 5, 6]]
+                # Look for L4 opportunity specifically for L5→L6 testing
+                l4_opportunities = [opp for opp in opportunities if opp.get('current_stage') == 4]
                 
-                if test_opportunities:
-                    # Use the first available opportunity
-                    self.l5_opportunity_id = test_opportunities[0]['id']
-                    current_stage = test_opportunities[0].get('current_stage')
-                    project_title = test_opportunities[0].get('project_title', 'Unknown')
+                if l4_opportunities:
+                    # Use L4 opportunity for testing
+                    self.l5_opportunity_id = l4_opportunities[0]['id']
+                    project_title = l4_opportunities[0].get('project_title', 'Unknown')
                     
                     self.log_test(
-                        "Find Test Opportunity", 
+                        "Find L4 Test Opportunity", 
                         True, 
-                        f"Found opportunity in stage L{current_stage}: {project_title} (ID: {self.l5_opportunity_id})"
+                        f"Found L4 opportunity for testing: {project_title} (ID: {self.l5_opportunity_id})"
                     )
                     return True
                 else:
-                    self.log_test("Find Test Opportunity", False, "No suitable opportunities found for testing")
-                    return False
+                    # Look for any opportunity we can use for testing
+                    test_opportunities = [opp for opp in opportunities if opp.get('current_stage') in [1, 2, 3]]
+                    
+                    if test_opportunities:
+                        self.l5_opportunity_id = test_opportunities[0]['id']
+                        current_stage = test_opportunities[0].get('current_stage')
+                        project_title = test_opportunities[0].get('project_title', 'Unknown')
+                        
+                        self.log_test(
+                            "Find Test Opportunity", 
+                            True, 
+                            f"Found opportunity in stage L{current_stage}: {project_title} (ID: {self.l5_opportunity_id})"
+                        )
+                        return True
+                    else:
+                        self.log_test("Find Test Opportunity", False, "No suitable opportunities found for testing")
+                        return False
             else:
                 self.log_test("Find Test Opportunity", False, f"Status: {response.status_code}")
                 return False
