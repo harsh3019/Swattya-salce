@@ -133,11 +133,17 @@ class L5L6StageConversionTester:
     def advance_l4_to_l5(self):
         """Advance L4 opportunity to L5 stage"""
         try:
+            # First create a quotation for the L4 opportunity
+            quotation_id = self.create_quotation_for_opportunity()
+            if not quotation_id:
+                self.log_test("Advance L4→L5", False, "Could not create quotation for L4 opportunity")
+                return False
+            
             # L4→L5 transition with quotation selection
             l5_transition_data = {
                 "target_stage": 5,  # L5 (Commercial Negotiation)
                 "stage_data": {
-                    "quotation_id": "test-quotation-id"  # Required for L4→L5
+                    "quotation_id": quotation_id  # Use the created quotation
                 }
             }
             
@@ -158,6 +164,46 @@ class L5L6StageConversionTester:
         except Exception as e:
             self.log_test("Advance L4→L5", False, f"Exception: {str(e)}")
             return False
+    
+    def create_quotation_for_opportunity(self):
+        """Create a quotation for the L4 opportunity"""
+        try:
+            # Get rate cards for quotation
+            rate_cards_response = requests.get(f"{self.base_url}/mst/rate-cards", headers=self.headers, timeout=10)
+            
+            if rate_cards_response.status_code != 200:
+                return None
+            
+            rate_cards = rate_cards_response.json()
+            if not rate_cards:
+                return None
+            
+            quotation_data = {
+                "quotation_name": "L5→L6 Test Quotation",
+                "rate_card_id": rate_cards[0]['id'],
+                "validity_date": "2025-06-30T00:00:00Z",
+                "items": []  # Empty items list for basic test
+            }
+            
+            response = requests.post(
+                f"{self.base_url}/opportunities/{self.l5_opportunity_id}/quotations",
+                headers=self.headers,
+                json=quotation_data,
+                timeout=10
+            )
+            
+            if response.status_code in [200, 201]:
+                data = response.json()
+                quotation_id = data.get('id')
+                self.log_test("Create Quotation for L4", True, f"Created quotation: {quotation_id}")
+                return quotation_id
+            else:
+                self.log_test("Create Quotation for L4", False, f"Status: {response.status_code}")
+                return None
+                
+        except Exception as e:
+            self.log_test("Create Quotation for L4", False, f"Exception: {str(e)}")
+            return None
     
     def test_l5_completion_validation(self):
         """Test L5 stage completion with all required fields"""
