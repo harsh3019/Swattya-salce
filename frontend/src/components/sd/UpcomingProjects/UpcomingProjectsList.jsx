@@ -119,6 +119,61 @@ const UpcomingProjectsList = () => {
     setRefreshing(false);
   };
 
+  const handleViewDetails = (project) => {
+    setSelectedProject(project);
+    setShowDetailsModal(true);
+  };
+
+  const handleConvertToProject = async (project) => {
+    try {
+      setActionLoading(true);
+      const token = localStorage.getItem('token');
+      
+      const response = await axios.post(
+        `${baseURL}/api/sd/upcoming-projects/${project.id}/convert`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      if (response.status === 200) {
+        toast.success('Project converted successfully!');
+        setShowConvertModal(false);
+        setSelectedProject(null);
+        await fetchProjects(); // Refresh the list
+      }
+    } catch (error) {
+      console.error('Error converting project:', error);
+      toast.error(error.response?.data?.detail || 'Failed to convert project');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRejectProject = async (project, reason = '') => {
+    try {
+      setActionLoading(true);
+      const token = localStorage.getItem('token');
+      
+      const response = await axios.post(
+        `${baseURL}/api/sd/upcoming-projects/${project.id}/reject`,
+        { reason },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      if (response.status === 200) {
+        toast.success('Project rejected successfully');
+        setShowRejectModal(false);
+        setSelectedProject(null);
+        await fetchProjects(); // Refresh the list
+      }
+    } catch (error) {
+      console.error('Error rejecting project:', error);
+      toast.error(error.response?.data?.detail || 'Failed to reject project');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const filteredProjects = projects.filter(project =>
     (project.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
     (project.order_id?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
