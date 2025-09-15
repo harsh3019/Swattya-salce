@@ -88,7 +88,8 @@ class L5L6StageConversionTester:
             )
             
             if response.status_code == 200:
-                opportunities = response.json()
+                data = response.json()
+                opportunities = data.get('opportunities', [])
                 
                 # Look for L5 opportunity (current_stage = 5)
                 l5_opportunities = [opp for opp in opportunities if opp.get('current_stage') == 5]
