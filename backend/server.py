@@ -6308,7 +6308,7 @@ async def create_upcoming_project_from_opportunity(opportunity_id: str, opportun
         upcoming_project = {
             "id": str(uuid.uuid4()),
             "order_id": order_id,
-            "opp_id": opportunity.get("opportunity_id", opportunity_id),
+            "opp_id": opportunity.get("opportunity_id", f"OPP-{str(uuid.uuid4())[:8].upper()}"),  # Use opportunity_id field, not UUID
             "pot_id": pot_id,
             "customer_id": opportunity.get("company_id"),
             "customer_name": company_name,
