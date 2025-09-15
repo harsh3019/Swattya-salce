@@ -1589,6 +1589,128 @@ async def test_trigger_upcoming_project(opportunity_id: str, current_user: User 
         logger.error(f"Test trigger failed for opportunity {opportunity_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to create upcoming project: {str(e)}")
 
+@api_router.get("/sd/tracking")
+async def get_process_tracking(
+    status: Optional[str] = None,
+    date_range: Optional[str] = None,
+    limit: int = 100,
+    skip: int = 0,
+    current_user: User = Depends(get_current_user)
+):
+    """Get comprehensive process tracking data from opportunity to project completion"""
+    try:
+        # Build query for opportunities
+        opp_query = {"is_active": True}
+        
+        # Date range filtering
+        if date_range and date_range != 'all':
+            from datetime import timedelta
+            now = datetime.now(timezone.utc)
+            
+            if date_range == '7d':
+                since_date = now - timedelta(days=7)
+            elif date_range == '30d':
+                since_date = now - timedelta(days=30)
+            elif date_range == '90d':
+                since_date = now - timedelta(days=90)
+            elif date_range == '1y':
+                since_date = now - timedelta(days=365)
+            else:
+                since_date = None
+            
+            if since_date:
+                opp_query["created_at"] = {"$gte": since_date}
+        
+        # Get opportunities
+        opportunities = await db.opportunities.find(opp_query).limit(limit).skip(skip).to_list(None)
+        
+        tracking_data = []
+        
+        for opp in opportunities:
+            # Get company info
+            company = await db.companies.find_one({"id": opp.get("company_id")}) if opp.get("company_id") else None
+            
+            # Get upcoming project if exists
+            upcoming_project = await db.upcoming_projects.find_one({"opp_id": opp.get("opportunity_id")})
+            
+            # Get active project if exists
+            active_project = None
+            if upcoming_project:
+                active_project = await db.projects.find_one({"upcoming_project_id": upcoming_project.get("id")})
+            
+            # Build tracking record
+            record = {
+                "id": opp["id"],
+                "opportunity_id": opp.get("opportunity_id"),
+                "opportunity_name": opp.get("name", opp.get("project_title")),
+                "customer_name": company.get("name", company.get("company_name")) if company else "Unknown",
+                "opportunity_stage": f"L{opp.get('current_stage', 1)}",
+                "opportunity_status": opp.get("status"),
+                "opportunity_created_at": opp.get("created_at"),
+                "opportunity_updated_at": opp.get("updated_at"),
+                
+                # Upcoming project data
+                "upcoming_project_id": upcoming_project.get("id") if upcoming_project else None,
+                "upcoming_project_status": upcoming_project.get("order_status") if upcoming_project else None,
+                "upcoming_project_created_at": upcoming_project.get("created_at") if upcoming_project else None,
+                
+                # Active project data
+                "active_project_id": active_project.get("id") if active_project else None,
+                "project_name": active_project.get("name") if active_project else None,
+                "project_status": active_project.get("status") if active_project else None,
+                "project_phase": active_project.get("phase") if active_project else None,
+                "project_approval_status": active_project.get("approval_status") if active_project else None,
+                "project_approval_timestamp": active_project.get("approval_timestamp") if active_project else None,
+                "project_created_at": active_project.get("created_at") if active_project else None,
+                "project_progress": active_project.get("overall_progress") if active_project else 0
+            }
+            
+            # Apply status filtering
+            if status and status != 'all':
+                if status == 'L1-L5' and opp.get('current_stage', 1) >= 6:
+                    continue
+                elif status == 'L6' and opp.get('current_stage', 1) != 6:
+                    continue
+                elif status == 'upcoming' and not upcoming_project:
+                    continue
+                elif status == 'active' and not active_project:
+                    continue
+                elif status == 'approved' and (not active_project or active_project.get('approval_status') != 'Approved'):
+                    continue
+            
+            tracking_data.append(record)
+        
+        # Calculate summary statistics
+        total_opportunities = len(await db.opportunities.find({"is_active": True}).to_list(None))
+        active_opportunities = len(await db.opportunities.find({"is_active": True, "status": "Open"}).to_list(None))
+        won_opportunities = len(await db.opportunities.find({"is_active": True, "current_stage": 6}).to_list(None))
+        upcoming_projects = len(await db.upcoming_projects.find({}).to_list(None))
+        active_projects = len(await db.projects.find({"is_active": True, "status": "Active"}).to_list(None))
+        approved_projects = len(await db.projects.find({"is_active": True, "approval_status": "Approved"}).to_list(None))
+        
+        completion_rate = round((won_opportunities / total_opportunities * 100) if total_opportunities > 0 else 0, 1)
+        
+        summary = {
+            "total_opportunities": total_opportunities,
+            "active_opportunities": active_opportunities,
+            "won_opportunities": won_opportunities,
+            "upcoming_projects": upcoming_projects,
+            "active_projects": active_projects,
+            "approved_projects": approved_projects,
+            "completion_rate": completion_rate,
+            "avg_cycle_time": 45  # Placeholder - would calculate actual average
+        }
+        
+        return {
+            "tracking_data": tracking_data,
+            "summary": summary,
+            "total_records": len(tracking_data)
+        }
+    
+    except Exception as e:
+        logger.error(f"Error fetching process tracking: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error fetching process tracking data")
+
 # Activity Logs (Read-only)
 @api_router.get("/activity-logs", response_model=List[ActivityLog])
 async def get_activity_logs(current_user: User = Depends(get_current_user)):
