@@ -476,39 +476,8 @@ const UpcomingProjectsList = () => {
                             onClick={() => handleViewDetails(project)}
                           >
                             <Eye className="w-4 h-4 mr-1" />
-                            Details
+                            View
                           </Button>
-                          
-                          {project.order_status === 'Pending' && (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="default"
-                                className="bg-green-600 hover:bg-green-700"
-                                onClick={() => {
-                                  setSelectedProject(project);
-                                  setShowConvertModal(true);
-                                }}
-                                disabled={actionLoading}
-                              >
-                                <Check className="w-4 h-4 mr-1" />
-                                Convert
-                              </Button>
-                              
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => {
-                                  setSelectedProject(project);
-                                  setShowRejectModal(true);
-                                }}
-                                disabled={actionLoading}
-                              >
-                                <X className="w-4 h-4 mr-1" />
-                                Reject
-                              </Button>
-                            </>
-                          )}
                         </div>
                       </TableCell>
                     </TableRow>
