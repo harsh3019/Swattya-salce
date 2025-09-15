@@ -163,11 +163,6 @@ const OpportunityForm = () => {
     return company ? company.name : 'Unknown Company';
   };
 
-  const getStageName = (stageId) => {
-    const stage = stages.find(s => s.id === stageId);
-    return stage ? `${stage.stage_code} - ${stage.stage_name}` : 'Unknown Stage';
-  };
-
   const getCurrencySymbol = (currencyId) => {
     const currency = currencies.find(c => c.id === currencyId);
     return currency ? currency.symbol : '₹';
