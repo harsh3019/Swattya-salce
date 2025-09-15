@@ -77,12 +77,12 @@ class L6SDIntegrationTester:
             return False
 
     def find_or_create_l5_opportunity(self):
-        """Find existing L5 opportunity or create one for testing"""
-        print("\n🎯 FINDING OR CREATING L5 OPPORTUNITY")
+        """Find existing L2 opportunity to progress to L6 for testing"""
+        print("\n🎯 FINDING OPPORTUNITY FOR L6 TESTING")
         print("=" * 50)
         
         try:
-            # First, try to find existing L5 opportunities
+            # First, try to find existing opportunities that can be progressed
             response = requests.get(
                 f"{self.base_url}/opportunities",
                 headers=self.headers,
@@ -93,26 +93,38 @@ class L6SDIntegrationTester:
                 data = response.json()
                 opportunities = data.get('opportunities', []) if isinstance(data, dict) else data
                 
-                # Look for L5 opportunities (stage 5)
-                l5_opportunities = [opp for opp in opportunities if opp.get('current_stage') == 5]
+                # Look for L2 opportunities that are Active (can be progressed)
+                l2_opportunities = [opp for opp in opportunities if opp.get('current_stage') == 2 and opp.get('status') == 'Active']
                 
-                if l5_opportunities:
-                    self.created_opportunity_id = l5_opportunities[0]['id']
+                if l2_opportunities:
+                    self.created_opportunity_id = l2_opportunities[0]['id']
                     self.log_test(
-                        "Find L5 Opportunity", 
+                        "Find L2 Opportunity for Testing", 
                         True, 
-                        f"Found existing L5 opportunity: {l5_opportunities[0].get('opportunity_id', 'Unknown ID')}"
+                        f"Found L2 opportunity to progress: {l2_opportunities[0].get('opportunity_id', 'Unknown ID')}"
                     )
                     return True
                 else:
-                    # No L5 opportunities found, create one
-                    return self.create_l5_opportunity()
+                    # Look for existing L6 opportunities to test integration
+                    l6_opportunities = [opp for opp in opportunities if opp.get('current_stage') == 6 and opp.get('status') == 'Won']
+                    
+                    if l6_opportunities:
+                        self.created_opportunity_id = l6_opportunities[0]['id']
+                        self.log_test(
+                            "Find L6 Opportunity for Testing", 
+                            True, 
+                            f"Found existing L6 opportunity: {l6_opportunities[0].get('opportunity_id', 'Unknown ID')}"
+                        )
+                        return True
+                    else:
+                        self.log_test("Find Opportunity for Testing", False, "No suitable opportunities found (need L2 Active or L6 Won)")
+                        return False
             else:
-                self.log_test("Find L5 Opportunity", False, f"Status: {response.status_code}")
+                self.log_test("Find Opportunity for Testing", False, f"Status: {response.status_code}")
                 return False
                 
         except Exception as e:
-            self.log_test("Find L5 Opportunity", False, f"Exception: {str(e)}")
+            self.log_test("Find Opportunity for Testing", False, f"Exception: {str(e)}")
             return False
 
     def create_l5_opportunity(self):
