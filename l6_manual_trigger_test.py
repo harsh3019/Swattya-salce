@@ -82,7 +82,8 @@ class L6ManualTriggerTester:
             )
             
             if response.status_code == 200:
-                opportunities = response.json()
+                response_data = response.json()
+                opportunities = response_data.get("opportunities", []) if isinstance(response_data, dict) else response_data
                 l6_won_opportunities = []
                 
                 print(f"📊 Total opportunities found: {len(opportunities)}")
